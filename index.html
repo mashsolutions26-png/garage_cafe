@@ -2342,7 +2342,7 @@
             <option value="+91">🇮🇳 +91</option>
             <option value="+86">🇨🇳 +86</option>
           </select>
-          <input required type="tel" placeholder="Phone number" class="flex-1 bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60">
+          <input required type="tel" id="bookingPhone" placeholder="Phone number (10 digits)" inputmode="numeric" maxlength="10" pattern="[0-9]{10}" title="Enter exactly 10 digits" class="flex-1 bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60">
         </div>
 
         <input required type="date" id="bookingDate" class="bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60">
@@ -4041,9 +4041,15 @@
     // order automatically once the phone prompt is submitted.
     let pendingOrderAfterPhone = false;
 
+    // pendingOrderAfterAuth is set to true whenever checkout was paused
+    // because the customer wasn't signed in yet, so we know to resume the
+    // order automatically once they sign in / sign up successfully.
+    let pendingOrderAfterAuth = false;
+
     function placeOrder() {
       if (!currentUser) {
-        showOrderNotification('Authentication Required', 'Please log in to place your order.', '🔐', false);
+        pendingOrderAfterAuth = true;
+        showOrderNotification('Authentication Required', 'Please sign in or sign up to place your order.', '🔐', false);
         openAuthModal();
         return;
       }
@@ -4470,8 +4476,8 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
       document.body.style.overflow = '';
     }
 
-    authClose.addEventListener('click', closeAuthModal);
-    authOverlay.addEventListener('click', (e) => { if (e.target === authOverlay) closeAuthModal(); });
+    authClose.addEventListener('click', () => { pendingOrderAfterAuth = false; closeAuthModal(); });
+    authOverlay.addEventListener('click', (e) => { if (e.target === authOverlay) { pendingOrderAfterAuth = false; closeAuthModal(); } });
 
     function setAuthTab(mode) {
       clearAuthError();
@@ -4691,6 +4697,15 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
             '👋',
             true
           );
+
+          // If checkout was paused earlier because the customer wasn't
+          // signed in, resume it now so the order continues normally
+          // (cart -> phone check if needed -> submit) instead of making
+          // them press "Proceed to Order" again.
+          if (pendingOrderAfterAuth) {
+            pendingOrderAfterAuth = false;
+            setTimeout(() => placeOrder(), 300);
+          }
         } else {
           icon.classList.remove('hidden');
           initial.classList.add('hidden');
@@ -4885,19 +4900,6 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
         return true;
       }, true);
 
-      // Seating selector
-      const seatBtns = document.querySelectorAll('.seat-btn');
-      const seatingHidden = document.getElementById('seatingPreference');
-      seatBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-          seatBtns.forEach(b => b.classList.remove('active'));
-          this.classList.add('active');
-          seatingHidden.value = this.dataset.seat;
-        });
-      });
-      document.querySelector('.seat-btn[data-seat="Upstairs"]').classList.add('active');
-      seatingHidden.value = 'Upstairs';
-
       validateDateTime();
     }
 
@@ -4907,6 +4909,14 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
     const guestsSelect = document.getElementById('guestsSelect');
     const customGuestsWrapper = document.getElementById('customGuestsWrapper');
     const customGuestsInput = document.getElementById('customGuestsInput');
+
+    // Only allow digits in the booking phone field, capped at 10.
+    const bookingPhoneInput = document.getElementById('bookingPhone');
+    if (bookingPhoneInput) {
+      bookingPhoneInput.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+      });
+    }
 
     guestsSelect.addEventListener('change', function() {
       if (this.value === 'custom') {
@@ -4928,7 +4938,18 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
       const bookingDate = document.getElementById('bookingDate');
       const bookingTime = document.getElementById('bookingTime');
       const bookingError = document.getElementById('bookingError');
-      
+
+      // Booking now requires an account, same as placing a menu order —
+      // guests are stopped here and prompted to log in instead of silently
+      // failing later.
+      if (!currentUser) {
+        bookingError.textContent = '🔐 Please log in to book a table.';
+        bookingError.classList.add('show');
+        showOrderNotification('Authentication Required', 'Please log in to book a table.', '🔐', false);
+        openAuthModal();
+        return;
+      }
+
       const selectedDate = bookingDate.value;
       const selectedTime = bookingTime.value;
       
@@ -4956,8 +4977,17 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
       const form = e.target;
       const name = form.querySelector('input[type="text"]').value;
       const phoneInput = form.querySelector('input[type="tel"]');
+      const phoneDigits = phoneInput.value.replace(/\D/g, '');
+
+      if (phoneDigits.length !== 10) {
+        bookingError.textContent = '❌ Please enter a valid 10-digit phone number.';
+        bookingError.classList.add('show');
+        phoneInput.focus();
+        return;
+      }
+
       const countryCode = form.querySelector('#countryCode').value;
-      const phone = countryCode + phoneInput.value;
+      const phone = countryCode + phoneDigits;
       const dateInput = form.querySelector('input[type="date"]');
       const timeInput = form.querySelector('input[type="time"]');
       let guestsValue = guestsSelect.value;
@@ -4985,13 +5015,12 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
       const userEmail = currentUser ? currentUser.email : 'guest@example.com';
       const userName = currentUser ? (currentUser.displayName || currentUser.email || 'Guest') : name;
       const uid = currentUser ? currentUser.uid : 'guest';
-      const seatingPreference = document.getElementById('seatingPreference').value || 'Not specified';
 
       const bookingData = {
         name, phone, date: dateInput.value, time: timeInput.value, guests: guestsValue,
         seating, table, specialRequest, additionalRequests, bookingId,
         guestType: currentUser ? 'Logged In User' : 'Guest',
-        createdAt, userEmail, userName, seatingPreference
+        createdAt, userEmail, userName
       };
 
       // Send the Telegram alert immediately, independent of the Firestore
@@ -5019,7 +5048,6 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
           uid, name, email: userEmail, phone, date: dateInput.value, time: timeInput.value,
           guests: guestsValue, seating, table, specialRequest, additionalRequests, bookingId,
           branch: currentBranchKey, guestType: currentUser ? 'Logged In User' : 'Guest',
-          seatingPreference: seatingPreference,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         }).then(() => {
           console.log('✅ Booking saved to Firestore');
@@ -5060,10 +5088,7 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
         hourReset = hourReset - 24;
       }
       document.getElementById('bookingTime').value = `${String(hourReset).padStart(2, '0')}:${String(minuteReset).padStart(2, '0')}`;
-      document.querySelectorAll('.seat-btn').forEach(b => b.classList.remove('active'));
-      document.querySelector('.seat-btn[data-seat="Upstairs"]').classList.add('active');
-      document.getElementById('seatingPreference').value = 'Upstairs';
-      
+
       // Reset new fields
       document.getElementById('bookingSeating').value = 'Upstairs';
       document.getElementById('bookingTable').value = '';
@@ -5163,6 +5188,8 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
     console.log('✅ Savings badges shown on each combo item');
     console.log('✅ Pickup / On Shop selector added with table list for On Shop');
     console.log('✅ All prices displayed in Rs.');
+    console.log('✅ Pending order after auth automatically resumes checkout once user logs in');
+    console.log('✅ Pending order after phone automatically resumes checkout once phone is submitted');
   </script>
 </body>
 </html>
