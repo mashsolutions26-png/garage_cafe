@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>THE GARAGE CAFE</title>
+    <meta name="description" content="Explore the vibrant atmosphere, delicious food, and cozy corners of THE GARAGE CAFE in Kandy, Sri Lanka." />
+    <link rel="icon" type="image/png" sizes="32x32" href="logo/logo.webp" />
+    <link rel="icon" type="image/png" sizes="16x16" href="logo/logo.webp" />
+    <link rel="apple-touch-icon" href="logo/logo.webp" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H5RMLCQD7W"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-H5RMLCQD7W');
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ink: '#0a0b0d',
+                        char: '#15171b',
+                        char2: '#1b1e23',
+                        brickline: '#2a2118',
+                        gold: '#f4b93e',
+                        crimson: '#c8102e',
+                        cream: '#f5f0e6',
+                        smoke: '#9a9a9f',
+                    },
+                    fontFamily: {
+                        display: ['"Fraunces"', 'serif'],
+                        body: ['"Manrope"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                },
+            },
+        };
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --ink: #0a0b0d;
+            --char: #15171b;
+            --char2: #1b1e23;
+            --brickline: #2a2118;
+            --gold: #f4b93e;
+            --crimson: #c8102e;
+            --cream: #f5f0e6;
+            --smoke: #9a9a9f;
+        }
+        * {
+            scroll-behavior: smooth;
+        }
+        body {
+            background: var(--ink);
+            font-family: 'Manrope', sans-serif;
+            color: var(--cream);
+        }
+        h1,
+        h2,
+        h3,
+        h4,
+        .font-display {
+            font-family: 'Fraunces', serif;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .glass-nav {
+            background: rgba(10, 11, 13, 0.55);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid rgba(244, 185, 62, 0.15);
+        }
+
+        .nav-link {
+            position: relative;
+            transition: color 0.2s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 0;
+            height: 2px;
+            background: var(--gold);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .nav-link:hover {
+            color: var(--gold);
+        }
+
+        #mobileMenu {
+            transition: all 0.3s ease;
+            transform-origin: top;
+        }
+        #mobileMenu.hidden {
+            opacity: 0;
+            transform: scaleY(0.95);
+            pointer-events: none;
+        }
+        #mobileMenu:not(.hidden) {
+            opacity: 1;
+            transform: scaleY(1);
+            pointer-events: auto;
+        }
+
+        .nav-logo {
+            height: 48px;
+            width: auto;
+            object-fit: contain;
+        }
+        @media (min-width: 640px) {
+            .nav-logo {
+                height: 56px;
+            }
+        }
+
+        /* Gallery Grid — tight mosaic layout */
+        .gallery-grid {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: 190px;
+            gap: 0.6rem;
+            transition: max-height 0.6s ease;
+            overflow: hidden;
+        }
+        @media (min-width: 1024px) {
+            .gallery-grid {
+                grid-auto-rows: 210px;
+            }
+        }
+        .gallery-grid.gallery-fade::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 220px;
+            background: linear-gradient(to top, var(--ink) 0%, rgba(10, 11, 13, 0.85) 35%, transparent 100%);
+            pointer-events: none;
+        }
+        .gallery-grid .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.85rem;
+            border: 1px solid rgba(244, 185, 62, 0.1);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background: #0f1115;
+            cursor: pointer;
+        }
+        .gallery-grid .gallery-item:hover {
+            transform: translateY(-6px) scale(1.02);
+            border-color: rgba(244, 185, 62, 0.4);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.8);
+            z-index: 2;
+        }
+        .gallery-grid .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .gallery-grid .gallery-item:hover img {
+            transform: scale(1.08);
+        }
+        .gallery-grid .gallery-item .overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(10, 11, 13, 0.8) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            display: flex;
+            align-items: flex-end;
+            padding: 1.5rem;
+        }
+        .gallery-grid .gallery-item:hover .overlay {
+            opacity: 1;
+        }
+        .gallery-grid .gallery-item .overlay span {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--cream);
+            letter-spacing: 0.02em;
+        }
+
+        .gallery-grid .gallery-item.tall {
+            grid-row: span 2;
+        }
+        .gallery-grid .gallery-item.wide {
+            grid-column: span 2;
+        }
+        .gallery-grid .gallery-item.big {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+                grid-auto-rows: 150px;
+                gap: 0.5rem;
+            }
+            .gallery-grid .gallery-item {
+                border-radius: 0.6rem;
+            }
+            .gallery-grid .gallery-item.big {
+                grid-column: span 2;
+                grid-row: span 2;
+            }
+        }
+
+        /* View More button + wrapper */
+        .gallery-viewmore-wrap {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        .gallery-viewmore-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ink);
+            background: var(--gold);
+            border: 1px solid var(--gold);
+            padding: 0.9rem 2.2rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .gallery-viewmore-btn:hover {
+            background: transparent;
+            color: var(--gold);
+            transform: translateY(-2px);
+        }
+        .gallery-viewmore-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(10, 11, 13, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+        .lightbox .lightbox-content {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 2rem;
+            border: 1px solid rgba(244, 185, 62, 0.2);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
+            object-fit: contain;
+            transform: scale(0.92);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .lightbox.active .lightbox-content {
+            transform: scale(1);
+        }
+        .lightbox .close-lightbox {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 9999px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cream);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .lightbox .close-lightbox:hover {
+            background: var(--gold);
+            color: var(--ink);
+            border-color: var(--gold);
+            transform: rotate(90deg);
+        }
+        .lightbox .nav-lightbox {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cream);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .lightbox .nav-lightbox:hover {
+            background: var(--gold);
+            color: var(--ink);
+            border-color: var(--gold);
+        }
+        .lightbox .nav-lightbox.prev {
+            left: 2rem;
+        }
+        .lightbox .nav-lightbox.next {
+            right: 2rem;
+        }
+        .lightbox .counter {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--cream);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        @media (max-width: 640px) {
+            .lightbox {
+                padding: 1rem;
+            }
+            .lightbox .close-lightbox {
+                top: 1rem;
+                right: 1rem;
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            .lightbox .nav-lightbox {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            .lightbox .nav-lightbox.prev {
+                left: 0.5rem;
+            }
+            .lightbox .nav-lightbox.next {
+                right: 0.5rem;
+            }
+            .lightbox .counter {
+                bottom: 1rem;
+                font-size: 0.7rem;
+                padding: 0.3rem 1rem;
+            }
+        }
+
+        /* Footer */
+        .minimal-footer {
+            position: relative;
+            background: var(--ink);
+            color: var(--cream);
+            padding: 96px 0 40px;
+            overflow: hidden;
+            isolation: isolate;
+        }
+        .minimal-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                    transparent 0%,
+                    rgba(244, 185, 62, 0.9) 20%,
+                    rgba(200, 16, 46, 0.9) 50%,
+                    rgba(244, 185, 62, 0.9) 80%,
+                    transparent 100%);
+            background-size: 200% 100%;
+            animation: footerShimmer 6s linear infinite;
+        }
+        @keyframes footerShimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .footer-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 56px;
+        }
+        .footer-grid>div {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1);
+        }
+        .footer-grid>div.in-view {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .footer-grid>div:nth-child(1) {
+            transition-delay: 0s;
+        }
+        .footer-grid>div:nth-child(2) {
+            transition-delay: .08s;
+        }
+        .footer-grid>div:nth-child(3) {
+            transition-delay: .16s;
+        }
+        .footer-grid>div:nth-child(4) {
+            transition-delay: .24s;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .coffee-animation {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            margin-right: 14px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, rgba(244, 185, 62, 0.18), rgba(244, 185, 62, 0.02) 70%);
+            border: 1px solid rgba(244, 185, 62, 0.25);
+        }
+        .coffee-icon {
+            font-size: 20px;
+            color: var(--gold);
+            animation: coffeeFloat 3s ease-in-out infinite;
+            transform-origin: center;
+        }
+        .coffee-steam {
+            position: absolute;
+            width: 3px;
+            background: linear-gradient(to top, rgba(244, 185, 62, 0.7), transparent);
+            border-radius: 2px;
+            animation: steamRise 2.5s ease-in-out infinite;
+        }
+        .steam-1 {
+            height: 14px;
+            top: -6px;
+            left: 14px;
+            animation-delay: 0s;
+        }
+        .steam-2 {
+            height: 11px;
+            top: -3px;
+            left: 22px;
+            animation-delay: 0.8s;
+        }
+        .steam-3 {
+            height: 13px;
+            top: -4px;
+            left: 30px;
+            animation-delay: 1.6s;
+        }
+        @keyframes coffeeFloat {
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-5px) rotate(4deg);
+            }
+        }
+        @keyframes steamRise {
+            0% {
+                opacity: 0;
+                transform: translateY(0) scale(0.8);
+            }
+            30% {
+                opacity: 0.8;
+                transform: translateY(-8px) scale(1);
+            }
+            70% {
+                opacity: 0.4;
+                transform: translateY(-16px) scale(1.1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-24px) scale(1.2);
+            }
+        }
+        .logo-text {
+            font-family: 'Fraunces', serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            background: linear-gradient(90deg, var(--cream) 0%, var(--gold) 45%, var(--cream) 55%, var(--gold) 100%);
+            background-size: 250% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: textShimmer 7s linear infinite;
+        }
+        @keyframes textShimmer {
+            0% {
+                background-position: 0% 0;
+            }
+            100% {
+                background-position: -250% 0;
+            }
+        }
+        .footer-description {
+            font-size: 14px;
+            color: var(--smoke);
+            line-height: 1.7;
+            margin-bottom: 22px;
+            max-width: 32ch;
+        }
+        .social-links {
+            display: flex;
+            gap: 14px;
+            margin-top: 20px;
+        }
+        .social-link {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(244, 185, 62, 0.06);
+            border: 1px solid rgba(244, 185, 62, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cream);
+            text-decoration: none;
+            overflow: hidden;
+            transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), border-color .35s ease, color .35s ease, box-shadow .35s ease;
+        }
+        .social-link::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--gold), var(--crimson));
+            opacity: 0;
+            transition: opacity .35s ease;
+            z-index: -1;
+        }
+        .social-link:hover {
+            transform: translateY(-4px) scale(1.08);
+            border-color: transparent;
+            color: var(--ink);
+            box-shadow: 0 8px 20px -6px rgba(244, 185, 62, 0.5);
+        }
+        .social-link:hover::before {
+            opacity: 1;
+        }
+        .footer-heading {
+            position: relative;
+            font-family: 'Fraunces', serif;
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 22px;
+            color: var(--cream);
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        .footer-heading::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 2px;
+            width: 28px;
+            background: linear-gradient(90deg, var(--gold), var(--crimson));
+            border-radius: 2px;
+            transition: width .4s ease;
+        }
+        .footer-grid>div:hover .footer-heading::after {
+            width: 48px;
+        }
+        .footer-links {
+            list-style: none;
+        }
+        .footer-links li {
+            margin-bottom: 13px;
+            font-size: 14px;
+            color: var(--smoke);
+        }
+        .footer-links a,
+        .footer-link-btn {
+            position: relative;
+            color: var(--smoke);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color .3s ease, transform .3s ease;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: 'Manrope', sans-serif;
+            text-align: left;
+            padding: 0;
+            display: inline-block;
+        }
+        .footer-links a::after,
+        .footer-link-btn::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -3px;
+            width: 0;
+            height: 1px;
+            background: linear-gradient(90deg, var(--gold), var(--crimson));
+            transition: width .35s ease;
+        }
+        .footer-links a:hover,
+        .footer-link-btn:hover {
+            color: var(--gold);
+            transform: translateX(4px);
+        }
+        .footer-links a:hover::after,
+        .footer-link-btn:hover::after {
+            width: 100%;
+        }
+        .footer-links i {
+            margin-right: 8px;
+            color: var(--gold);
+            width: 14px;
+            text-align: center;
+        }
+        .footer-bottom {
+            position: relative;
+            padding-top: 32px;
+            margin-top: 8px;
+            border-top: 1px solid rgba(244, 185, 62, 0.12);
+            text-align: center;
+            color: var(--smoke);
+            font-size: 13px;
+            letter-spacing: .2px;
+        }
+        .footer-bottom a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color .3s ease;
+        }
+        .footer-bottom a:hover {
+            color: var(--crimson);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 992px) {
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+            .minimal-footer {
+                padding: 72px 0 32px;
+            }
+        }
+
+        .brick-texture {
+            background-image:
+                repeating-linear-gradient(0deg, rgba(244, 185, 62, 0.02) 0px, rgba(244, 185, 62, 0.02) 1px, transparent 1px, transparent 34px),
+                repeating-linear-gradient(90deg, rgba(244, 185, 62, 0.02) 0px, rgba(244, 185, 62, 0.02) 1px, transparent 1px, transparent 64px);
+            background-position: 0 0, 32px 17px;
+        }
+
+        img.lazy-load {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        img.lazy-load.loaded {
+            opacity: 1;
+        }
+
+        .gallery-header {
+            padding-top: 140px;
+        }
+        @media (max-width: 640px) {
+            .gallery-header {
+                padding-top: 110px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    NAVIGATION (same as index.html)
+    ============================================================ -->
+    <header id="siteHeader" class="fixed inset-x-0 top-4 z-50 flex justify-center px-3 sm:px-4">
+        <div class="w-full max-w-6xl">
+            <nav class="glass-nav rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between">
+                <a href="index.html" class="flex items-center gap-2 shrink-0">
+                    <img src="logo/logo.webp" alt="THE GARAGE CAFE Logo" class="nav-logo rounded-md bg-transparent" loading="lazy">
+                </a>
+
+                <div class="hidden lg:flex items-center gap-8 font-medium text-sm text-cream/80">
+                    <a href="index.html#about" class="nav-link">About Us</a>
+                    <a href="index.html#menu" class="nav-link">Menu</a>
+                    <a href="index.html#book" class="nav-link">Book a Table</a>
+                    <a href="gallery.html" class="nav-link text-gold">Gallery</a>
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <a href="index.html" class="hidden sm:block text-cream/60 hover:text-gold transition text-sm font-medium">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Back
+                    </a>
+                    <button id="mobileToggle" class="lg:hidden w-9 h-9 flex items-center justify-center rounded-full bg-char/70 border border-gold/20 transition hover:border-gold/50">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                    </button>
+                </div>
+            </nav>
+
+            <div id="mobileMenu" class="hidden lg:hidden glass-nav mt-2 rounded-2xl px-6 py-6 flex flex-col gap-5 text-sm font-medium">
+                <div class="flex flex-col gap-4 mt-2">
+                    <a href="index.html#menu" class="nav-link">Menu</a>
+                    <a href="index.html#about" class="nav-link">About</a>
+                    <a href="index.html#hours" class="nav-link">Hours</a>
+                    <a href="index.html#book" class="nav-link">Book a Table</a>
+                    <a href="gallery.html" class="nav-link text-gold">Gallery</a>
+                    <a href="menu.html" class="nav-link text-gold/70">Full Menu →</a>
+                </div>
+                <div class="h-px bg-cream/10 my-2"></div>
+                <div class="flex items-center justify-between mt-2">
+                    <a href="index.html" class="flex items-center gap-3 text-cream/80 hover:text-gold transition">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Back to Home</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    GALLERY PAGE HEADER
+    ============================================================ -->
+    <section class="gallery-header brick-texture border-b border-brickline">
+        <div class="max-w-6xl mx-auto px-6 sm:px-10 text-center">
+            <span class="text-xs tracking-[0.25em] uppercase text-gold/80">Visual Story</span>
+            <h1 class="font-display text-4xl sm:text-5xl md:text-6xl mt-3 mb-4">Our Gallery</h1>
+            <p class="text-cream/60 max-w-2xl mx-auto text-sm sm:text-base">
+                A glimpse into the heart of THE GARAGE CAFE — the food, the vibe, the moments.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    GALLERY GRID
+    ============================================================ -->
+    <section class="py-12 px-6 sm:px-10 border-b border-brickline">
+        <div class="max-w-6xl mx-auto">
+            <div class="gallery-grid" id="galleryGrid">
+                <!-- Images will be injected by JavaScript -->
+            </div>
+            <div class="gallery-viewmore-wrap" id="viewMoreWrap">
+                <button type="button" class="gallery-viewmore-btn" id="viewMoreBtn">View More</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    LIGHTBOX
+    ============================================================ -->
+    <div class="lightbox" id="lightbox">
+        <button class="close-lightbox" id="closeLightbox" aria-label="Close lightbox">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <button class="nav-lightbox prev" id="prevLightbox" aria-label="Previous">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button class="nav-lightbox next" id="nextLightbox" aria-label="Next">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <img class="lightbox-content" id="lightboxImg" src="" alt="Gallery image" />
+        <div class="counter" id="lightboxCounter">1 / 1</div>
+    </div>
+
+    <!-- ============================================================
+    FOOTER (same as index.html)
+    ============================================================ -->
+    <footer class="minimal-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+
+                <div>
+                    <div class="footer-logo">
+                        <div class="coffee-animation">
+                            <i class="fas fa-mug-hot coffee-icon"></i>
+                            <div class="coffee-steam steam-1"></div>
+                            <div class="coffee-steam steam-2"></div>
+                            <div class="coffee-steam steam-3"></div>
+                        </div>
+                        <span class="logo-text">THE GARAGE CAFE</span>
+                    </div>
+                    <p class="footer-description">
+                        A cozy café slinging honest breakfasts and slow-drip coffee from a hidden corner of Kandy. No pretense — just brick walls, good light, and a kitchen that opens early.
+                    </p>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/theblizzcafe" target="_blank" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/blizz_cafe_" target="_blank" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.tiktok.com/@blizz.cafe" target="_blank" class="social-link"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" target="_blank" class="social-link"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Explore</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html#about" class="footer-link-btn">About Us</a></li>
+                        <li><a href="index.html#menu" class="footer-link-btn">Menu</a></li>
+                        <li><a href="menu.html" class="footer-link-btn text-gold">Full Menu</a></li>
+                        <li><a href="index.html#book" class="footer-link-btn">Book a Table</a></li>
+                        <li><a href="gallery.html" class="footer-link-btn text-gold">Gallery</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" class="footer-link-btn">Privacy Policy</a></li>
+                        <li><a href="#" class="footer-link-btn">Terms of Service</a></li>
+                        <li><a href="#" class="footer-link-btn">Allergen Info</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Follow</h4>
+                    <ul class="footer-links" style="list-style: none; color: #999;">
+                        <li><a href="https://www.instagram.com/blizz_cafe_" target="_blank" class="footer-link-btn">Instagram</a></li>
+                        <li><a href="https://www.facebook.com/theblizzcafe" target="_blank" class="footer-link-btn">Facebook</a></li>
+                        <li><a href="https://www.tiktok.com/@blizz.cafe" target="_blank" class="footer-link-btn">TikTok</a></li>
+                        <li><i class="fas fa-map-marker-alt"></i> Kandy, Sri Lanka</li>
+                        <li><i class="fas fa-phone"></i> +94 (75) 666 0666</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="footer-bottom">
+                <p>
+                    &copy; <span id="year"></span> THE GARAGE CAFE. All rights reserved. |
+                    DESIGNED & DEVELOPED BY <a href="http://wa.me/713171006" target="_blank">MASH SOLUTIONS</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
+    <script>
+        // ============================================================
+        // LAZY LOAD
+        // ============================================================
+        (function lazyLoadImages() {
+            const lazyImages = document.querySelectorAll('img.lazy-load');
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('loaded');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { rootMargin: '200px' });
+                lazyImages.forEach(img => {
+                    const rect = img.getBoundingClientRect();
+                    const winHeight = window.innerHeight || document.documentElement.clientHeight;
+                    if (rect.top < winHeight + 200) {
+                        img.classList.add('loaded');
+                    } else {
+                        observer.observe(img);
+                    }
+                });
+            } else {
+                lazyImages.forEach(img => img.classList.add('loaded'));
+            }
+        })();
+
+        // ============================================================
+        // GALLERY DATA
+        // ============================================================
+        const GALLERY_IMAGES = [
+            { src: 'img/p1.webp', alt: 'Garage Cafe interior', caption: 'Cozy seating area' },
+            { src: 'img/p2.webp', alt: 'Garage Cafe food', caption: 'Signature dishes' },
+            { src: 'img/p3.webp', alt: 'Garage Cafe coffee', caption: 'Freshly brewed coffee' },
+            { src: 'img/p4.webp', alt: 'Garage Cafe ambiance', caption: 'Warm lighting' },
+            { src: 'img/p5.webp', alt: 'Garage Cafe outdoor', caption: 'Outdoor seating' },
+            { src: 'img/p6.webp', alt: 'Garage Cafe dessert', caption: 'Sweet treats' },
+            { src: 'img/p7.webp', alt: 'Garage Cafe bar', caption: 'The bar area' },
+            { src: 'img/p8.webp', alt: 'Garage Cafe group', caption: 'Perfect for groups' },
+            { src: 'img/p9.webp', alt: 'Garage Cafe breakfast', caption: 'Breakfast classics' },
+            { src: 'img/p10.webp', alt: 'Garage Cafe night', caption: 'Evening vibe' },
+            { src: 'img/p11.webp', alt: 'Garage Cafe art', caption: 'Brick wall art' },
+            { src: 'img/p12.webp', alt: 'Garage Cafe drinks', caption: 'Refreshing drinks' },
+            { src: 'img/p13.webp', alt: 'Garage Cafe closeup', caption: 'Food closeup' },
+            { src: 'img/p14.webp', alt: 'Garage Cafe corner', caption: 'Quiet corner' },
+            { src: 'img/p15.webp', alt: 'Garage Cafe plants', caption: 'Green touches' },
+            { src: 'img/p16.webp', alt: 'Garage Cafe window', caption: 'Natural light' },
+            { src: 'img/p17.webp', alt: 'Garage Cafe staff', caption: 'Our team' },
+            { src: 'img/p18.webp', alt: 'Garage Cafe crowd', caption: 'Buzzing atmosphere' },
+            { src: 'img/p19.webp', alt: 'Garage Cafe plate', caption: 'Plated to perfection' },
+            { src: 'img/p20.webp', alt: 'Garage Cafe sign', caption: 'The Garage sign' },
+            { src: 'img2/p41.webp', alt: 'Garage Cafe night lights', caption: 'Night lights' },
+            { src: 'img2/p22.webp', alt: 'Garage Cafe pastry', caption: 'Fresh pastries' },
+            { src: 'img2/p23.webp', alt: 'Garage Cafe salad', caption: 'Garden fresh salad' },
+            { src: 'img2/p24.webp', alt: 'Garage Cafe patio', caption: 'Patio evenings' },
+            { src: 'img2/p25.webp', alt: 'Garage Cafe grill', caption: 'Off the grill' },
+            { src: 'img2/p26.webp', alt: 'Garage Cafe live music', caption: 'Live music nights' },
+            { src: 'img2/p27.webp', alt: 'Garage Cafe latte art', caption: 'Latte art' },
+            { src: 'img2/p28.webp', alt: 'Garage Cafe friends', caption: 'Good company' },
+            { src: 'img2/p29.webp', alt: 'Garage Cafe pizza', caption: 'Wood-fired pizza' },
+            { src: 'img2/p30.webp', alt: 'Garage Cafe details', caption: 'The little details' },
+            { src: 'img2/p31.webp', alt: 'Garage Cafe rooftop', caption: 'Rooftop view' },
+            { src: 'img2/p32.webp', alt: 'Garage Cafe cake', caption: 'Celebration cakes' },
+            { src: 'img2/p33.webp', alt: 'Garage Cafe bartender', caption: 'Craft cocktails' },
+            { src: 'img2/p34.webp', alt: 'Garage Cafe reading corner', caption: 'A quiet read' },
+            { src: 'img2/p35.webp', alt: 'Garage Cafe brunch', caption: 'Weekend brunch' },
+            { src: 'img2/p36.webp', alt: 'Garage Cafe fireplace', caption: 'Fireside warmth' },
+            { src: 'img2/p37.webp', alt: 'Garage Cafe chef', caption: 'Behind the scenes' },
+            { src: 'img2/p38.webp', alt: 'Garage Cafe seasonal', caption: 'Seasonal specials' },
+            { src: 'img2/p39.webp', alt: 'Garage Cafe rain day', caption: 'Cozy rain day' },
+            { src: 'img2/p40.webp', alt: 'Garage Cafe sunset', caption: 'Golden hour' },
+        ];
+
+        const INITIAL_VISIBLE = 20;
+        let visibleCount = Math.min(INITIAL_VISIBLE, GALLERY_IMAGES.length);
+
+        // ============================================================
+        // RENDER GALLERY
+        // ============================================================
+        // Mosaic size pattern (repeats every 8 items) — mix of squares,
+        // wide, tall and big tiles similar to the reference layout
+        const SIZE_PATTERN = ['', 'wide', '', 'tall', 'big', '', 'wide', ''];
+
+        function renderGallery() {
+            const grid = document.getElementById('galleryGrid');
+            const viewMoreWrap = document.getElementById('viewMoreWrap');
+            const viewMoreBtn = document.getElementById('viewMoreBtn');
+            grid.innerHTML = '';
+
+            const itemsToShow = GALLERY_IMAGES.slice(0, visibleCount);
+
+            itemsToShow.forEach((img, index) => {
+                const item = document.createElement('div');
+                const sizeClass = SIZE_PATTERN[index % SIZE_PATTERN.length];
+                item.className = 'gallery-item' + (sizeClass ? ' ' + sizeClass : '');
+                item.dataset.index = index;
+                item.innerHTML = `
+                    <img src="${img.src}" alt="${img.alt}" class="lazy-load" loading="lazy" />
+                    <div class="overlay">
+                        <span>${img.caption}</span>
+                    </div>
+                `;
+                item.addEventListener('click', () => openLightbox(index));
+                grid.appendChild(item);
+            });
+
+            // Show fade overlay + View More button only while more images remain
+            const hasMore = visibleCount < GALLERY_IMAGES.length;
+            grid.classList.toggle('gallery-fade', hasMore);
+            viewMoreWrap.style.display = hasMore ? 'flex' : 'none';
+            if (viewMoreBtn) {
+                viewMoreBtn.textContent = hasMore ? 'View More' : 'Showing All';
+            }
+
+            // Trigger lazy load for any remaining images
+            document.querySelectorAll('img.lazy-load:not(.loaded)').forEach(img => {
+                const rect = img.getBoundingClientRect();
+                const winHeight = window.innerHeight || document.documentElement.clientHeight;
+                if (rect.top < winHeight + 200) {
+                    img.classList.add('loaded');
+                }
+            });
+        }
+
+        // ============================================================
+        // VIEW MORE
+        // ============================================================
+        document.getElementById('viewMoreBtn').addEventListener('click', () => {
+            visibleCount = GALLERY_IMAGES.length;
+            renderGallery();
+        });
+
+        // ============================================================
+        // LIGHTBOX
+        // ============================================================
+        let currentLightboxIndex = 0;
+
+        function openLightbox(index) {
+            currentLightboxIndex = index;
+            const lightbox = document.getElementById('lightbox');
+            const img = document.getElementById('lightboxImg');
+            const counter = document.getElementById('lightboxCounter');
+
+            img.src = GALLERY_IMAGES[index].src;
+            img.alt = GALLERY_IMAGES[index].alt;
+            counter.textContent = `${index + 1} / ${GALLERY_IMAGES.length}`;
+
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function navigateLightbox(direction) {
+            const newIndex = (currentLightboxIndex + direction + GALLERY_IMAGES.length) % GALLERY_IMAGES.length;
+            openLightbox(newIndex);
+        }
+
+        // Lightbox event listeners
+        document.getElementById('closeLightbox').addEventListener('click', closeLightbox);
+        document.getElementById('prevLightbox').addEventListener('click', () => navigateLightbox(-1));
+        document.getElementById('nextLightbox').addEventListener('click', () => navigateLightbox(1));
+
+        // Close lightbox on overlay click
+        document.getElementById('lightbox').addEventListener('click', function(e) {
+            if (e.target === this) closeLightbox();
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('lightbox').classList.contains('active')) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') navigateLightbox(-1);
+            if (e.key === 'ArrowRight') navigateLightbox(1);
+        });
+
+        // ============================================================
+        // MOBILE NAV TOGGLE
+        // ============================================================
+        document.getElementById('mobileToggle').addEventListener('click', () => {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+
+        // ============================================================
+        // FOOTER SCROLL REVEAL
+        // ============================================================
+        (function footerReveal() {
+            const footerCols = document.querySelectorAll('.footer-grid > div');
+            if ('IntersectionObserver' in window && footerCols.length) {
+                const footerObserver = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('in-view');
+                            footerObserver.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.15 });
+                footerCols.forEach((col) => footerObserver.observe(col));
+            } else {
+                footerCols.forEach((col) => col.classList.add('in-view'));
+            }
+        })();
+
+        // ============================================================
+        // YEAR
+        // ============================================================
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        renderGallery();
+        console.log('✅ Gallery page loaded with', GALLERY_IMAGES.length, 'images');
+    </script>
+
+</body>
+</html>
