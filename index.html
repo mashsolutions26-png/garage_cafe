@@ -2713,13 +2713,13 @@
     // FIREBASE INITIALISATION
     // ============================================================
     const firebaseConfig = {
-      apiKey: "AIzaSyB_UdWrxjbuhPiFBSOZGo_mGIIdalUZbx8",
-      authDomain: "blizzkandy.firebaseapp.com",
-      projectId: "blizzkandy",
-      storageBucket: "blizzkandy.firebasestorage.app",
-      messagingSenderId: "705369840142",
-      appId: "1:705369840142:web:310d32d621a8e835c5ba5f",
-      measurementId: "G-GDCLPQVDJ6"
+      apiKey: "AIzaSyAiNBCW8fX6Y4s2tU4Z7Z-SGhxw12ryNG8",
+      authDomain: "thegaragecafe.firebaseapp.com",
+      projectId: "thegaragecafe",
+      storageBucket: "thegaragecafe.firebasestorage.app",
+      messagingSenderId: "616374331257",
+      appId: "1:616374331257:web:b33c42e0f2df328d7eb1a8",
+      measurementId: "G-B4LH3CPMBK"
     };
     let auth = null;
     let db = null;
@@ -2735,6 +2735,10 @@
     // Telegram Bot Config
     const TELEGRAM_BOT_TOKEN = '8978617133:AAH7EZX77R9JuwhHKBOW256xnxTnqDHyHgo';
     const TELEGRAM_CHAT_ID = '8617382834';
+
+    // Cafe WhatsApp Config (order alert copy sent to the cafe's WhatsApp)
+    // 0764044417 -> international format: no leading 0, with 94 country code
+    const CAFE_WHATSAPP_NUMBER = '94764044417';
 
     // ============================================================
     // BRANCH DATA
@@ -3894,6 +3898,47 @@
         });
     }
 
+    // ============================================================
+    // WHATSAPP ORDER ALERT (to the cafe's WhatsApp number)
+    // ============================================================
+    // Important, honest limitation: WhatsApp does NOT let a plain website
+    // silently send a message the way the Telegram bot does above. There is
+    // no public "send from browser" API. The only thing a static site like
+    // this can do is open a wa.me link with the message pre-filled, which
+    // opens WhatsApp (app or web) on the CUSTOMER's device with the cafe's
+    // number as the recipient and the order details already typed in — the
+    // customer just needs to tap Send once. That's what this does. It is
+    // opened in a new tab immediately when "Order Now" is pressed, so it's
+    // as close to "automatic" as is possible without paying for and setting
+    // up the official WhatsApp Business Cloud API (which needs Meta business
+    // verification + a backend server to call it — a bigger project than
+    // this file can do on its own).
+    function buildWhatsAppOrderMessage(orderId, phone, orderItems, totals, orderData) {
+      const itemLines = orderItems
+        .map(i => `• ${i.name} x${i.quantity} = Rs. ${(i.price * i.quantity).toFixed(0)}`)
+        .join('\n');
+      return `🛎️ *New Order - THE GARAGE CAFE*\n\n` +
+        `🆔 Order ID: ${orderId}\n` +
+        `👤 Customer: ${orderData.userName}\n` +
+        `📞 Phone: ${phone}\n` +
+        `📍 Branch: ${orderData.branch}\n\n` +
+        `*Items:*\n${itemLines}\n\n` +
+        `🟡 *TOTAL: Rs. ${totals.total.toFixed(0)}*\n\n` +
+        `📦 Pick Up Only`;
+    }
+
+    function sendWhatsAppOrderAlert(orderId, phone, orderItems, totals, orderData) {
+      try {
+        const message = buildWhatsAppOrderMessage(orderId, phone, orderItems, totals, orderData);
+        const url = `https://wa.me/${CAFE_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+        // Opened synchronously (still inside the click's call stack) so
+        // browsers don't block it as an unrequested popup.
+        window.open(url, '_blank');
+      } catch (waErr) {
+        console.error('❌ WhatsApp alert open failed:', waErr);
+      }
+    }
+
     function sendBookingTelegram(bookingData) {
       const n = escapeTelegramHtml(bookingData.name);
       const ph = escapeTelegramHtml(bookingData.phone);
@@ -4095,6 +4140,11 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} = Rs. 
       } catch (tgErr) {
         console.error('❌ Telegram send threw synchronously:', tgErr);
       }
+
+      // Open a pre-filled WhatsApp message to the cafe (see note above
+      // sendWhatsAppOrderAlert for why this needs one tap from the customer
+      // rather than being fully silent like the Telegram alert).
+      sendWhatsAppOrderAlert(orderId, phone, orderItems, totals, orderData);
 
       if (!db) {
         console.error('❌ Firestore (db) is not available — Firebase failed to initialise. Order was sent to Telegram but NOT saved, so it will not appear in the admin panel or your account.');
