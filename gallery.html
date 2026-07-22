@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>THE GARAGE CAFE</title>
+    <title>Gallery — THE GARAGE CAFE</title>
     <meta name="description" content="Explore the vibrant atmosphere, delicious food, and cozy corners of THE GARAGE CAFE in Kandy, Sri Lanka." />
-    <link rel="icon" type="image/png" sizes="32x32" href="logo/logo.webp" />
-    <link rel="icon" type="image/png" sizes="16x16" href="logo/logo.webp" />
-    <link rel="apple-touch-icon" href="logo/logo.webp" />
+    <link rel="icon" type="image/png" sizes="32x32" href="img/favicon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="img/favicon.png" />
+    <link rel="apple-touch-icon" href="img/favicon.png" />
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-H5RMLCQD7W"></script>
@@ -135,7 +135,7 @@
             }
         }
 
-        /* Gallery Grid — tight mosaic layout */
+        /* Gallery Grid — clean dark background, no brick texture */
         .gallery-grid {
             position: relative;
             display: grid;
@@ -144,6 +144,7 @@
             gap: 0.6rem;
             transition: max-height 0.6s ease;
             overflow: hidden;
+            background: var(--ink);      /* pure dark background */
         }
         @media (min-width: 1024px) {
             .gallery-grid {
@@ -702,11 +703,10 @@
             }
         }
 
+        /* REMOVED .brick-texture — background lines removed */
         .brick-texture {
-            background-image:
-                repeating-linear-gradient(0deg, rgba(244, 185, 62, 0.02) 0px, rgba(244, 185, 62, 0.02) 1px, transparent 1px, transparent 34px),
-                repeating-linear-gradient(90deg, rgba(244, 185, 62, 0.02) 0px, rgba(244, 185, 62, 0.02) 1px, transparent 1px, transparent 64px);
-            background-position: 0 0, 32px 17px;
+            /* completely removed brick texture */
+            background: var(--ink);
         }
 
         img.lazy-load {
@@ -777,9 +777,9 @@
     </header>
 
     <!-- ============================================================
-    GALLERY PAGE HEADER
+    GALLERY PAGE HEADER (no brick background)
     ============================================================ -->
-    <section class="gallery-header brick-texture border-b border-brickline">
+    <section class="gallery-header border-b border-brickline" style="background: var(--ink);">
         <div class="max-w-6xl mx-auto px-6 sm:px-10 text-center">
             <span class="text-xs tracking-[0.25em] uppercase text-gold/80">Visual Story</span>
             <h1 class="font-display text-4xl sm:text-5xl md:text-6xl mt-3 mb-4">Our Gallery</h1>
@@ -790,12 +790,12 @@
     </section>
 
     <!-- ============================================================
-    GALLERY GRID
+    GALLERY GRID — pure dark background, no grid lines
     ============================================================ -->
-    <section class="py-12 px-6 sm:px-10 border-b border-brickline">
+    <section class="py-12 px-6 sm:px-10 border-b border-brickline" style="background: var(--ink);">
         <div class="max-w-6xl mx-auto">
-            <div class="gallery-grid" id="galleryGrid">
-                <!-- Images will be injected by JavaScript -->
+            <div class="gallery-grid" id="galleryGrid" style="background: var(--ink);">
+                <!-- Images injected by JavaScript -->
             </div>
             <div class="gallery-viewmore-wrap" id="viewMoreWrap">
                 <button type="button" class="gallery-viewmore-btn" id="viewMoreBtn">View More</button>
@@ -966,6 +966,7 @@
             { src: 'img2/p38.webp', alt: 'Garage Cafe seasonal', caption: 'Seasonal specials' },
             { src: 'img2/p39.webp', alt: 'Garage Cafe rain day', caption: 'Cozy rain day' },
             { src: 'img2/p40.webp', alt: 'Garage Cafe sunset', caption: 'Golden hour' },
+            { src: 'img2/p42.webp', alt: 'Garage Cafe sunset', caption: 'Golden hour' },
         ];
 
         const INITIAL_VISIBLE = 20;
@@ -974,8 +975,6 @@
         // ============================================================
         // RENDER GALLERY
         // ============================================================
-        // Mosaic size pattern (repeats every 8 items) — mix of squares,
-        // wide, tall and big tiles similar to the reference layout
         const SIZE_PATTERN = ['', 'wide', '', 'tall', 'big', '', 'wide', ''];
 
         function renderGallery() {
@@ -1001,7 +1000,6 @@
                 grid.appendChild(item);
             });
 
-            // Show fade overlay + View More button only while more images remain
             const hasMore = visibleCount < GALLERY_IMAGES.length;
             grid.classList.toggle('gallery-fade', hasMore);
             viewMoreWrap.style.display = hasMore ? 'flex' : 'none';
@@ -1009,7 +1007,6 @@
                 viewMoreBtn.textContent = hasMore ? 'View More' : 'Showing All';
             }
 
-            // Trigger lazy load for any remaining images
             document.querySelectorAll('img.lazy-load:not(.loaded)').forEach(img => {
                 const rect = img.getBoundingClientRect();
                 const winHeight = window.innerHeight || document.documentElement.clientHeight;
@@ -1057,17 +1054,14 @@
             openLightbox(newIndex);
         }
 
-        // Lightbox event listeners
         document.getElementById('closeLightbox').addEventListener('click', closeLightbox);
         document.getElementById('prevLightbox').addEventListener('click', () => navigateLightbox(-1));
         document.getElementById('nextLightbox').addEventListener('click', () => navigateLightbox(1));
 
-        // Close lightbox on overlay click
         document.getElementById('lightbox').addEventListener('click', function(e) {
             if (e.target === this) closeLightbox();
         });
 
-        // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             if (!document.getElementById('lightbox').classList.contains('active')) return;
             if (e.key === 'Escape') closeLightbox();
