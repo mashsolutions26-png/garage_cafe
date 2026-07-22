@@ -2975,7 +2975,7 @@
           showPromoMessage('Promo codes are currently unavailable.', false);
         }
         updateCartUI();
-      }, () => {});
+      }, err => { console.error('❌ Promo settings listener error:', err); });
     }
 
     function listenPromoCodes() {
@@ -3015,7 +3015,7 @@
         }
 
         updateCartUI();
-      }, () => {});
+      }, err => { console.error('❌ Promo codes listener error:', err); });
     }
 
     function showPromoMessage(msg, isSuccess) {
@@ -3625,7 +3625,7 @@
         card.innerHTML = `
             <div class="relative menu-image-wrap">
               <div class="w-full h-56">
-                <img src="${item.image}" class="w-full h-full object-cover lazy-load" alt="${item.name}" loading="lazy">
+                <img src="${item.image || 'img/herologo.png'}" class="w-full h-full object-cover lazy-load" alt="${item.name}" loading="lazy" onerror="this.onerror=null;this.src='img/herologo.png';">
               </div>
             </div>
             <div class="p-5">
@@ -3935,6 +3935,11 @@
       const itemLines = orderItems
         .map(i => `• ${i.name} x${i.quantity} = Rs. ${(i.price * i.quantity).toFixed(0)}`)
         .join('\n');
+      // Show the promo line only when a promo code was actually applied and
+      // it produced a real discount — otherwise this row is skipped.
+      const promoLine = (orderData.promoCode && totals.discount > 0)
+        ? `🎟️ Promo (${orderData.promoCode}): - Rs. ${totals.discount.toFixed(0)}\n`
+        : '';
       return `🛎️ *New Order - THE GARAGE CAFE*\n\n` +
         `🆔 Order ID: ${orderId}\n` +
         `👤 Customer: ${orderData.userName}\n` +
@@ -3942,6 +3947,7 @@
         `📍 Branch: ${orderData.branch}\n\n` +
         `*Items:*\n${itemLines}\n\n` +
         `💰 Subtotal: Rs. ${totals.subtotal.toFixed(0)}\n` +
+        promoLine +
         `💵 Service Fee: Rs. ${totals.serviceFee.toFixed(0)}\n` +
         `🟡 *TOTAL: Rs. ${totals.total.toFixed(0)}*\n\n` +
         `📦 Order Type: ${orderData.orderType}`;
@@ -4640,6 +4646,25 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
         const icon = document.getElementById('profileIcon');
         const initial = document.getElementById('profileInitial');
 
+        // Re-attach the promo code / promo settings / discount listeners
+        // on every auth state change (login, logout, or the very first
+        // resolution on page load). These are also started once further
+        // down the script as soon as the page loads, but that first
+        // attempt can happen before Firebase has finished resolving the
+        // visitor's auth state. If Firestore's security rules require an
+        // authenticated request to read 'promoCodes' / 'settings', that
+        // first attempt fails with permission-denied and — because
+        // Firestore does not auto-retry a dead onSnapshot listener — the
+        // promo code box would stay broken for the rest of the session,
+        // even after the customer logs in. Calling these functions again
+        // here is safe (they always unsubscribe any previous listener
+        // first) and guarantees a fresh, correctly authenticated
+        // subscription each time, so promo codes reliably sync from the
+        // admin panel.
+        try { listenPromoSettings(); } catch (err) { console.error('⚠️ Promo settings listener failed:', err); }
+        try { listenPromoCodes(); } catch (err) { console.error('⚠️ Promo codes listener failed:', err); }
+        try { listenDiscounts(); } catch (err) { console.error('⚠️ Discount listener failed:', err); }
+
         if (user) {
           const displayName = user.displayName || user.email || 'Guest';
           icon.classList.add('hidden');
@@ -5000,6 +5025,15 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
           console.log('✅ Booking saved to Firestore');
         }).catch((err) => {
           console.error('❌ Booking Firestore save error:', err.code || '', err.message || err);
+          // Surface this on screen too — a console-only error means staff
+          // never find out the booking silently failed to reach the admin
+          // panel (this is almost always a Firestore Security Rules issue).
+          showOrderNotification(
+            '⚠️ Booking Not Saved',
+            `Your booking was NOT saved to our system (${err.code || err.message || 'unknown error'}). Please call to confirm your table.`,
+            '⚠️',
+            false
+          );
         });
       }
 

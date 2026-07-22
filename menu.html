@@ -1349,192 +1349,106 @@
     }
 
     // ============================================================
-    // BLIZZ MENU DATA (full) + NEW DRINKS/DESSERTS
+    // MENU DATA — now sourced LIVE from Firestore's `menuItems`
+    // collection, the exact same collection admin.html's Add/Edit/
+    // Delete Menu Item CRUD writes to.
+    //
+    // Previously this page rendered from a hardcoded static
+    // BLIZZ_MENU object that never changed after page load — that
+    // object is why adding or editing an item in the admin panel
+    // never showed up here. It's been replaced with a real-time
+    // onSnapshot listener (listenMenuItems, below) so any add, edit,
+    // or delete in admin.html reflects on this page within moments,
+    // with no manual refresh needed.
     // ============================================================
-    const BLIZZ_MENU = {
-      // ----- SIDES -----
-      sides: [
-        { name: '60 MPH Fries', price: 480, desc: 'Speed fries — regular.' },
-        { name: '100 MPH Fries', price: 940, desc: 'Speed fries — large.' },
-        { name: '200 MPH Fully Loaded (Meat + Cheese)', price: 1450, desc: 'Loaded fries with meat & cheese.' },
-        { name: 'Kochchi Bites', price: 600, desc: 'Spicy kochchi bites.' },
-        { name: 'Crispy Chicken Popcorn', price: 650, desc: 'Crispy chicken popcorn.' }
-      ],
-      // ----- SUPER FRIES -----
-      superFries: [
-        { name: 'Super Fries (Cheese)', price: 640, desc: 'Fries with cheese.' },
-        { name: 'Super Fries (Cheese + Chicken)', price: 740, desc: 'Fries with cheese & chicken.' },
-        { name: 'Super Fries (Cheese + Beef)', price: 840, desc: 'Fries with cheese & beef.' },
-        { name: 'Super Fries (Fish)', price: 840, desc: 'Fries with fish.' }
-      ],
-      // ----- ENGINE KOTTU -----
-      engineKottu: [
-        { name: 'V6 Kottu (Chicken)', price: 590, desc: 'V6 engine kottu with chicken.' },
-        { name: 'V6 Kottu (Beef)', price: 740, desc: 'V6 engine kottu with beef.' },
-        { name: 'V6 Kottu (Seafood)', price: 740, desc: 'V6 engine kottu with seafood.' },
-        { name: 'V6 Kottu (Egg)', price: 570, desc: 'V6 engine kottu with egg.' },
-        { name: 'V6 Kottu (Veg)', price: 550, desc: 'V6 engine kottu with veg.' },
-        { name: 'V6 Kottu (Mix)', price: 990, desc: 'V6 engine kottu mixed.' },
-        { name: 'V6 Kottu (+Cheese)', price: 120, desc: 'Add cheese to your V6 kottu.' },
-        { name: 'V8 Kottu (Chicken)', price: 1390, desc: 'V8 engine kottu with chicken.' },
-        { name: 'V8 Kottu (Beef)', price: 1590, desc: 'V8 engine kottu with beef.' },
-        { name: 'V8 Kottu (Seafood)', price: 1590, desc: 'V8 engine kottu with seafood.' },
-        { name: 'V8 Kottu (Egg)', price: 1370, desc: 'V8 engine kottu with egg.' },
-        { name: 'V8 Kottu (Mix + Fries + Cheese + Sausage)', price: 1990, desc: 'V8 engine kottu with mix.' }
-      ],
-      // ----- TRIPTRONIC RICE -----
-      triptronicRice: [
-        { name: '1000 RPM Fried Rice (Chicken)', price: 690, desc: 'Fried rice with chicken.' },
-        { name: '1000 RPM Fried Rice (Beef)', price: 890, desc: 'Fried rice with beef.' },
-        { name: '1000 RPM Fried Rice (Seafood)', price: 890, desc: 'Fried rice with seafood.' },
-        { name: '1000 RPM Fried Rice (Egg)', price: 680, desc: 'Fried rice with egg.' },
-        { name: '1000 RPM Fried Rice (Veg)', price: 670, desc: 'Fried rice with veg.' },
-        { name: '1000 RPM Fried Rice (Mix)', price: 1090, desc: 'Fried rice mixed.' },
-        { name: 'Full Tank Nasigoreng (Chicken)', price: 790, desc: 'Nasigoreng with chicken.' },
-        { name: 'Full Tank Nasigoreng (Beef)', price: 940, desc: 'Nasigoreng with beef.' },
-        { name: 'Full Tank Nasigoreng (Seafood)', price: 940, desc: 'Nasigoreng with seafood.' },
-        { name: 'Full Tank Nasigoreng (Egg)', price: 770, desc: 'Nasigoreng with egg.' },
-        { name: 'Full Tank Nasigoreng (Mix)', price: 1190, desc: 'Nasigoreng mixed.' },
-        { name: 'Spicy Rice with Grilled Chicken', price: 790, desc: 'Spicy rice with grilled chicken.' }
-      ],
-      // ----- NOODLES (TRIPTRONIC) -----
-      triptronicNoodles: [
-        { name: 'Noodles (Chicken)', price: 690, desc: 'Noodles with chicken.' },
-        { name: 'Noodles (Beef)', price: 890, desc: 'Noodles with beef.' },
-        { name: 'Noodles (Seafood)', price: 890, desc: 'Noodles with seafood.' },
-        { name: 'Noodles (Egg)', price: 680, desc: 'Noodles with egg.' },
-        { name: 'Noodles (Veg)', price: 670, desc: 'Noodles with veg.' },
-        { name: 'Noodles (Mix)', price: 1090, desc: 'Noodles mixed.' }
-      ],
-      // ----- WAFFLES -----
-      waffles: [
-        { name: 'Spicy Chicken + Cheese Waffle', price: 580, desc: 'Savory waffle with spicy chicken & cheese.' },
-        { name: 'Spicy Beef + Cheese Waffle', price: 780, desc: 'Savory waffle with spicy beef & cheese.' },
-        { name: 'Sausage + Cheese Waffle', price: 580, desc: 'Savory waffle with sausage & cheese.' },
-        { name: 'Honey with Ice Cream Waffle', price: 420, desc: 'Sweet waffle with honey & ice cream.' },
-        { name: 'Chocolate with Ice Cream Waffle', price: 420, desc: 'Sweet waffle with chocolate & ice cream.' },
-        { name: 'Strawberry with Ice Cream Waffle', price: 420, desc: 'Sweet waffle with strawberry & ice cream.' },
-        { name: 'Brownies with Ice Cream Waffle', price: 480, desc: 'Sweet waffle with brownies & ice cream.' },
-        { name: 'Pancakes (Chocolate)', price: 480, desc: 'Chocolate pancakes.' }
-      ],
-      // ----- BURGERS -----
-      burgers: [
-        { name: 'Chicken Burger', price: 790, desc: 'Chicken burger.' },
-        { name: 'XL Chicken Burger', price: 1090, desc: 'XL chicken burger.' },
-        { name: 'Beef Burger', price: 890, desc: 'Beef burger.' },
-        { name: 'XL Beef Burger', price: 1190, desc: 'XL beef burger.' },
-        { name: 'Egg Burger', price: 780, desc: 'Egg burger.' },
-        { name: 'Veg Burger', price: 780, desc: 'Veg burger.' },
-        { name: 'Crispy Chicken with Egg Burger', price: 980, desc: 'Crispy chicken burger with egg.' },
-        { name: 'Grilled Chicken Burger', price: 980, desc: 'Grilled chicken burger.' },
-        { name: 'Double Chicken Burger', price: 1580, desc: 'Double chicken burger.' },
-        { name: 'Add Cheese (Burger)', price: 150, desc: 'Add cheese to burger.' }
-      ],
-      // ----- SUBMARINE -----
-      submarine: [
-        { name: 'Chicken Submarine', price: 840, desc: 'Chicken submarine.' },
-        { name: 'Beef Submarine', price: 940, desc: 'Beef submarine.' },
-        { name: 'Tuna Submarine', price: 980, desc: 'Tuna submarine.' },
-        { name: 'Seafood Submarine', price: 980, desc: 'Seafood submarine.' },
-        { name: 'Crispy Chicken Submarine', price: 980, desc: 'Crispy chicken submarine.' },
-        { name: 'Veg Submarine', price: 800, desc: 'Veg submarine.' },
-        { name: 'Add Cheese (Submarine)', price: 150, desc: 'Add cheese to submarine.' }
-      ],
-      // ----- PASTA -----
-      pasta: [
-        { name: 'Carbonara (Chicken)', price: 690, desc: 'Carbonara pasta with chicken.' },
-        { name: 'Carbonara (Beef)', price: 820, desc: 'Carbonara pasta with beef.' },
-        { name: 'Carbonara (Seafood)', price: 820, desc: 'Carbonara pasta with seafood.' },
-        { name: 'Carbonara (Sausage)', price: 690, desc: 'Carbonara pasta with sausage.' },
-        { name: 'Spicy Pasta (Chicken)', price: 690, desc: 'Spicy pasta with chicken.' },
-        { name: 'Spicy Pasta (Beef)', price: 820, desc: 'Spicy pasta with beef.' },
-        { name: 'Spicy Pasta (Seafood)', price: 820, desc: 'Spicy pasta with seafood.' },
-        { name: 'Spicy Pasta (Sausage)', price: 690, desc: 'Spicy pasta with sausage.' },
-        { name: 'Napolitan (Veg)', price: 650, desc: 'Napolitan pasta veg.' },
-        { name: 'Bolognese (Chicken)', price: 690, desc: 'Bolognese pasta with chicken.' },
-        { name: 'Bolognese (Beef)', price: 820, desc: 'Bolognese pasta with beef.' },
-        { name: 'Marinara (Seafood)', price: 820, desc: 'Marinara pasta with seafood.' }
-      ],
-      // ----- SOUP -----
-      soup: [
-        { name: 'Soup (Veg)', price: 420, desc: 'Vegetable soup.' },
-        { name: 'Soup (Chicken)', price: 480, desc: 'Chicken soup.' },
-        { name: 'Soup (Seafood)', price: 560, desc: 'Seafood soup.' }
-      ],
-      // ----- MEAT PLATTER -----
-      meatPlatter: [
-        { name: 'Meat Platter', price: 1850, desc: 'Includes: Garlic Bread, Crispy Chicken, Green Salad, Kochchi Bites, French Fries, Jumbo Sausage.' }
-      ],
-      // ----- BEVERAGES (UPDATED) -----
-      hybridIceTea: [
-        { name: 'Hybrid Ice Tea (Plain)', price: 460, desc: 'Refreshing iced tea.' },
-        { name: 'Hybrid Ice Tea (Apple)', price: 460, desc: 'Apple flavored iced tea.' },
-        { name: 'Hybrid Ice Tea (Passion)', price: 460, desc: 'Passion fruit iced tea.' },
-        { name: 'Hybrid Ice Tea (Black Currant)', price: 460, desc: 'Black currant iced tea.' }
-      ],
-      jumpStartFrizz: [
-        { name: 'Jump Start Frizz (Lime)', price: 460, desc: 'Lime frizz.' },
-        { name: 'Jump Start Frizz (Apple)', price: 460, desc: 'Apple frizz.' },
-        { name: 'Jump Start Frizz (Passion)', price: 460, desc: 'Passion frizz.' },
-        { name: 'Jump Start Frizz (Black Currant)', price: 460, desc: 'Black currant frizz.' }
-      ],
-      nitrogenMojito: [
-        { name: 'Nitrogen Mojito (Lime)', price: 560, desc: 'Lime mojito.' },
-        { name: 'Nitrogen Mojito (Apple)', price: 560, desc: 'Apple mojito.' },
-        { name: 'Nitrogen Mojito (Passion)', price: 560, desc: 'Passion mojito.' },
-        { name: 'Nitrogen Mojito (Black Currant)', price: 560, desc: 'Black currant mojito.' },
-        { name: 'Nitrogen Mojito (Ginger)', price: 560, desc: 'Ginger mojito.' }
-      ],
-      octane92: [
-        { name: '92 Octane Shake (Chocolate)', price: 490, desc: 'Chocolate shake.' },
-        { name: '92 Octane Shake (Vanilla)', price: 490, desc: 'Vanilla shake.' },
-        { name: '92 Octane Shake (Milo)', price: 490, desc: 'Milo shake.' },
-        { name: '92 Octane Shake (Faluda)', price: 490, desc: 'Faluda shake.' }
-      ],
-      octane95: [
-        { name: '95 Octane Shake (Oreo)', price: 780, desc: 'Oreo shake.' },
-        { name: '95 Octane Shake (Cake)', price: 780, desc: 'Cake shake.' },
-        { name: '95 Octane Shake (Brownies)', price: 780, desc: 'Brownie shake.' },
-        { name: '95 Octane Shake (Caramel)', price: 780, desc: 'Caramel shake.' }
-      ],
-      coolantJuice: [
-        { name: 'Coolant Fruit Juice (Watermelon)', price: 460, desc: 'Watermelon juice.' },
-        { name: 'Coolant Fruit Juice (Wood Apple)', price: 460, desc: 'Wood apple juice.' },
-        { name: 'Coolant Fruit Juice (Mango)', price: 460, desc: 'Mango juice.' },
-        { name: 'Coolant Fruit Juice (Lime)', price: 460, desc: 'Lime juice.' },
-        { name: 'Coolant Fruit Juice (Papaya)', price: 460, desc: 'Papaya juice.' },
-        { name: 'Coolant Fruit Juice (Pineapple)', price: 460, desc: 'Pineapple juice.' },
-        { name: 'Coolant Fruit Juice (Avocado)', price: 460, desc: 'Avocado juice.' }
-      ],
-      softDrinks: [
-        { name: 'EGB (Soft Drink)', price: 200, desc: 'EGB soft drink.' },
-        { name: 'Pepsi (Soft Drink)', price: 200, desc: 'Pepsi soft drink.' },
-        { name: '7UP (Soft Drink)', price: 200, desc: '7UP soft drink.' }
-      ],
-      smoothies: [
-        { name: 'Smoothie (Avocado)', price: 780, desc: 'Avocado smoothie.' },
-        { name: 'Smoothie (Mango)', price: 780, desc: 'Mango smoothie.' },
-        { name: 'Smoothie (Pineapple)', price: 780, desc: 'Pineapple smoothie.' },
-        { name: 'Smoothie (Passion)', price: 780, desc: 'Passion fruit smoothie.' }
-      ],
-      mocktails: [
-        { name: 'Mocktail (Blue Lagoon)', price: 980, desc: 'Blue Lagoon mocktail.' },
-        { name: 'Mocktail (Strawberry)', price: 980, desc: 'Strawberry mocktail.' }
-      ],
-      hotBeverages: [
-        { name: 'Supercharged Hot Chocolate', price: 680, desc: 'Supercharged hot chocolate.' },
-        { name: 'Cadbury Hot Chocolate', price: 550, desc: 'Cadbury hot chocolate.' },
-        { name: 'Americano', price: 650, desc: 'Americano coffee.' },
-        { name: 'Cappuccino', price: 650, desc: 'Cappuccino coffee.' }
-      ],
-      tea: [
-        { name: 'Jump Start Tea', price: 230, desc: 'Jump start tea.' },
-        { name: 'Milk Tea', price: 210, desc: 'Classic milk tea.' },
-        { name: 'Mint Tea', price: 230, desc: 'Mint tea.' },
-        { name: 'Green Tea', price: 230, desc: 'Green tea.' },
-        { name: 'Plain Tea', price: 210, desc: 'Plain tea.' }
-      ]
+
+    // Maps a menu item's `category` field (as typed in admin.html)
+    // to the fixed section grid it belongs to on this page. This is
+    // just a routing table for existing sections — it does not
+    // limit which categories can exist.
+    const CATEGORY_GRID_MAP = {
+      'Sides': 'sidesGrid',
+      'Super Fries': 'superFriesGrid',
+      'Engine Kottu': 'engineKottuGrid',
+      'Triptronic Rice': 'triptronicRiceGrid',
+      'Triptronic Noodles': 'triptronicNoodlesGrid',
+      'Waffles & Pancakes': 'wafflesGrid',
+      'Burgers': 'burgersGrid',
+      'Submarine': 'submarineGrid',
+      'Pasta': 'pastaGrid',
+      'Soup': 'soupGrid',
+      'Meat Platter': 'meatPlatterGrid',
+      'Hybrid Ice Tea': 'hybridIceTeaGrid',
+      'Jump Start Frizz': 'jumpStartFrizzGrid',
+      'Nitrogen Mojito': 'nitrogenMojitoGrid',
+      '92 Octane Shakes': 'octane92Grid',
+      '95 Octane Shakes': 'octane95Grid',
+      'Coolant Fruit Juice': 'coolantJuiceGrid',
+      'Soft Drinks': 'softDrinksGrid',
+      'Smoothies': 'smoothiesGrid',
+      'Mocktails': 'mocktailsGrid',
+      'Hot Beverages': 'hotBeveragesGrid',
+      'Tea': 'teaGrid'
     };
+
+    // Which of the mapped categories live under the Beverages tab —
+    // used only to decide where a brand-new/unmapped category's
+    // auto-created section should be appended (Food tab vs Beverages tab).
+    const BEVERAGE_CATEGORIES = new Set([
+      'Hybrid Ice Tea', 'Jump Start Frizz', 'Nitrogen Mojito', '92 Octane Shakes',
+      '95 Octane Shakes', 'Coolant Fruit Juice', 'Soft Drinks', 'Smoothies',
+      'Mocktails', 'Hot Beverages', 'Tea'
+    ]);
+
+    let menuItemsUnsubscribe = null;
+    let liveMenuItems = []; // raw docs from Firestore's `menuItems` collection
+    const dynamicCategoryGrids = {}; // category name -> grid element, for categories created on the fly (not in CATEGORY_GRID_MAP)
+
+    // Subscribes to the live menu collection. Fires immediately with
+    // whatever is currently in Firestore, then again on every future
+    // add/edit/delete from admin.html.
+    function listenMenuItems() {
+      if (menuItemsUnsubscribe) menuItemsUnsubscribe();
+      menuItemsUnsubscribe = db.collection('menuItems').onSnapshot(snap => {
+        liveMenuItems = [];
+        snap.forEach(doc => liveMenuItems.push({ id: doc.id, ...doc.data() }));
+        renderFullMenu();
+      }, err => {
+        console.error('Menu items listener error:', err);
+      });
+    }
+
+    // Finds (or lazily creates) the grid element that a given
+    // category's items should render into. Known categories map to
+    // their existing fixed section; a brand-new category typed into
+    // admin.html gets its own section appended automatically so a
+    // new item never silently fails to appear.
+    function getGridForCategory(category) {
+      const name = category || 'Other';
+      const mappedId = CATEGORY_GRID_MAP[name];
+      if (mappedId) {
+        const el = document.getElementById(mappedId);
+        if (el) return el;
+      }
+      if (dynamicCategoryGrids[name]) return dynamicCategoryGrids[name];
+
+      const parent = BEVERAGE_CATEGORIES.has(name)
+        ? document.getElementById('beverageView')
+        : document.getElementById('foodView');
+
+      const heading = document.createElement('h2');
+      heading.className = 'menu-category-title mt-16';
+      heading.textContent = name;
+
+      const grid = document.createElement('div');
+      grid.className = 'full-menu-grid';
+      grid.id = `dyn-${name.replace(/\W+/g, '-').toLowerCase()}-grid`;
+
+      parent.appendChild(heading);
+      parent.appendChild(grid);
+      dynamicCategoryGrids[name] = grid;
+      return grid;
+    }
 
     // ============================================================
     // DISCOUNT LISTENER (same as original)
@@ -1627,30 +1541,39 @@
     // RENDER FULL MENU (Blizz + Drinks/Desserts)
     // ============================================================
     function renderFullMenu() {
-      const sidesGrid = document.getElementById('sidesGrid');
-      const superFriesGrid = document.getElementById('superFriesGrid');
-      const engineKottuGrid = document.getElementById('engineKottuGrid');
-      const triptronicRiceGrid = document.getElementById('triptronicRiceGrid');
-      const triptronicNoodlesGrid = document.getElementById('triptronicNoodlesGrid');
-      const wafflesGrid = document.getElementById('wafflesGrid');
-      const burgersGrid = document.getElementById('burgersGrid');
-      const submarineGrid = document.getElementById('submarineGrid');
-      const pastaGrid = document.getElementById('pastaGrid');
-      const soupGrid = document.getElementById('soupGrid');
-      const meatPlatterGrid = document.getElementById('meatPlatterGrid');
+      // Group the live Firestore items by category. This replaces the
+      // old approach of reading fixed BLIZZ_MENU.xxx arrays — any item
+      // added/edited/deleted in admin.html is already reflected in
+      // liveMenuItems (kept current by the onSnapshot listener), so
+      // grouping it fresh here is all that's needed to sync the page.
+      const grouped = {};
+      liveMenuItems.forEach(item => {
+        const cat = item.category || 'Other';
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(item);
+      });
 
-      // beverage grids
-      const hybridIceTeaGrid = document.getElementById('hybridIceTeaGrid');
-      const jumpStartFrizzGrid = document.getElementById('jumpStartFrizzGrid');
-      const nitrogenMojitoGrid = document.getElementById('nitrogenMojitoGrid');
-      const octane92Grid = document.getElementById('octane92Grid');
-      const octane95Grid = document.getElementById('octane95Grid');
-      const coolantJuiceGrid = document.getElementById('coolantJuiceGrid');
-      const softDrinksGrid = document.getElementById('softDrinksGrid');
-      const smoothiesGrid = document.getElementById('smoothiesGrid');
-      const mocktailsGrid = document.getElementById('mocktailsGrid');
-      const hotBeveragesGrid = document.getElementById('hotBeveragesGrid');
-      const teaGrid = document.getElementById('teaGrid');
+      // Drop any dynamically-created category section whose last item
+      // was deleted (or recategorized) in admin, so it doesn't linger.
+      Object.keys(dynamicCategoryGrids).forEach(name => {
+        if (!grouped[name]) {
+          const grid = dynamicCategoryGrids[name];
+          const heading = grid.previousElementSibling;
+          grid.remove();
+          if (heading && heading.classList.contains('menu-category-title')) heading.remove();
+          delete dynamicCategoryGrids[name];
+        }
+      });
+
+      // Clear every fixed-section grid up front so a deleted item (or
+      // one moved to a different category) doesn't leave a stale card
+      // behind; grids get repopulated below only for categories that
+      // currently have items.
+      Object.values(CATEGORY_GRID_MAP).forEach(gridId => {
+        const el = document.getElementById(gridId);
+        if (el) el.innerHTML = '';
+      });
+      Object.values(dynamicCategoryGrids).forEach(el => { el.innerHTML = ''; });
 
       let itemCounter = 0;
 
@@ -1732,30 +1655,14 @@
         });
       }
 
-      renderItems(BLIZZ_MENU.sides, sidesGrid);
-      renderItems(BLIZZ_MENU.superFries, superFriesGrid);
-      renderItems(BLIZZ_MENU.engineKottu, engineKottuGrid);
-      renderItems(BLIZZ_MENU.triptronicRice, triptronicRiceGrid);
-      renderItems(BLIZZ_MENU.triptronicNoodles, triptronicNoodlesGrid);
-      renderItems(BLIZZ_MENU.waffles, wafflesGrid);
-      renderItems(BLIZZ_MENU.burgers, burgersGrid);
-      renderItems(BLIZZ_MENU.submarine, submarineGrid);
-      renderItems(BLIZZ_MENU.pasta, pastaGrid);
-      renderItems(BLIZZ_MENU.soup, soupGrid);
-      renderItems(BLIZZ_MENU.meatPlatter, meatPlatterGrid);
-
-      // beverages
-      renderItems(BLIZZ_MENU.hybridIceTea, hybridIceTeaGrid);
-      renderItems(BLIZZ_MENU.jumpStartFrizz, jumpStartFrizzGrid);
-      renderItems(BLIZZ_MENU.nitrogenMojito, nitrogenMojitoGrid);
-      renderItems(BLIZZ_MENU.octane92, octane92Grid);
-      renderItems(BLIZZ_MENU.octane95, octane95Grid);
-      renderItems(BLIZZ_MENU.coolantJuice, coolantJuiceGrid);
-      renderItems(BLIZZ_MENU.softDrinks, softDrinksGrid);
-      renderItems(BLIZZ_MENU.smoothies, smoothiesGrid);
-      renderItems(BLIZZ_MENU.mocktails, mocktailsGrid);
-      renderItems(BLIZZ_MENU.hotBeverages, hotBeveragesGrid);
-      renderItems(BLIZZ_MENU.tea, teaGrid);
+      // Render every category that currently has at least one live item.
+      // Known categories land in their existing fixed section; anything
+      // new (a category typed into admin.html that isn't in
+      // CATEGORY_GRID_MAP) gets its own section created on the fly by
+      // getGridForCategory, so a new item is never silently dropped.
+      Object.keys(grouped).forEach(cat => {
+        renderItems(grouped[cat], getGridForCategory(cat));
+      });
     }
 
     // ============================================================
@@ -2378,7 +2285,7 @@ ${itemLines}
     loadCartFromLocalStorage();
     setupProfileLinks();
     listenDiscounts();
-    setTimeout(renderFullMenu, 500);
+    listenMenuItems(); // live sync with admin.html's menuItems collection
   </script>
 </body>
 </html>
