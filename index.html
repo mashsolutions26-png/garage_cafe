@@ -448,16 +448,54 @@
       text-transform: uppercase;
     }
 
-    .pickup-only-banner {
-      background: linear-gradient(135deg, rgba(200, 16, 46, 0.15), rgba(200, 16, 46, 0.05));
-      border: 1px solid rgba(200, 16, 46, 0.25);
+    .dining-option-box {
+      background: rgba(244, 185, 62, 0.06);
+      border: 1px solid rgba(244, 185, 62, 0.2);
       border-radius: 0.75rem;
-      padding: 0.75rem 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
+      padding: 0.85rem 1rem;
       margin-bottom: 1rem;
     }
+    .dining-option-box .dine-type-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .dining-option-box .dine-type-btn {
+      flex: 1;
+      padding: 0.55rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-align: center;
+      border: 1px solid rgba(244, 185, 62, 0.25);
+      color: rgba(245, 240, 230, 0.7);
+      background: transparent;
+      transition: all .2s ease;
+      cursor: pointer;
+    }
+    .dining-option-box .dine-type-btn.active {
+      background: var(--gold);
+      color: var(--ink);
+      border-color: var(--gold);
+    }
+    .dining-option-box select {
+      background: var(--ink);
+      border: 1px solid rgba(245, 240, 230, 0.15);
+      border-radius: 0.65rem;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.85rem;
+      color: var(--cream);
+      width: 100%;
+    }
+    .dining-option-box select:focus { border-color: var(--gold); }
+    .dining-table-wrap { display: none; margin-top: 0.65rem; }
+    .dining-table-wrap.active { display: block; }
+    .dining-error {
+      color: var(--crimson);
+      font-size: 0.72rem;
+      margin-top: 0.4rem;
+      display: none;
+    }
+    .dining-error.show { display: block; }
 
     .empty-cart-emoji {
       font-size: 4rem;
@@ -2520,15 +2558,26 @@
           <p class="text-cream/30 text-xs mt-1">Add something delicious!</p>
         </div>
         <div id="cartItems" class="hidden space-y-3 mb-6"></div>
-        <div id="pickupBanner" class="pickup-only-banner hidden">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c8102e" stroke-width="2">
-            <path d="M12 2v4M12 22v-4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M22 12h-4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-          <div>
-            <span class="text-xs font-bold text-crimson uppercase tracking-wider">Pick Up Only</span>
-            <p class="text-xs text-cream/50">All orders are for in-store pickup only. No delivery available.</p>
+        <div id="diningOptionBox" class="dining-option-box hidden">
+          <label class="text-xs font-bold text-gold/80 uppercase tracking-wider mb-2 block">Dining Option</label>
+          <div class="dine-type-row">
+            <button type="button" id="dineTypePickup" class="dine-type-btn active" data-dine="pickup">Pick Up</button>
+            <button type="button" id="dineTypeOnShop" class="dine-type-btn" data-dine="onshop">On Shop / Dine-In</button>
           </div>
+          <div id="diningTableWrap" class="dining-table-wrap">
+            <select id="diningTableSelect">
+              <option value="">Select a table…</option>
+              <option value="Table 01">Table 01</option>
+              <option value="Table 02">Table 02</option>
+              <option value="Table 03">Table 03</option>
+              <option value="Table 04">Table 04</option>
+              <option value="Table 05">Table 05</option>
+              <option value="Table 06">Table 06</option>
+              <option value="Table 07">Table 07</option>
+              <option value="Table 08">Table 08</option>
+            </select>
+          </div>
+          <p id="diningError" class="dining-error">Please select a table number for On Shop / Dine-In.</p>
         </div>
         <div id="promoCodeBox" class="hidden mb-4">
           <div id="promoApplyRow" class="flex gap-2">
@@ -2640,21 +2689,14 @@
       </button>
 
       <h3 class="font-display text-2xl mb-2">One more thing…</h3>
-      <p class="text-cream/60 text-sm mb-6">We need a phone number to confirm your order. Add it once and we'll remember it for next time.</p>
+      <p class="text-cream/60 text-sm mb-6">We need a valid Sri Lankan phone number to confirm your order. Add it once and we'll remember it for next time.</p>
 
       <div id="phonePromptError" class="auth-error"></div>
 
       <form id="phonePromptForm" class="space-y-3">
         <div class="flex gap-2">
-          <select id="opCountryCode" class="bg-ink border border-cream/15 rounded-xl px-2 py-3 text-sm focus:border-gold/60 w-24">
-            <option value="+94" selected>🇱🇰 +94</option>
-            <option value="+61">🇦🇺 +61</option>
-            <option value="+1">🇺🇸 +1</option>
-            <option value="+44">🇬🇧 +44</option>
-            <option value="+91">🇮🇳 +91</option>
-            <option value="+86">🇨🇳 +86</option>
-          </select>
-          <input required type="tel" id="opPhone" placeholder="Phone number" class="flex-1 bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60">
+          <span class="bg-ink border border-cream/15 rounded-xl px-3 py-3 text-sm w-16 text-center">🇱🇰 +94</span>
+          <input required type="tel" id="opPhone" placeholder="0771234567" maxlength="10" class="flex-1 bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60">
         </div>
         <button type="submit" class="submit-btn">Continue to Order</button>
       </form>
@@ -2733,7 +2775,7 @@
     }
 
     // Telegram Bot Config
-    const TELEGRAM_BOT_TOKEN = '8978617133:AAH7EZX77R9JuwhHKBOW256xnxTnqDHyHgo';
+    const TELEGRAM_BOT_TOKEN = '8231023123:AAGTSpPf_1i7b-eSAQzOUkrDRnmAH7UaTSs';
     const TELEGRAM_CHAT_ID = '8617382834';
 
     // Cafe WhatsApp Config (order alert copy sent to the cafe's WhatsApp)
@@ -2765,6 +2807,22 @@
     let ordersUnsubscribe = null;
     let cart = [];
     let cartUnsubscribe = null;
+
+    // ============================================================
+    // DINING OPTION (Pick Up / On Shop + Table) — chosen once per
+    // order in the Cart/Checkout drawer.
+    // ============================================================
+    let cartDiningType = 'pickup'; // 'pickup' | 'onshop'
+    let cartTableNumber = '';
+
+    // ============================================================
+    // SRI LANKAN PHONE NUMBER VALIDATION
+    // Must be exactly 10 digits and start with '0' (e.g. 0771234567).
+    // ============================================================
+    function isValidSriLankanPhone(number) {
+      const digits = String(number || '').replace(/\D/g, '');
+      return /^0\d{9}$/.test(digits);
+    }
     let discountsUnsubscribe = null;
     let activeDiscount = null;
     let promoCodesUnsubscribe = null;
@@ -2777,7 +2835,7 @@
     // LOCALSTORAGE CART FUNCTIONS
     // ============================================================
     function loadCartFromLocalStorage() {
-      const savedCart = localStorage.getItem('blizzCafeCart');
+      const savedCart = localStorage.getItem('garageCafeCart');
       if (savedCart) {
         try {
           cart = JSON.parse(savedCart);
@@ -2787,7 +2845,7 @@
           cart = [];
         }
       }
-      const savedPromoCode = localStorage.getItem('blizzCafePromoCode');
+      const savedPromoCode = localStorage.getItem('garageCafePromoCode');
       if (savedPromoCode) {
         // will be re-validated once promo codes load from Firestore
         pendingSavedPromoCode = savedPromoCode;
@@ -2795,7 +2853,7 @@
     }
 
     function saveCartToLocalStorage() {
-      localStorage.setItem('blizzCafeCart', JSON.stringify(cart));
+      localStorage.setItem('garageCafeCart', JSON.stringify(cart));
     }
 
     let pendingSavedPromoCode = null;
@@ -2913,7 +2971,7 @@
         // if promo system was switched off while a code was applied, drop it
         if (!promoSystemEnabled && appliedPromo) {
           appliedPromo = null;
-          localStorage.removeItem('blizzCafePromoCode');
+          localStorage.removeItem('garageCafePromoCode');
           showPromoMessage('Promo codes are currently unavailable.', false);
         }
         updateCartUI();
@@ -2936,7 +2994,7 @@
           if (match && promoSystemEnabled) {
             appliedPromo = { code: match.code, discountPercent: match.discountPercent, applyMode: match.applyMode, items: match.items || [] };
           } else {
-            localStorage.removeItem('blizzCafePromoCode');
+            localStorage.removeItem('garageCafePromoCode');
           }
           pendingSavedPromoCode = null;
         }
@@ -2946,7 +3004,7 @@
           const stillValid = promoCodesList.find(p => p.code === appliedPromo.code && p.status === 'active');
           if (!stillValid) {
             appliedPromo = null;
-            localStorage.removeItem('blizzCafePromoCode');
+            localStorage.removeItem('garageCafePromoCode');
             showPromoMessage('Your promo code is no longer valid and was removed.', false);
           } else {
             // keep discount % / apply mode in sync with any admin edits
@@ -3002,14 +3060,14 @@
         return;
       }
       appliedPromo = { code: match.code, discountPercent: match.discountPercent, applyMode: match.applyMode, items: match.items || [] };
-      localStorage.setItem('blizzCafePromoCode', match.code);
+      localStorage.setItem('garageCafePromoCode', match.code);
       showPromoMessage(`Promo code applied — ${match.discountPercent}% off!`, true);
       updateCartUI();
     }
 
     function removePromoCode() {
       appliedPromo = null;
-      localStorage.removeItem('blizzCafePromoCode');
+      localStorage.removeItem('garageCafePromoCode');
       const input = document.getElementById('promoCodeInput');
       if (input) input.value = '';
       const el = document.getElementById('promoMessage');
@@ -3741,7 +3799,7 @@
       // Service fee: 2% for combos, 5% for regular items
       const serviceRate = hasCombo ? 0.02 : 0.05;
       
-      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const subtotal = cart.reduce((sum, item) => sum + ((Number(item?.price) || 0) * (Number(item?.quantity) || 1)), 0);
 
       const discount = (promoSystemEnabled && appliedPromo) ? getPromoDiscountAmount(subtotal) : 0;
       const discountedSubtotal = Math.max(0, subtotal - discount);
@@ -3762,7 +3820,7 @@
       const summary = document.getElementById('cartSummary');
       const checkoutBtn = document.getElementById('checkoutBtn');
       const cartCount = document.getElementById('cartCount');
-      const pickupBanner = document.getElementById('pickupBanner');
+      const diningOptionBox = document.getElementById('diningOptionBox');
       const promoBox = document.getElementById('promoCodeBox');
       
       const mobileBadge = document.getElementById('mobileCartBadge');
@@ -3772,7 +3830,7 @@
         cartItems.classList.add('hidden');
         summary.classList.add('hidden');
         checkoutBtn.classList.add('hidden');
-        pickupBanner.classList.add('hidden');
+        diningOptionBox.classList.add('hidden');
         cartCount.classList.add('hidden');
         mobileBadge.classList.add('hidden');
         if (promoBox) promoBox.classList.add('hidden');
@@ -3783,25 +3841,32 @@
       cartItems.classList.remove('hidden');
       summary.classList.remove('hidden');
       checkoutBtn.classList.remove('hidden');
-      pickupBanner.classList.remove('hidden');
+      diningOptionBox.classList.remove('hidden');
       if (promoBox) promoBox.classList.toggle('hidden', !promoSystemEnabled);
 
-      cartItems.innerHTML = cart.map(item => `
+      cartItems.innerHTML = cart.map(item => {
+        // Safe fallbacks so a malformed cart item (missing price/name/etc.)
+        // can never throw and blank out the whole cart.
+        const safeName = item?.name || 'Unnamed item';
+        const safePrice = Number(item?.price) || 0;
+        const safeQty = Number(item?.quantity) || 1;
+        const safeSavings = Number(item?.savings) || 0;
+        return `
         <div class="cart-item flex items-center gap-3 p-3 rounded-xl bg-char border border-cream/5">
           <div class="flex-1">
-            <p class="font-medium text-sm">${item.name}</p>
-            ${item.isCombo ? `<p class="text-cream/40 text-xs">Combo · Save Rs. ${item.savings.toFixed(0)}</p>` : ''}
-            <p class="text-cream/50 text-xs">Rs. ${item.price.toFixed(0)}</p>
-            <p class="text-cream/40 text-xs">${item.orderType === 'onshop' ? 'Table: ' + item.table : 'Pick Up'}</p>
+            <p class="font-medium text-sm">${safeName}</p>
+            ${item?.isCombo ? `<p class="text-cream/40 text-xs">Combo · Save Rs. ${safeSavings.toFixed(0)}</p>` : ''}
+            <p class="text-cream/50 text-xs">Rs. ${safePrice.toFixed(0)}</p>
+            <p class="text-cream/40 text-xs">${item?.orderType === 'onshop' ? 'Table: ' + (item?.table || '') : 'Pick Up'}</p>
           </div>
           <div class="flex items-center gap-2">
-            <button class="quantity-btn" onclick="updateQuantity('${item.name}', -1)">−</button>
-            <span class="text-sm font-mono w-6 text-center">${item.quantity}</span>
-            <button class="quantity-btn" onclick="updateQuantity('${item.name}', 1)">+</button>
+            <button class="quantity-btn" onclick="updateQuantity('${safeName}', -1)">−</button>
+            <span class="text-sm font-mono w-6 text-center">${safeQty}</span>
+            <button class="quantity-btn" onclick="updateQuantity('${safeName}', 1)">+</button>
           </div>
-          <button onclick="removeFromCart('${item.name}')" class="text-cream/30 hover:text-crimson transition text-sm ml-1">✕</button>
+          <button onclick="removeFromCart('${safeName}')" class="text-cream/30 hover:text-crimson transition text-sm ml-1">✕</button>
         </div>
-      `).join('');
+      `;}).join('');
 
       const totals = getCartTotal();
       document.getElementById('cartSubtotal').textContent = `Rs. ${totals.subtotal.toFixed(0)}`;
@@ -3923,8 +3988,10 @@
         `📞 Phone: ${phone}\n` +
         `📍 Branch: ${orderData.branch}\n\n` +
         `*Items:*\n${itemLines}\n\n` +
+        `💰 Subtotal: Rs. ${totals.subtotal.toFixed(0)}\n` +
+        `💵 Service Fee: Rs. ${totals.serviceFee.toFixed(0)}\n` +
         `🟡 *TOTAL: Rs. ${totals.total.toFixed(0)}*\n\n` +
-        `📦 Pick Up Only`;
+        `📦 Order Type: ${orderData.orderType}`;
     }
 
     function sendWhatsAppOrderAlert(orderId, phone, orderItems, totals, orderData) {
@@ -4027,9 +4094,14 @@
         return;
       }
 
-      if (!currentUserPhone) {
-        // No phone number saved on this account yet — ask for one before
-        // continuing. submitOrder() runs automatically once it's submitted.
+      if (!validateDiningSelection()) {
+        return;
+      }
+
+      if (!currentUserPhone || !isValidSriLankanPhone(currentUserPhone)) {
+        // No valid phone number saved on this account yet — ask for one
+        // before continuing. submitOrder() runs automatically once it's
+        // submitted.
         pendingOrderAfterPhone = true;
         openPhonePromptModal();
         return;
@@ -4038,76 +4110,105 @@
       submitOrder(currentUserPhone);
     }
 
-    function submitOrder(phone) {
+    async function submitOrder(phone) {
       // Everything below can throw synchronously (bad branch data, missing
       // fields, etc). Wrapping it means a bug here can never again leave the
       // UI stuck on "Placing Order..." with nothing happening — the user
       // always gets a real error message, and we log full details to the
       // console for debugging.
+
+      // Final integrity gate: never allow a submission through with an
+      // invalid phone number or an incomplete dining option / table.
+      if (!isValidSriLankanPhone(phone)) {
+        showOrderNotification('Invalid Phone Number', 'Please provide a valid Sri Lankan phone number (10 digits, starting with 0) before ordering.', '📵', false);
+        pendingOrderAfterPhone = true;
+        openPhonePromptModal();
+        return;
+      }
+      if (!validateDiningSelection()) {
+        return;
+      }
+
+      const normalizedPhone = String(phone).replace(/\D/g, '');
+      const isOnShop = cartDiningType === 'onshop';
+      const overallOrderType = isOnShop ? `On Shop (${cartTableNumber})` : 'Pick Up';
+
       let totals, orderItems, orderId, orderData, telegramMessage;
       try {
         totals = getCartTotal();
+        // Safe fallbacks so a malformed cart item can never crash checkout.
         orderItems = cart.map(item => ({
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          orderType: item.orderType || 'pickup',
-          table: item.table || 'Pickup',
-          isCombo: item.isCombo || false,
-          comboItems: item.comboItems || [],
-          savings: item.savings || 0
+          name: item?.name || 'Unnamed item',
+          price: Number(item?.price) || 0,
+          quantity: Number(item?.quantity) || 1,
+          isCombo: item?.isCombo || false,
+          comboItems: item?.comboItems || [],
+          savings: item?.savings || 0
         }));
 
         orderId = 'ORD-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
 
-        const branch = BRANCHES[currentBranchKey] || { name: 'THE GARAGE CAFE', address: '' };
+        const branch = BRANCHES[currentBranchKey] || { name: 'The Garage Café', address: '' };
+        const totalAmount = Number(totals.total) || 0;
 
         orderData = {
           orderId: orderId,
+          // userId when logged in (this function is only reached once a
+          // user is authenticated); customer contact details are still
+          // captured separately below for staff/kitchen use.
           userId: currentUser.uid,
           userEmail: currentUser.email || 'guest@example.com',
           userName: currentUser.displayName || currentUser.email || 'Guest',
-          phone: phone,
+          phone: normalizedPhone,
+          customerDetails: { name: currentUser.displayName || currentUser.email || 'Guest', phone: normalizedPhone },
           items: orderItems,
           subtotal: totals.subtotal,
           promoCode: (promoSystemEnabled && appliedPromo) ? appliedPromo.code : null,
           discount: totals.discount || 0,
+          serviceFeeRate: totals.serviceRate,
           serviceFee: totals.serviceFee,
-          total: totals.total,
-          status: 'Confirmed',
-          orderType: 'Pickup',
-          type: 'PickUp',
+          // Keep both names in sync: `total` for legacy screens still
+          // reading it, `totalAmount` as the standardized field.
+          total: totalAmount,
+          totalAmount: totalAmount,
+          // Same idea for status: `status` is what account.html currently
+          // renders, `orderStatus` is the standardized field.
+          status: 'Pending',
+          orderStatus: 'Pending',
+          orderType: overallOrderType,
+          type: isOnShop ? 'OnShop' : 'PickUp',
+          tableNumber: isOnShop ? cartTableNumber : null,
           paymentMethod: 'Online',
           branch: branch.name,
           branchAddress: branch.address,
           createdAt: (window.firebase && firebase.firestore) ? firebase.firestore.FieldValue.serverTimestamp() : new Date(),
           updatedAt: (window.firebase && firebase.firestore) ? firebase.firestore.FieldValue.serverTimestamp() : new Date(),
           statusHistory: [{
-            status: 'Confirmed',
+            status: 'Pending',
             timestamp: (window.firebase && firebase.firestore) ? firebase.firestore.FieldValue.serverTimestamp() : new Date()
           }]
         };
 
         telegramMessage = `
-🛎️ <b>New Order at THE GARAGE CAFE!</b>
+🍔 <b>NEW ORDER RECEIVED</b>
 
 🆔 <b>Order ID:</b> ${escapeTelegramHtml(orderId)}
-👤 <b>Customer:</b> ${escapeTelegramHtml(orderData.userName)}
-📞 <b>Phone:</b> ${escapeTelegramHtml(phone)}
+👤 <b>Customer Name:</b> ${escapeTelegramHtml(orderData.userName)}
+📞 <b>Phone Number:</b> ${escapeTelegramHtml(normalizedPhone)}
 📧 <b>Email:</b> ${escapeTelegramHtml(orderData.userEmail)}
 📍 <b>Branch:</b> ${escapeTelegramHtml(orderData.branch)}
+📦 <b>Order Type:</b> ${escapeTelegramHtml(overallOrderType)}
 
 <b>Items:</b>
-${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} = Rs. ${(i.price * i.quantity).toFixed(0)} (${i.orderType === 'onshop' ? 'Table: ' + escapeTelegramHtml(i.table) : 'Pick Up'})${i.isCombo ? ' [COMBO - Save Rs. ' + i.savings + ']' : ''}`).join('\n')}
+${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. ${(i.price * i.quantity).toFixed(0)})${i.isCombo ? ' [COMBO - Save Rs. ' + i.savings + ']' : ''}`).join('\n')}
 
 💰 <b>Subtotal:</b> Rs. ${totals.subtotal.toFixed(0)}${orderData.promoCode ? `\n🎟️ <b>Promo (${escapeTelegramHtml(orderData.promoCode)}):</b> - Rs. ${totals.discount.toFixed(0)}` : ''}
 💵 <b>Service Fee (${Math.round(totals.serviceRate * 100)}%):</b> Rs. ${totals.serviceFee.toFixed(0)}
-🟡 <b>TOTAL:</b> Rs. ${totals.total.toFixed(0)}
+🟡 <b>Total Amount:</b> Rs. ${totals.total.toFixed(0)}
 
-📦 <b>Type:</b> Pick Up Only
 📍 <b>Address:</b> ${escapeTelegramHtml(branch.address)}
 
-🔔 <i>Please prepare this order for pickup.</i>
+🔔 <i>Please prepare this order${isOnShop ? ' for ' + escapeTelegramHtml(cartTableNumber) : ' for pickup'}.</i>
       `;
       } catch (buildErr) {
         console.error('❌ Order build error (before saving/sending anything):', buildErr);
@@ -4123,10 +4224,26 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} = Rs. 
       function finishCartAfterOrder() {
         cart = [];
         appliedPromo = null;
-        localStorage.removeItem('blizzCafePromoCode');
+        localStorage.removeItem('garageCafePromoCode');
         updateCartUI();
-        saveCartToLocalStorage();
+        // Clear the shared cart key so every page (index, menu, account)
+        // reflects the empty cart immediately.
+        localStorage.removeItem('garageCafeCart');
         try { saveCartToFirestore(); } catch (e) { console.error('⚠️ saveCartToFirestore failed:', e); }
+        // Reset the dining option selector back to its default state so
+        // the next order starts clean.
+        cartDiningType = 'pickup';
+        cartTableNumber = '';
+        const pickupBtn = document.getElementById('dineTypePickup');
+        const onShopBtn = document.getElementById('dineTypeOnShop');
+        const tableWrap = document.getElementById('diningTableWrap');
+        const tableSelect = document.getElementById('diningTableSelect');
+        const diningError = document.getElementById('diningError');
+        if (pickupBtn) pickupBtn.classList.add('active');
+        if (onShopBtn) onShopBtn.classList.remove('active');
+        if (tableWrap) tableWrap.classList.remove('active');
+        if (tableSelect) tableSelect.value = '';
+        if (diningError) diningError.classList.remove('show');
         closeCart();
       }
 
@@ -4144,7 +4261,7 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} = Rs. 
       // Open a pre-filled WhatsApp message to the cafe (see note above
       // sendWhatsAppOrderAlert for why this needs one tap from the customer
       // rather than being fully silent like the Telegram alert).
-      sendWhatsAppOrderAlert(orderId, phone, orderItems, totals, orderData);
+      sendWhatsAppOrderAlert(orderId, normalizedPhone, orderItems, totals, orderData);
 
       if (!db) {
         console.error('❌ Firestore (db) is not available — Firebase failed to initialise. Order was sent to Telegram but NOT saved, so it will not appear in the admin panel or your account.');
@@ -4158,36 +4275,37 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} = Rs. 
         return;
       }
 
-      db.collection('orders').add(orderData)
-        .then((docRef) => {
-          console.log('✅ Order saved to Firestore with ID:', docRef.id);
-          finishCartAfterOrder();
-          showOrderNotification(
-            '🎉 Order Confirmed!',
-            `Order #${orderId} placed successfully. Total: Rs. ${totals.total.toFixed(0)}. We'll notify you when it's ready.`,
-            '✅',
-            true
-          );
-          document.getElementById('cartContent').classList.add('hidden');
-          document.getElementById('orderSuccess').classList.remove('hidden');
-          setTimeout(() => {
-            document.getElementById('orderSuccess').classList.add('hidden');
-            document.getElementById('cartContent').classList.remove('hidden');
-          }, 5000);
-        })
-        .catch((err) => {
-          console.error('❌ Firestore save error:', err.code || '', err.message || err);
-          sendTelegramNotification(
-            `⚠️ <b>ORDER NOT SAVED TO SYSTEM</b> (Firestore error: ${err.code || err.message})\n` + telegramMessage
-          );
-          finishCartAfterOrder();
-          showOrderNotification(
-            '⚠️ Order Sent, But Not Saved',
-            `We notified the kitchen directly, but this order could not be saved (${err.code || err.message}). Please tell staff your order ID: ${orderId}.`,
-            '⚠️',
-            false
-          );
-        });
+      try {
+        const docRef = await db.collection('orders').add(orderData);
+        console.log('✅ Order saved to Firestore with ID:', docRef.id, '| orderId:', orderId);
+        finishCartAfterOrder();
+        showOrderNotification(
+          '🎉 Order Confirmed!',
+          `Order #${orderId} placed successfully. Total: Rs. ${totals.total.toFixed(0)}. We'll notify you when it's ready.`,
+          '✅',
+          true
+        );
+        document.getElementById('cartContent').classList.add('hidden');
+        document.getElementById('orderSuccess').classList.remove('hidden');
+        setTimeout(() => {
+          document.getElementById('orderSuccess').classList.add('hidden');
+          document.getElementById('cartContent').classList.remove('hidden');
+        }, 5000);
+      } catch (err) {
+        // Log full Firestore error details (code + message) so permission /
+        // rules issues are easy to diagnose from the console.
+        console.error('❌ Firestore save error:', err.code || '', err.message || err);
+        sendTelegramNotification(
+          `⚠️ <b>ORDER NOT SAVED TO SYSTEM</b> (Firestore error: ${err.code || err.message})\n` + telegramMessage
+        );
+        finishCartAfterOrder();
+        showOrderNotification(
+          '⚠️ Order Sent, But Not Saved',
+          `We notified the kitchen directly, but this order could not be saved (${err.code || err.message}). Please tell staff your order ID: ${orderId}.`,
+          '⚠️',
+          false
+        );
+      }
     }
 
     // ============================================================
@@ -4222,7 +4340,6 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} = Rs. 
       phonePromptError.textContent = '';
       phonePromptError.classList.remove('show');
 
-      const countryCode = document.getElementById('opCountryCode').value;
       const rawNumber = document.getElementById('opPhone').value.trim();
 
       if (!rawNumber) {
@@ -4231,7 +4348,13 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} = Rs. 
         return;
       }
 
-      const phone = countryCode + rawNumber;
+      if (!isValidSriLankanPhone(rawNumber)) {
+        phonePromptError.textContent = 'Enter a valid Sri Lankan phone number (10 digits, starting with 0, e.g. 0771234567).';
+        phonePromptError.classList.add('show');
+        return;
+      }
+
+      const phone = rawNumber.replace(/\D/g, '');
 
       // Save it to the account so we never have to ask again.
       if (currentUser && db) {
@@ -4241,7 +4364,6 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} = Rs. 
 
       currentUserPhone = phone;
       phonePromptForm.reset();
-      document.getElementById('opCountryCode').value = countryCode;
       phonePromptOverlay.classList.add('hidden');
       document.body.style.overflow = '';
 
@@ -4274,6 +4396,52 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} = Rs. 
       document.getElementById('cartContent').classList.remove('hidden');
     });
     document.getElementById('checkoutBtn').addEventListener('click', placeOrder);
+
+    // ============================================================
+    // DINING OPTION SELECTOR (Cart / Checkout drawer)
+    // ============================================================
+    (function setupDiningOptionSelector() {
+      const pickupBtn = document.getElementById('dineTypePickup');
+      const onShopBtn = document.getElementById('dineTypeOnShop');
+      const tableWrap = document.getElementById('diningTableWrap');
+      const tableSelect = document.getElementById('diningTableSelect');
+      const diningError = document.getElementById('diningError');
+      if (!pickupBtn || !onShopBtn || !tableSelect) return;
+
+      pickupBtn.addEventListener('click', function() {
+        cartDiningType = 'pickup';
+        cartTableNumber = '';
+        pickupBtn.classList.add('active');
+        onShopBtn.classList.remove('active');
+        tableWrap.classList.remove('active');
+        diningError.classList.remove('show');
+      });
+
+      onShopBtn.addEventListener('click', function() {
+        cartDiningType = 'onshop';
+        pickupBtn.classList.remove('active');
+        onShopBtn.classList.add('active');
+        tableWrap.classList.add('active');
+        cartTableNumber = tableSelect.value || '';
+      });
+
+      tableSelect.addEventListener('change', function() {
+        cartTableNumber = tableSelect.value || '';
+        if (cartTableNumber) diningError.classList.remove('show');
+      });
+    })();
+
+    // Returns true only when the dining option is fully valid (Pick Up,
+    // or On Shop with a table selected). Shows an inline error otherwise.
+    function validateDiningSelection() {
+      const diningError = document.getElementById('diningError');
+      if (cartDiningType === 'onshop' && !cartTableNumber) {
+        if (diningError) diningError.classList.add('show');
+        showOrderNotification('Table Number Required', 'Please select a table number for On Shop / Dine-In orders.', '🍽️', false);
+        return false;
+      }
+      return true;
+    }
 
     document.getElementById('mobileCartFloat').addEventListener('click', openCart);
 

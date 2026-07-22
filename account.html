@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Blizz Café - Profile</title>
+  <title>The Garage Café - Profile</title>
   <meta name="description" content="Manage your Garage Café account — profile details, orders and table bookings." />
   <link rel="icon" type="image/png" sizes="32x32" href="logo/logo.webp" />
   <link rel="icon" type="image/png" sizes="16x16" href="logo/logo.webp" />
@@ -421,8 +421,8 @@
   ========================================================= -->
   <header class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-6xl">
     <nav class="glass-nav rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between">
-      <a href="index.html" class="flex items-center gap-2 shrink-0" title="Back to Blizz Café home">
-        <img src="img/logo.webp" alt="Blizz Café Logo" class="h-8 w-auto sm:h-10 object-contain rounded-md bg-transparent">
+      <a href="index.html" class="flex items-center gap-2 shrink-0" title="Back to The Garage Café home">
+        <img src="logo/logo.webp" alt="The Garage Café Logo" class="h-8 w-auto sm:h-10 object-contain rounded-md bg-transparent">
       </a>
 
       <div class="hidden sm:block font-display text-lg text-cream/90">My Account</div>
@@ -654,7 +654,7 @@
       <section id="page-bookings" class="page-section">
         <div class="card p-5 sm:p-8">
           <h2 class="font-display text-xl mb-1">Table Bookings</h2>
-          <p class="text-cream/50 text-sm mb-6">All the tables you've reserved at Blizz Café.</p>
+          <p class="text-cream/50 text-sm mb-6">All the tables you've reserved at The Garage Café.</p>
 
           <div id="bookingsList" class="space-y-3">
             <p class="text-cream/40 text-sm">Loading bookings…</p>
@@ -665,7 +665,7 @@
     </div>
   </main>
 
-  <!-- FOOTER - BLIZZ CAFÉ (background colour animation removed) -->
+  <!-- FOOTER - THE GARAGE CAFE (background colour animation removed) -->
   <footer class="minimal-footer">
     <!-- footer-glow removed to stop colour animation -->
     <div class="footer-container">
@@ -679,7 +679,7 @@
               <div class="coffee-steam steam-2"></div>
               <div class="coffee-steam steam-3"></div>
             </div>
-            <span class="logo-text">BLIZZ CAFÉ</span>
+            <span class="logo-text">The Garage Cafe</span>
           </div>
           <p class="footer-description">
             A cozy café slinging honest breakfasts and slow-drip coffee from a hidden corner of Kandy. No pretense — just brick walls, good light, and a kitchen that opens early.
@@ -728,7 +728,7 @@
 
       <div class="footer-bottom">
         <p>
-          &copy; <span id="year"></span> Blizz Café. All rights reserved. |
+          &copy; <span id="year"></span> The Garage Café. All rights reserved. |
           DESIGNED & DEVELOPED BY <a href="http://wa.me/713171006" target="_blank">MASH SOLUTIONS</a>
         </p>
       </div>
@@ -922,12 +922,12 @@
 
     function loadFavouritesFromLocalStorage() {
       try {
-        return JSON.parse(localStorage.getItem('brickLaneFavourites')) || [];
+        return JSON.parse(localStorage.getItem('garageCafeFavourites')) || [];
       } catch { return []; }
     }
 
     function saveFavouritesToLocalStorage() {
-      localStorage.setItem('brickLaneFavourites', JSON.stringify(favourites));
+      localStorage.setItem('garageCafeFavourites', JSON.stringify(favourites));
     }
 
     function saveFavouritesToFirestore() {
@@ -959,23 +959,28 @@
     window.removeFavourite = removeFavourite;
     window.addFavouriteToCart = function(item) {
       try {
-        let cart = JSON.parse(localStorage.getItem('blizzCafeCart')) || [];
-        // Also check if there's a cart in Firestore or use the same key as menu.html
-        // menu.html uses 'brickLaneCart' - let's use that
-        let cartItems = JSON.parse(localStorage.getItem('brickLaneCart')) || [];
-        const existing = cartItems.find(i => i.name === item.name);
+        // Safe fallbacks so a favourite missing a name/price/desc can never
+        // throw here.
+        const safeItem = {
+          name: item?.name || 'Unnamed item',
+          price: Number(item?.price) || 0,
+          desc: item?.desc || ''
+        };
+        // Standardized cart key shared by index.html / menu.html / account.html.
+        let cartItems = JSON.parse(localStorage.getItem('garageCafeCart')) || [];
+        const existing = cartItems.find(i => i.name === safeItem.name);
         if (existing) {
-          existing.quantity += 1;
+          existing.quantity = (existing.quantity || 0) + 1;
         } else {
-          cartItems.push({ 
-            name: item.name, 
-            price: item.price || 0, 
-            quantity: 1, 
-            desc: item.desc || ''
+          cartItems.push({
+            name: safeItem.name,
+            price: safeItem.price,
+            quantity: 1,
+            desc: safeItem.desc
           });
         }
-        localStorage.setItem('brickLaneCart', JSON.stringify(cartItems));
-        showToast('Added to Cart', item.name + ' added to your order.', '🛒');
+        localStorage.setItem('garageCafeCart', JSON.stringify(cartItems));
+        showToast('Added to Cart', safeItem.name + ' added to your order.', '🛒');
         // If we're on the main site, also update the cart UI there
         if (typeof window.updateCartUI === 'function') {
           window.updateCartUI();
@@ -1014,23 +1019,27 @@
 
       container.innerHTML = `
         <div class="fav-items-container">
-          ${favourites.map(item => `
+          ${favourites.map(item => {
+            const name = item.name || 'Unnamed item';
+            const desc = item.desc || '';
+            const price = Number(item.price) || 0;
+            return `
             <div class="fav-item-card">
               <div class="fav-info">
-                <h4>${item.name}</h4>
-                <p>${item.desc || ''}</p>
+                <h4>${name}</h4>
+                <p>${desc}</p>
               </div>
-              <div class="fav-price">Rs. ${(item.price || 0).toFixed(0)}</div>
+              <div class="fav-price">Rs. ${price.toFixed(0)}</div>
               <div class="fav-actions">
-                <button class="fav-order-btn" onclick="window.addFavouriteToCart && window.addFavouriteToCart({name:'${item.name.replace(/'/g, "\\'")}', price:${item.price || 0}, desc:'${(item.desc || '').replace(/'/g, "\\'")}'})">
+                <button class="fav-order-btn" onclick="window.addFavouriteToCart && window.addFavouriteToCart({name:'${name.replace(/'/g, "\\'")}', price:${price}, desc:'${desc.replace(/'/g, "\\'")}'})">
                   Order
                 </button>
-                <button class="fav-remove-btn" onclick="window.removeFavourite && window.removeFavourite('${item.name.replace(/'/g, "\\'")}')">
+                <button class="fav-remove-btn" onclick="window.removeFavourite && window.removeFavourite('${name.replace(/'/g, "\\'")}')">
                   ✕
                 </button>
               </div>
             </div>
-          `).join('')}
+          `;}).join('')}
         </div>
       `;
     }
@@ -1167,6 +1176,7 @@
     // ============================================================
     function getStatusClass(status) {
       switch (status) {
+        case 'Pending': return 'status-confirmed';
         case 'Confirmed': return 'status-confirmed';
         case 'Packed': return 'status-packed';
         case 'Picked Up': return 'status-picked';
@@ -1187,13 +1197,16 @@
           snapshot.forEach(function(doc) {
             var data = doc.data();
             data.id = doc.id;
-            if (data.status === 'Complete') completed.push(data);
+            // Read the standardized `orderStatus` field, falling back to the
+            // legacy `status` field for orders written before the rename.
+            var currentStatus = data.orderStatus || data.status || 'Pending';
+            if (currentStatus === 'Complete' || currentStatus === 'Completed') completed.push(data);
             else active.push(data);
           });
           renderOrderList(active, 'activeOrdersList', 'No active orders right now.');
           renderOrderList(completed, 'completedOrdersList', 'No past orders yet.');
         }, function(err) {
-          console.error('Error loading orders:', err);
+          console.error('❌ Error loading orders from Firestore:', err.code || '', err.message || err);
           document.getElementById('activeOrdersList').innerHTML = '<p class="text-cream/40 text-sm">Could not load orders.</p>';
         });
     }
@@ -1201,23 +1214,32 @@
     function renderOrderList(orders, containerId, emptyText) {
       var container = document.getElementById(containerId);
       if (!container) return;
-      if (orders.length === 0) {
+      if (!orders || orders.length === 0) {
         container.innerHTML = '<p class="text-cream/40 text-sm">' + emptyText + '</p>';
         return;
       }
       container.innerHTML = orders.map(function(order) {
-        var itemsList = (order.items || []).map(function(i) { return i.name + ' × ' + (i.quantity || 1); }).join(', ');
-        var date = order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleString() : 'Just now';
+        // Safe fallbacks throughout — a malformed/older order document can
+        // never throw and blank out the whole list.
+        var items = order.items || [];
+        var itemsList = items.map(function(i) {
+          return (i && i.name ? i.name : 'Item') + ' × ' + (i && i.quantity ? i.quantity : 1);
+        }).join(', ');
+        var date = (order.createdAt && order.createdAt.seconds)
+          ? new Date(order.createdAt.seconds * 1000).toLocaleString()
+          : 'Just now';
+        var amount = Number(order.totalAmount != null ? order.totalAmount : order.total) || 0;
+        var currentStatus = order.orderStatus || order.status || 'Pending';
         return `
           <div class="bg-char2 rounded-2xl p-4 border border-cream/5">
             <div class="flex justify-between items-start gap-3">
               <div class="min-w-0">
                 <p class="font-mono text-xs text-gold mb-1">${order.orderId || order.id}</p>
                 <p class="font-semibold text-sm">${itemsList || 'Order items'}</p>
-                <p class="text-cream/50 text-xs mt-1">Rs. ${(order.total || 0).toFixed(0)} · ${order.branch || ''}</p>
+                <p class="text-cream/50 text-xs mt-1">Rs. ${amount.toFixed(0)} · ${order.branch || ''}</p>
                 <p class="text-cream/30 text-[11px] mt-1">${date}</p>
               </div>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${getStatusClass(order.status)} shrink-0">${order.status || 'Confirmed'}</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${getStatusClass(currentStatus)} shrink-0">${currentStatus}</span>
             </div>
             <button class="mt-3 text-gold text-xs font-semibold hover:underline flex items-center gap-1" onclick='downloadOrderInvoice(${JSON.stringify(order).replace(/'/g, "&#39;")})'>
               <i class="fas fa-file-invoice"></i> Download Invoice (PDF)
@@ -1236,7 +1258,7 @@
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(20);
       doc.setTextColor(dark[0], dark[1], dark[2]);
-      doc.text('BLIZZ CAFÉ', 14, 20);
+      doc.text('THE GARAGE CAFE', 14, 20);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(120, 120, 120);
@@ -1298,15 +1320,15 @@
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.text('TOTAL', 140, y);
-      doc.text('Rs. ' + (order.total || 0).toFixed(0), 178, y);
+      doc.text('Rs. ' + (Number(order.totalAmount != null ? order.totalAmount : order.total) || 0).toFixed(0), 178, y);
 
       y += 20;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(150, 150, 150);
-      doc.text('Thank you for ordering from Blizz Café.', 14, y);
+      doc.text('Thank you for ordering from The Garage Café.', 14, y);
 
-      doc.save('BlizzCafe-Invoice-' + (order.orderId || order.id) + '.pdf');
+      doc.save('GarageCafe-Invoice-' + (order.orderId || order.id) + '.pdf');
     }
 
     // ============================================================
@@ -1369,7 +1391,7 @@
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(20);
       doc.setTextColor(dark[0], dark[1], dark[2]);
-      doc.text('BLIZZ CAFÉ', 14, 20);
+      doc.text('THE GARAGE CAFE', 14, 20);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(120, 120, 120);
@@ -1410,9 +1432,9 @@
 
       doc.setFontSize(9);
       doc.setTextColor(150, 150, 150);
-      doc.text('We look forward to hosting you at Blizz Café.', 14, 135);
+      doc.text('We look forward to hosting you at The Garage Café.', 14, 135);
 
-      doc.save('BlizzCafe-Booking-' + (booking.bookingId || booking.id) + '.pdf');
+      doc.save('GarageCafe-Booking-' + (booking.bookingId || booking.id) + '.pdf');
     }
 
     // ============================================================
