@@ -3643,49 +3643,10 @@
                   <button data-item='${JSON.stringify(item)}' class="add-to-cart flex-1 bg-gold/10 text-gold border border-gold/30 rounded-full py-2 text-sm font-semibold hover:bg-gold hover:text-ink transition">Add to Order</button>
                   <button class="favourite-btn" data-item="${item.name}" aria-label="Add to favourites">♡</button>
                 </div>
-                <div class="order-options">
-                  <div class="order-type-selector">
-                    <button class="type-btn active" data-type="pickup">Pick Up</button>
-                    <button class="type-btn" data-type="onshop">On Shop</button>
-                  </div>
-                  <div class="table-selector" data-type="onshop">
-                    <label for="tableSelect_${itemIndex}">Select Table</label>
-                    <select id="tableSelect_${itemIndex}" class="w-full">
-                      <option value="Table 1">Table 1</option>
-                      <option value="Table 2">Table 2</option>
-                      <option value="Table 3">Table 3</option>
-                      <option value="Table 4">Table 4</option>
-                      <option value="Table 5">Table 5</option>
-                      <option value="Table 6">Table 6</option>
-                      <option value="Table 7">Table 7</option>
-                      <option value="Table 8">Table 8</option>
-                    </select>
-                  </div>
-                </div>
               </div>
             </div>
           `;
         grid.appendChild(card);
-      });
-
-      // Order type selector logic
-      document.querySelectorAll('.order-type-selector').forEach(group => {
-        const btns = group.querySelectorAll('.type-btn');
-        const card = group.closest('.menu-item-card');
-        const tableSelector = card.querySelector('.table-selector');
-        
-        btns.forEach(btn => {
-          btn.addEventListener('click', function() {
-            btns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            const type = this.dataset.type;
-            if (type === 'onshop') {
-              tableSelector.classList.add('active');
-            } else {
-              tableSelector.classList.remove('active');
-            }
-          });
-        });
       });
 
       document.querySelectorAll('img.lazy-load:not(.loaded)').forEach(img => {
@@ -3699,15 +3660,7 @@
       document.querySelectorAll('.add-to-cart').forEach(btn => {
         btn.addEventListener('click', function() {
           const item = JSON.parse(this.dataset.item);
-          const card = this.closest('.menu-item-card');
-          const typeBtn = card.querySelector('.type-btn.active');
-          const orderType = typeBtn ? typeBtn.dataset.type : 'pickup';
-          let table = 'Pickup';
-          if (orderType === 'onshop') {
-            const tableSelect = card.querySelector('.table-selector select');
-            table = tableSelect ? tableSelect.value : 'Table 1';
-          }
-          addToCart({ ...item, orderType, table });
+          addToCart({ ...item, orderType: 'pickup', table: 'Pickup' });
         });
       });
 

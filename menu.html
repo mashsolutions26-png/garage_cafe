@@ -1702,57 +1702,16 @@
                 <i class="fas fa-heart"></i>
               </button>
             </div>
-            <div class="order-options">
-              <div class="order-type-selector">
-                <button type="button" class="type-btn active" data-type="pickup">Pick Up</button>
-                <button type="button" class="type-btn" data-type="onshop">On Shop</button>
-              </div>
-              <div class="table-selector" data-type="onshop">
-                <label for="tableSelect_${itemIndex}">Select Table</label>
-                <select id="tableSelect_${itemIndex}" class="w-full">
-                  <option value="Table 1">Table 1</option>
-                  <option value="Table 2">Table 2</option>
-                  <option value="Table 3">Table 3</option>
-                  <option value="Table 4">Table 4</option>
-                  <option value="Table 5">Table 5</option>
-                  <option value="Table 6">Table 6</option>
-                  <option value="Table 7">Table 7</option>
-                  <option value="Table 8">Table 8</option>
-                </select>
-              </div>
-            </div>
           `;
           container.appendChild(card);
 
-          // Pick Up / On Shop toggle for this card
-          const typeBtns = card.querySelectorAll('.order-type-selector .type-btn');
-          const tableSelector = card.querySelector('.table-selector');
-          typeBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-              typeBtns.forEach(b => b.classList.remove('active'));
-              this.classList.add('active');
-              if (this.dataset.type === 'onshop') {
-                tableSelector.classList.add('active');
-              } else {
-                tableSelector.classList.remove('active');
-              }
-            });
-          });
-
           card.querySelector('.item-add-btn').addEventListener('click', function() {
-            const activeTypeBtn = card.querySelector('.order-type-selector .type-btn.active');
-            const orderType = activeTypeBtn ? activeTypeBtn.dataset.type : 'pickup';
-            let table = 'Pickup';
-            if (orderType === 'onshop') {
-              const tableSelect = card.querySelector('.table-selector select');
-              table = tableSelect ? tableSelect.value : 'Table 1';
-            }
             const itemData = {
               name: this.dataset.name,
               price: parseFloat(this.dataset.price),
               desc: this.dataset.desc,
-              orderType,
-              table
+              orderType: 'pickup',
+              table: 'Pickup'
             };
             addToCart(itemData);
           });
