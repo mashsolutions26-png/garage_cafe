@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title></title>
+  <meta name="description" content="Explore the full Blizz menu at Brick Lane — Melbourne's laneway café." />
+  <link rel="icon" type="image/png" sizes="32x32" href="gallery2/logo.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="gallery2/logo.png" />
+  <link rel="apple-touch-icon" href="gallery2/logo.png" />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H5RMLCQD7W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-H5RMLCQD7W');
+  </script>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#0a0b0d',
+            char: '#15171b',
+            char2: '#1b1e23',
+            brickline: '#2a2118',
+            gold: '#f4b93e',
+            crimson: '#c8102e',
+            cream: '#f5f0e6',
+            smoke: '#9a9a9f',
+          },
+          fontFamily: {
+            display: ['"Fraunces"', 'serif'],
+            body: ['"Manrope"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- Firebase v10 Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --ink: #0a0b0d;
+      --char: #15171b;
+      --char2: #1b1e23;
+      --brickline: #2a2118;
+      --gold: #f4b93e;
+      --crimson: #c8102e;
+      --cream: #f5f0e6;
+      --smoke: #9a9a9f;
+    }
+    * {
+      scroll-behavior: smooth;
+    }
+    body {
+      background: var(--ink);
+      font-family: 'Manrope', sans-serif;
+      color: var(--cream);
+    }
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Fraunces', serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .brick-texture {
+      background-image:
+        repeating-linear-gradient(0deg, rgba(244, 185, 62, 0.03) 0px, rgba(244, 185, 62, 0.03) 1px, transparent 1px, transparent 34px),
+        repeating-linear-gradient(90deg, rgba(244, 185, 62, 0.03) 0px, rgba(244, 185, 62, 0.03) 1px, transparent 1px, transparent 64px);
+      background-position: 0 0, 32px 17px;
+    }
+
+    .glass-nav {
+      background: rgba(10, 11, 13, 0.55);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(244, 185, 62, 0.15);
+    }
+
+    .nav-link {
+      position: relative;
+      transition: color 0.2s ease;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 0;
+      height: 2px;
+      background: var(--gold);
+      transition: width 0.3s ease;
+    }
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    .nav-link:hover {
+      color: var(--gold);
+    }
+
+    .minimal-footer {
+      background: #1A1A1A;
+      color: white;
+      padding: 80px 0 40px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .coffee-animation {
+      position: relative;
+      display: inline-block;
+      margin-right: 12px;
+    }
+    .coffee-icon {
+      font-size: 32px;
+      color: #D4A574;
+      animation: coffeeFloat 3s ease-in-out infinite;
+      transform-origin: center;
+    }
+    .coffee-steam {
+      position: absolute;
+      width: 4px;
+      background: rgba(212, 165, 116, 0.5);
+      border-radius: 2px;
+      animation: steamRise 2.5s ease-in-out infinite;
+    }
+    .steam-1 { height: 16px; top: -10px; left: 6px; animation-delay: 0s; }
+    .steam-2 { height: 12px; top: -7px; left: 18px; animation-delay: 0.8s; }
+    .steam-3 { height: 14px; top: -8px; left: 30px; animation-delay: 1.6s; }
+    @keyframes coffeeFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(3deg); }
+    }
+    @keyframes steamRise {
+      0% { opacity: 0; transform: translateY(0) scale(0.8); }
+      30% { opacity: 0.8; transform: translateY(-10px) scale(1); }
+      70% { opacity: 0.5; transform: translateY(-20px) scale(1.1); }
+      100% { opacity: 0; transform: translateY(-30px) scale(1.2); }
+    }
+    .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: 2px;
+    }
+    .footer-description {
+      font-size: 14px;
+      color: #999;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .social-links {
+      display: flex;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .social-link {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    .social-link:hover {
+      background: #D4A574;
+      transform: translateY(-3px);
+    }
+    .footer-heading {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: white;
+    }
+    .footer-links {
+      list-style: none;
+    }
+    .footer-links li {
+      margin-bottom: 12px;
+    }
+    .footer-links a,
+    .footer-link-btn {
+      color: #999;
+      text-decoration: none;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      text-align: left;
+      padding: 0;
+    }
+    .footer-links a:hover,
+    .footer-link-btn:hover {
+      color: #D4A574;
+      padding-left: 8px;
+    }
+    .footer-links i {
+      margin-right: 8px;
+      color: #D4A574;
+    }
+    .footer-bottom {
+      padding-top: 40px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+      color: #999;
+      font-size: 14px;
+    }
+    .footer-bottom a {
+      color: #D4A574;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .footer-bottom a:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 992px) {
+      .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 768px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .menu-page .menu-item-card {
+      background: #1a1c22;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .menu-page .menu-item-card:hover {
+      border-color: rgba(244, 185, 62, 0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    }
+    .menu-page .menu-item-card .item-price {
+      color: #f4b93e;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .menu-page .menu-item-card .item-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      width: 100%;
+    }
+    .menu-page .menu-item-card .item-add-btn {
+      background: rgba(244, 185, 62, 0.12);
+      border: 1px solid rgba(244, 185, 62, 0.2);
+      border-radius: 9999px;
+      padding: 0.5rem 1rem;
+      color: #f4b93e;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      flex: 1;
+      min-height: 40px;
+    }
+    .menu-page .menu-item-card .item-add-btn:hover {
+      background: #f4b93e;
+      color: #0a0b0d;
+    }
+    .menu-page .menu-item-card .item-fav-btn {
+      width: 40px;
+      min-height: 40px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: #6a6a6f;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .menu-page .menu-item-card .item-fav-btn:hover {
+      border-color: rgba(200, 16, 46, 0.3);
+      background: rgba(200, 16, 46, 0.08);
+    }
+    .menu-page .menu-item-card .item-fav-btn.is-fav {
+      color: #c8102e;
+      border-color: rgba(200, 16, 46, 0.3);
+      background: rgba(200, 16, 46, 0.1);
+    }
+    .menu-page .menu-item-card .item-fav-btn.is-fav:hover {
+      background: rgba(200, 16, 46, 0.2);
+    }
+
+    .menu-page .menu-item-card .item-option {
+      color: #9a9a9f;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+    .menu-page .menu-item-card .item-option span {
+      color: #f4b93e;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #9a9a9f;
+      transition: color 0.2s ease;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .back-link:hover {
+      color: #f4b93e;
+    }
+
+    .full-menu-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    @media (min-width: 640px) {
+      .full-menu-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (min-width: 1024px) {
+      .full-menu-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+
+    .menu-category-title {
+      font-family: 'Fraunces', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      color: #f4b93e;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(244, 185, 62, 0.2);
+    }
+
+    .menu-hero-bg {
+      background: linear-gradient(135deg, #0a0b0d 40%, rgba(10, 11, 13, 0.7) 100%),
+                  url('gallery2/Brick8.webp');
+      background-size: cover;
+      background-position: center;
+    }
+
+    #cartSidebar {
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      max-width: 400px;
+      width: 100%;
+      background: #1b1e23;
+    }
+    #cartSidebar.translate-x-full {
+      transform: translateX(100%);
+    }
+    .cart-item {
+      transition: all 0.2s ease;
+    }
+    .cart-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    .quantity-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      color: #f5f0e6;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .quantity-btn:hover {
+      background: rgba(244, 185, 62, 0.2);
+      border-color: #f4b93e;
+      color: #f4b93e;
+    }
+    .quantity-btn:active {
+      transform: scale(0.92);
+    }
+    .pickup-only-banner {
+      background: linear-gradient(135deg, rgba(200, 16, 46, 0.15), rgba(200, 16, 46, 0.05));
+      border: 1px solid rgba(200, 16, 46, 0.25);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .empty-cart-emoji {
+      font-size: 4rem;
+      opacity: 0.3;
+    }
+    .thin-scroll::-webkit-scrollbar { width: 6px; }
+    .thin-scroll::-webkit-scrollbar-thumb { background: rgba(244, 185, 62, 0.35); border-radius: 4px; }
+
+    #mobileMenu {
+      transition: all 0.3s ease;
+      transform-origin: top;
+    }
+    #mobileMenu.hidden {
+      opacity: 0;
+      transform: scaleY(0.95);
+      pointer-events: none;
+    }
+    #mobileMenu:not(.hidden) {
+      opacity: 1;
+      transform: scaleY(1);
+      pointer-events: auto;
+    }
+
+    .order-notification-success {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 9999;
+      background: #1a1e24;
+      border: 1px solid rgba(244, 185, 62, 0.3);
+      border-radius: 16px;
+      padding: 20px 24px;
+      max-width: 400px;
+      min-width: 300px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+      animation: slideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      backdrop-filter: blur(12px);
+      background: rgba(26, 30, 36, 0.95);
+      display: flex;
+      align-items: center;
+    }
+    .order-notification-success .notif-icon {
+      font-size: 32px;
+      margin-right: 14px;
+      flex-shrink: 0;
+    }
+    .order-notification-success .notif-content {
+      flex: 1;
+    }
+    .order-notification-success .notif-title {
+      font-weight: 700;
+      color: #f4b93e;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .order-notification-success .notif-message {
+      color: #b0b0b0;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .order-notification-success .notif-close {
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0 0 0 12px;
+      transition: color 0.2s;
+    }
+    .order-notification-success .notif-close:hover {
+      color: #f4b93e;
+    }
+    @keyframes slideUp {
+      0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @media (max-width: 500px) {
+      .order-notification-success {
+        right: 10px;
+        left: 10px;
+        min-width: unset;
+        max-width: unset;
+        bottom: 20px;
+        padding: 16px 18px;
+      }
+    }
+
+    .mobile-account-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f4b93e, #c8102e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0a0b0d;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      flex-shrink: 0;
+    }
+    .mobile-account-icon:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(244, 185, 62, 0.3);
+    }
+
+    #authOverlay {
+      background: rgba(10, 11, 13, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+    }
+    #authOverlay .glass-nav {
+      background: rgba(26, 30, 36, 0.95);
+      border: 1px solid rgba(244, 185, 62, 0.2);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+      max-width: 440px;
+      width: 100%;
+      border-radius: 28px;
+    }
+    #authOverlay .glass-nav input {
+      background: #0f1115;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 0.9rem 1.2rem;
+      color: #f5f0e6;
+      font-size: 0.95rem;
+      transition: border 0.3s ease;
+    }
+    #authOverlay .glass-nav input:focus {
+      border-color: #f4b93e;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(244, 185, 62, 0.15);
+    }
+    #authOverlay .glass-nav input::placeholder {
+      color: #6a6a6f;
+    }
+    #authOverlay .glass-nav .tab-btn {
+      transition: all 0.25s ease;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.6rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      text-align: center;
+      flex: 1;
+    }
+    #authOverlay .glass-nav .tab-btn.active {
+      background: #f4b93e;
+      color: #0a0b0d;
+    }
+    #authOverlay .glass-nav .tab-btn.inactive {
+      color: #9a9a9f;
+    }
+    #authOverlay .glass-nav .tab-btn.inactive:hover {
+      color: #f5f0e6;
+    }
+    #authOverlay .glass-nav .submit-btn {
+      background: #f4b93e;
+      color: #0a0b0d;
+      font-weight: 700;
+      padding: 0.9rem;
+      border-radius: 9999px;
+      width: 100%;
+      transition: all 0.25s ease;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #authOverlay .glass-nav .submit-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 30px rgba(244, 185, 62, 0.3);
+    }
+    #authOverlay .glass-nav .google-btn {
+      background: #f5f0e6;
+      color: #0a0b0d;
+      font-weight: 600;
+      padding: 0.9rem;
+      border-radius: 9999px;
+      width: 100%;
+      transition: all 0.25s ease;
+      border: none;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    #authOverlay .glass-nav .google-btn:hover {
+      transform: scale(1.02);
+      background: #ffffff;
+    }
+    #authOverlay .glass-nav .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    #authOverlay .glass-nav .divider-line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    #authOverlay .glass-nav .divider-text {
+      color: #6a6a6f;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    #authOverlay .glass-nav .auth-error {
+      background: rgba(200, 16, 46, 0.12);
+      border: 1px solid rgba(200, 16, 46, 0.25);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #f87171;
+      font-size: 0.85rem;
+      display: none;
+    }
+    #authOverlay .glass-nav .auth-error.show {
+      display: block;
+    }
+    #authOverlay .glass-nav .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1.25rem;
+      color: #6a6a6f;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    #authOverlay .glass-nav .close-btn:hover {
+      color: #f4b93e;
+    }
+    .apple-btn {
+      background: #000;
+      color: #fff;
+      font-weight: 600;
+      padding: 0.9rem;
+      border-radius: 9999px;
+      width: 100%;
+      transition: all 0.25s ease;
+      border: none;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    .apple-btn:hover {
+      transform: scale(1.02);
+      background: #1a1a1a;
+    }
+    .apple-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .menu-discount-badge {
+      font-size: 0.65rem;
+      background: rgba(200, 16, 46, 0.2);
+      color: #c8102e;
+      border: 1px solid rgba(200, 16, 46, 0.3);
+      border-radius: 9999px;
+      padding: 0.1rem 0.6rem;
+      margin-left: 0.5rem;
+      display: inline-block;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ============================================================
+       FOOD / BEVERAGES TOGGLE (Yellow / Black / White — no glow)
+       ============================================================ */
+    .menu-toggle-outer {
+      display: flex;
+      justify-content: center;
+      margin-top: 2.25rem;
+    }
+    .menu-toggle-wrap {
+      position: relative;
+      display: inline-flex;
+      background: #000000;
+      border: 2px solid #f4b93e;
+      border-radius: 9999px;
+      padding: 5px;
+    }
+    .menu-toggle-slider {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      height: calc(100% - 10px);
+      width: calc(50% - 5px);
+      background: #f4b93e;
+      border-radius: 9999px;
+      transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+      transform: translateX(0%);
+      z-index: 1;
+    }
+    .menu-toggle-wrap.view-beverages .menu-toggle-slider {
+      transform: translateX(100%);
+    }
+    .menu-toggle-btn {
+      position: relative;
+      z-index: 2;
+      border: none;
+      background: transparent;
+      padding: 0.7rem 1.75rem;
+      min-width: 150px;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+      cursor: pointer;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: color 0.3s ease, transform 0.2s ease;
+    }
+    .menu-toggle-btn.active {
+      color: #000000;
+    }
+    .menu-toggle-btn:active {
+      transform: scale(0.96);
+    }
+
+    .menu-view-section {
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .menu-view-section.is-hidden {
+      display: none;
+      opacity: 0;
+    }
+    .menu-view-section.is-entering {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    .menu-view-section.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="menu-page">
+
+  <!-- =========================================================
+  NAVIGATION (Same as main site)
+  ========================================================= -->
+  <header class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-6xl">
+    <nav class="glass-nav rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2 shrink-0">
+        <img src="img/logo.webp" alt="Brick Lane Logo" class="h-8 w-auto sm:h-10 object-contain rounded-md bg-transparent">
+      </a>
+
+      <div class="hidden lg:flex items-center gap-8 font-medium text-sm text-cream/80">
+        <a href="index.html#about" class="nav-link">About Us</a>
+        <a href="index.html#menu" class="nav-link">Menu</a>
+        <a href="index.html#book" class="nav-link">Book a Table</a>
+        <a href="index.html#gallery" class="nav-link">Gallery</a>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button id="cartTrigger" class="relative w-9 h-9 flex items-center justify-center rounded-full bg-char/70 border border-gold/20 hover:border-gold/50 transition-colors" aria-label="View cart">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span id="cartCount" class="absolute -top-1.5 -right-1.5 bg-crimson text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
+        </button>
+
+        <a id="profileLink" href="#" class="w-9 h-9 rounded-full bg-gradient-to-br from-gold to-crimson flex items-center justify-center font-bold text-ink text-sm hover:opacity-90 transition-opacity">
+          <svg id="profileIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0a0b0d" stroke-width="2.4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="profileInitial" class="hidden"></span>
+        </a>
+
+        <button id="mobileToggle" class="lg:hidden w-9 h-9 flex items-center justify-center rounded-full bg-char/70 border border-gold/20 transition hover:border-gold/50">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+      </div>
+    </nav>
+
+    <div id="mobileMenu" class="hidden lg:hidden glass-nav mt-2 rounded-2xl px-6 py-6 flex flex-col gap-5 text-sm font-medium">
+      <div class="flex flex-col gap-4 mt-2">
+        <a href="index.html#menu" class="nav-link">Menu</a>
+        <a href="index.html#about" class="nav-link">About</a>
+        <a href="index.html#hours" class="nav-link">Hours</a>
+        <a href="index.html#book" class="nav-link">Book a Table</a>
+        <a href="index.html#gallery" class="nav-link">Gallery</a>
+        <a href="index.html" class="nav-link text-gold">← Back to Home</a>
+      </div>
+      <div class="h-px bg-cream/10 my-2"></div>
+      <div class="flex items-center justify-between mt-2">
+        <a id="mobileProfileLink" href="#" class="flex items-center gap-3 text-cream/80 hover:text-gold transition">
+          <div class="mobile-account-icon" id="mobileProfileIcon">M</div>
+          <span id="mobileProfileText">Account</span>
+        </a>
+        <button id="mobileOrderBtn" class="bg-crimson text-white font-bold px-6 py-2.5 rounded-full hover:brightness-110 transition shadow-lg shadow-crimson/20">
+          Order Now
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+  HERO - Full Menu Page
+  ========================================================= -->
+  <section class="relative pt-32 pb-16 px-6 sm:px-10 menu-hero-bg border-b border-brickline">
+    <div class="absolute inset-0 brick-texture opacity-10"></div>
+    <div class="relative max-w-6xl mx-auto">
+      <a href="index.html" class="back-link mb-6 inline-block">
+        ← Back to Home
+      </a>
+      <h1 class="font-display text-5xl sm:text-6xl md:text-7xl leading-[1.1] text-cream mb-4">
+        Blizz Menu
+      </h1>
+      <p class="text-cream/60 text-lg max-w-xl">
+        Rice, Kottu, Shawarma & more — made from scratch, every day.
+      </p>
+
+      <div class="menu-toggle-outer">
+        <div class="menu-toggle-wrap" id="menuToggleWrap">
+          <div class="menu-toggle-slider"></div>
+          <button type="button" class="menu-toggle-btn active" id="foodToggleBtn" data-view="food">
+            🍽️ Food
+          </button>
+          <button type="button" class="menu-toggle-btn" id="beverageToggleBtn" data-view="beverages">
+            🥤 Beverages
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+  FULL MENU CONTENT (BLIZZ)
+  ========================================================= -->
+  <section class="py-16 px-6 sm:px-10 brick-texture">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- ============ FOOD VIEW ============ -->
+      <div class="menu-view-section is-visible" id="foodView">
+
+        <!-- SIDES -->
+        <h2 class="menu-category-title">🍟 Sides</h2>
+        <div class="full-menu-grid" id="sidesGrid"></div>
+
+        <!-- SUPER FRIES -->
+        <h2 class="menu-category-title mt-16">🍟 Super Fries</h2>
+        <div class="full-menu-grid" id="superFriesGrid"></div>
+
+        <!-- ENGINE KOTTU -->
+        <h2 class="menu-category-title mt-16">🍛 Engine Kottu</h2>
+        <div class="full-menu-grid" id="engineKottuGrid"></div>
+
+        <!-- TRIPTRONIC RICE -->
+        <h2 class="menu-category-title mt-16">🍚 Triptronic Rice</h2>
+        <div class="full-menu-grid" id="triptronicRiceGrid"></div>
+
+        <!-- NOODLES (TRIPTRONIC) -->
+        <h2 class="menu-category-title mt-16">🍜 Noodles</h2>
+        <div class="full-menu-grid" id="triptronicNoodlesGrid"></div>
+
+        <!-- WAFFLES -->
+        <h2 class="menu-category-title mt-16">🧇 Waffles</h2>
+        <div class="full-menu-grid" id="wafflesGrid"></div>
+
+        <!-- BURGERS -->
+        <h2 class="menu-category-title mt-16">🍔 Burgers</h2>
+        <div class="full-menu-grid" id="burgersGrid"></div>
+
+        <!-- SUBMARINE -->
+        <h2 class="menu-category-title mt-16">🥖 Submarine</h2>
+        <div class="full-menu-grid" id="submarineGrid"></div>
+
+        <!-- PASTA -->
+        <h2 class="menu-category-title mt-16">🍝 Pasta</h2>
+        <div class="full-menu-grid" id="pastaGrid"></div>
+
+        <!-- SOUP -->
+        <h2 class="menu-category-title mt-16">🥣 Soup</h2>
+        <div class="full-menu-grid" id="soupGrid"></div>
+
+        <!-- MEAT PLATTER -->
+        <h2 class="menu-category-title mt-16">🍖 Meat Platter</h2>
+        <div class="full-menu-grid" id="meatPlatterGrid"></div>
+
+      </div>
+
+      <!-- ============ BEVERAGES VIEW ============ -->
+      <div class="menu-view-section is-hidden" id="beverageView">
+
+        <!-- 🧊 HYBRID ICE TEA -->
+        <h2 class="menu-category-title">🧊 Hybrid Ice Tea</h2>
+        <div class="full-menu-grid" id="hybridIceTeaGrid"></div>
+
+        <!-- 🍹 JUMP START FRIZZ -->
+        <h2 class="menu-category-title mt-16">🍹 Jump Start Frizz</h2>
+        <div class="full-menu-grid" id="jumpStartFrizzGrid"></div>
+
+        <!-- 🌿 NITROGEN MOJITO -->
+        <h2 class="menu-category-title mt-16">🌿 Nitrogen Mojito</h2>
+        <div class="full-menu-grid" id="nitrogenMojitoGrid"></div>
+
+        <!-- 🥤 92 OCTANE SHAKES -->
+        <h2 class="menu-category-title mt-16">🥤 92 Octane Shakes</h2>
+        <div class="full-menu-grid" id="octane92Grid"></div>
+
+        <!-- 🥛 95 OCTANE SHAKES -->
+        <h2 class="menu-category-title mt-16">🥛 95 Octane Shakes</h2>
+        <div class="full-menu-grid" id="octane95Grid"></div>
+
+        <!-- 🍉 COOLANT FRUIT JUICE -->
+        <h2 class="menu-category-title mt-16">🍉 Coolant Fruit Juice</h2>
+        <div class="full-menu-grid" id="coolantJuiceGrid"></div>
+
+        <!-- 🥤 SOFT DRINKS -->
+        <h2 class="menu-category-title mt-16">🥤 Soft Drinks</h2>
+        <div class="full-menu-grid" id="softDrinksGrid"></div>
+
+        <!-- 🥭 SMOOTHIES -->
+        <h2 class="menu-category-title mt-16">🥭 Smoothies</h2>
+        <div class="full-menu-grid" id="smoothiesGrid"></div>
+
+        <!-- 🍸 MOCKTAILS -->
+        <h2 class="menu-category-title mt-16">🍸 Mocktails</h2>
+        <div class="full-menu-grid" id="mocktailsGrid"></div>
+
+        <!-- ☕ HOT BEVERAGES -->
+        <h2 class="menu-category-title mt-16">☕ Hot Beverages</h2>
+        <div class="full-menu-grid" id="hotBeveragesGrid"></div>
+
+        <!-- 🍵 TEA -->
+        <h2 class="menu-category-title mt-16">🍵 Tea</h2>
+        <div class="full-menu-grid" id="teaGrid"></div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================
+  FOOTER
+  ========================================================= -->
+  <footer class="minimal-footer">
+    <div class="footer-container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">
+            <div class="coffee-animation">
+              <i class="fas fa-mug-hot coffee-icon"></i>
+              <div class="coffee-steam steam-1"></div>
+              <div class="coffee-steam steam-2"></div>
+              <div class="coffee-steam steam-3"></div>
+            </div>
+            <span class="logo-text">BRICK LANE</span>
+          </div>
+          <p class="footer-description">
+            A laneway café slinging honest breakfasts and slow-drip coffee from a hidden corner of the CBD.
+          </p>
+          <div class="social-links">
+            <a href="#" target="_blank" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" target="_blank" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" target="_blank" class="social-link"><i class="fab fa-pinterest"></i></a>
+            <a href="#" target="_blank" class="social-link"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">Explore</h4>
+          <ul class="footer-links">
+            <li><a href="index.html#about" class="footer-link-btn">About Us</a></li>
+            <li><a href="index.html#menu" class="footer-link-btn">Menu</a></li>
+            <li><a href="index.html#book" class="footer-link-btn">Book a Table</a></li>
+            <li><a href="index.html#gallery" class="footer-link-btn">Gallery</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-heading">Legal</h4>
+          <ul class="footer-links">
+            <li><a href="#" class="footer-link-btn">Privacy Policy</a></li>
+            <li><a href="#" class="footer-link-btn">Terms of Service</a></li>
+            <li><a href="#" class="footer-link-btn">Allergen Info</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-heading">Follow</h4>
+          <ul class="footer-links" style="list-style: none; color: #999;">
+            <li><a href="#" class="footer-link-btn">Instagram</a></li>
+            <li><a href="#" class="footer-link-btn">Facebook</a></li>
+            <li><i class="fas fa-map-marker-alt"></i> 33 Guildford Ln, Melbourne</li>
+            <li><i class="fas fa-phone"></i> +61 3 7023 9333</li>
+            <li><i class="fas fa-envelope"></i> hello@bricklane.com</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <span id="year"></span> Brick Lane. All rights reserved. | DESIGNED & DEVELOPED BY <a href="#" target="_blank">MASH SOLUTIONS</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================
+  CART SIDEBAR
+  ========================================================= -->
+  <div id="cartOverlay" class="hidden fixed inset-0 z-[100] bg-ink/70 backdrop-blur-sm"></div>
+  <aside id="cartSidebar" class="fixed top-0 right-0 h-full w-full sm:max-w-md border-l border-gold/15 z-[101] translate-x-full transition-transform duration-300 thin-scroll overflow-y-auto">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="font-display text-2xl text-gold">Your Order</h2>
+        <button id="cartClose" class="text-cream/50 hover:text-gold transition">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="cartContent">
+        <div id="emptyCart" class="text-center py-12">
+          <div class="empty-cart-emoji mb-4">🍽️</div>
+          <p class="text-cream/40 text-sm">Your basket is empty.</p>
+          <p class="text-cream/30 text-xs mt-1">Add something delicious!</p>
+        </div>
+        <div id="cartItems" class="hidden space-y-3 mb-6"></div>
+        <div id="pickupBanner" class="pickup-only-banner hidden">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c8102e" stroke-width="2">
+            <path d="M12 2v4M12 22v-4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M22 12h-4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <div>
+            <span class="text-xs font-bold text-crimson uppercase tracking-wider">Pick Up Only</span>
+            <p class="text-xs text-cream/50">All orders are for in-store pickup only.</p>
+          </div>
+        </div>
+        <div id="cartSummary" class="hidden border-t border-cream/10 pt-4 space-y-2">
+          <div class="flex justify-between text-sm">
+            <span class="text-cream/60">Subtotal</span>
+            <span id="cartSubtotal" class="font-mono text-cream">$0.00</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-cream/60">Service Fee (10%)</span>
+            <span id="cartServiceFee" class="font-mono text-cream">$0.00</span>
+          </div>
+          <div class="flex justify-between text-lg font-semibold pt-2 border-t border-cream/10">
+            <span>TOTAL</span>
+            <span id="cartTotal" class="font-mono text-gold">$0.00</span>
+          </div>
+        </div>
+        <button id="checkoutBtn" class="hidden w-full bg-gold text-ink font-semibold py-3 rounded-full hover:brightness-110 transition mt-4">Proceed to Order</button>
+      </div>
+      <div id="orderSuccess" class="hidden text-center py-8">
+        <div class="text-5xl mb-4">✅</div>
+        <h3 class="font-display text-xl text-gold mb-2">Order Placed!</h3>
+        <p class="text-cream/50 text-sm">Your order has been received. We'll notify you when it's ready.</p>
+        <button id="orderSuccessClose" class="mt-6 text-gold/70 hover:text-gold text-sm transition">Close</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =========================================================
+  AUTH MODAL
+  ========================================================= -->
+  <div id="authOverlay" class="hidden fixed inset-0 z-[1000] flex items-center justify-center p-4">
+    <div class="glass-nav rounded-3xl p-8 relative max-h-[90vh] overflow-y-auto thin-scroll">
+      <button id="authClose" class="close-btn" aria-label="Close">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="flex gap-2 mb-6 bg-char/60 rounded-full p-1">
+        <button id="tabLogin" class="tab-btn active">Log In</button>
+        <button id="tabSignup" class="tab-btn inactive">Sign Up</button>
+      </div>
+      <div id="authError" class="auth-error"></div>
+      <form id="loginForm" class="space-y-3">
+        <input required type="email" id="loginEmail" placeholder="Email address" class="w-full">
+        <input required type="password" id="loginPassword" placeholder="Password" class="w-full">
+        <button type="submit" class="submit-btn">Log In</button>
+      </form>
+      <form id="signupForm" class="hidden space-y-3">
+        <input required type="text" id="suName" placeholder="Full name" class="w-full">
+        <div class="flex gap-2">
+          <select id="suCountryCode" class="bg-ink border border-cream/15 rounded-xl px-2 py-3 text-sm focus:border-gold/60 w-24">
+            <option value="+61">🇦🇺 +61</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+94">🇱🇰 +94</option>
+            <option value="+91">🇮🇳 +91</option>
+          </select>
+          <input required type="tel" id="suPhone" placeholder="Phone number" class="flex-1 bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60">
+        </div>
+        <input required type="email" id="suEmail" placeholder="Email address" class="w-full">
+        <input required type="password" id="suPassword" placeholder="Password" class="w-full">
+        <input required type="password" id="suPasswordConfirm" placeholder="Re-type password" class="w-full">
+        <button type="submit" class="submit-btn">Create Account</button>
+      </form>
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">or</span>
+        <div class="divider-line"></div>
+      </div>
+      <button id="googleAuthBtn" class="google-btn">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.6 15.6 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4c-7.4 0-13.8 4.2-17 10.4z"/><path fill="#4CAF50" d="M24 44c5.4 0 10.3-2.1 14-5.5l-6.5-5.5C29.5 34.7 26.9 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.6 5.1C9.1 39.6 16 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.5 5.5C40.5 36.6 44 30.8 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        Continue with Google
+      </button>
+      <button id="appleAuthBtn" class="apple-btn mt-3" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Sign in with Apple
+        <span class="text-xs opacity-60 ml-1">(coming soon)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+  JAVASCRIPT
+  ========================================================= -->
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBQLWEuZ_ydmR7Xe9vNDYxvZiWMme4wj0M",
+      authDomain: "bricklane-28f56.firebaseapp.com",
+      projectId: "bricklane-28f56",
+      storageBucket: "bricklane-28f56.firebasestorage.app",
+      messagingSenderId: "767079384468",
+      appId: "1:767079384468:web:e76e47f6e151169b4efb81",
+      measurementId: "G-H5RMLCQD7W"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const TELEGRAM_BOT_TOKEN = '8808752785:AAGg2qBtXdsLEPaJNw7z9lDZ6pFhMf1qOew';
+    const TELEGRAM_CHAT_ID = '8617382834';
+
+    let currentUser = null;
+    let cart = [];
+    let favourites = [];
+    let activeDiscount = null;
+    let discountsUnsubscribe = null;
+    let favUnsubscribe = null;
+
+    // ============================================================
+    // BLIZZ MENU DATA (full) + NEW DRINKS/DESSERTS
+    // ============================================================
+    const BLIZZ_MENU = {
+      // ----- SIDES -----
+      sides: [
+        { name: '60 MPH Fries', price: 480, desc: 'Speed fries — regular.' },
+        { name: '100 MPH Fries', price: 940, desc: 'Speed fries — large.' },
+        { name: '200 MPH Fully Loaded (Meat + Cheese)', price: 1450, desc: 'Loaded fries with meat & cheese.' },
+        { name: 'Kochchi Bites', price: 600, desc: 'Spicy kochchi bites.' },
+        { name: 'Crispy Chicken Popcorn', price: 650, desc: 'Crispy chicken popcorn.' }
+      ],
+      // ----- SUPER FRIES -----
+      superFries: [
+        { name: 'Super Fries (Cheese)', price: 640, desc: 'Fries with cheese.' },
+        { name: 'Super Fries (Cheese + Chicken)', price: 740, desc: 'Fries with cheese & chicken.' },
+        { name: 'Super Fries (Cheese + Beef)', price: 840, desc: 'Fries with cheese & beef.' },
+        { name: 'Super Fries (Fish)', price: 840, desc: 'Fries with fish.' }
+      ],
+      // ----- ENGINE KOTTU -----
+      engineKottu: [
+        { name: 'V6 Kottu (Chicken)', price: 590, desc: 'V6 engine kottu with chicken.' },
+        { name: 'V6 Kottu (Beef)', price: 740, desc: 'V6 engine kottu with beef.' },
+        { name: 'V6 Kottu (Seafood)', price: 740, desc: 'V6 engine kottu with seafood.' },
+        { name: 'V6 Kottu (Egg)', price: 570, desc: 'V6 engine kottu with egg.' },
+        { name: 'V6 Kottu (Veg)', price: 550, desc: 'V6 engine kottu with veg.' },
+        { name: 'V6 Kottu (Mix)', price: 990, desc: 'V6 engine kottu mixed.' },
+        { name: 'V6 Kottu (+Cheese)', price: 120, desc: 'Add cheese to your V6 kottu.' },
+        { name: 'V8 Kottu (Chicken)', price: 1390, desc: 'V8 engine kottu with chicken.' },
+        { name: 'V8 Kottu (Beef)', price: 1590, desc: 'V8 engine kottu with beef.' },
+        { name: 'V8 Kottu (Seafood)', price: 1590, desc: 'V8 engine kottu with seafood.' },
+        { name: 'V8 Kottu (Egg)', price: 1370, desc: 'V8 engine kottu with egg.' },
+        { name: 'V8 Kottu (Mix + Fries + Cheese + Sausage)', price: 1990, desc: 'V8 engine kottu with mix.' }
+      ],
+      // ----- TRIPTRONIC RICE -----
+      triptronicRice: [
+        { name: '1000 RPM Fried Rice (Chicken)', price: 690, desc: 'Fried rice with chicken.' },
+        { name: '1000 RPM Fried Rice (Beef)', price: 890, desc: 'Fried rice with beef.' },
+        { name: '1000 RPM Fried Rice (Seafood)', price: 890, desc: 'Fried rice with seafood.' },
+        { name: '1000 RPM Fried Rice (Egg)', price: 680, desc: 'Fried rice with egg.' },
+        { name: '1000 RPM Fried Rice (Veg)', price: 670, desc: 'Fried rice with veg.' },
+        { name: '1000 RPM Fried Rice (Mix)', price: 1090, desc: 'Fried rice mixed.' },
+        { name: 'Full Tank Nasigoreng (Chicken)', price: 790, desc: 'Nasigoreng with chicken.' },
+        { name: 'Full Tank Nasigoreng (Beef)', price: 940, desc: 'Nasigoreng with beef.' },
+        { name: 'Full Tank Nasigoreng (Seafood)', price: 940, desc: 'Nasigoreng with seafood.' },
+        { name: 'Full Tank Nasigoreng (Egg)', price: 770, desc: 'Nasigoreng with egg.' },
+        { name: 'Full Tank Nasigoreng (Mix)', price: 1190, desc: 'Nasigoreng mixed.' },
+        { name: 'Spicy Rice with Grilled Chicken', price: 790, desc: 'Spicy rice with grilled chicken.' }
+      ],
+      // ----- NOODLES (TRIPTRONIC) -----
+      triptronicNoodles: [
+        { name: 'Noodles (Chicken)', price: 690, desc: 'Noodles with chicken.' },
+        { name: 'Noodles (Beef)', price: 890, desc: 'Noodles with beef.' },
+        { name: 'Noodles (Seafood)', price: 890, desc: 'Noodles with seafood.' },
+        { name: 'Noodles (Egg)', price: 680, desc: 'Noodles with egg.' },
+        { name: 'Noodles (Veg)', price: 670, desc: 'Noodles with veg.' },
+        { name: 'Noodles (Mix)', price: 1090, desc: 'Noodles mixed.' }
+      ],
+      // ----- WAFFLES -----
+      waffles: [
+        { name: 'Spicy Chicken + Cheese Waffle', price: 580, desc: 'Savory waffle with spicy chicken & cheese.' },
+        { name: 'Spicy Beef + Cheese Waffle', price: 780, desc: 'Savory waffle with spicy beef & cheese.' },
+        { name: 'Sausage + Cheese Waffle', price: 580, desc: 'Savory waffle with sausage & cheese.' },
+        { name: 'Honey with Ice Cream Waffle', price: 420, desc: 'Sweet waffle with honey & ice cream.' },
+        { name: 'Chocolate with Ice Cream Waffle', price: 420, desc: 'Sweet waffle with chocolate & ice cream.' },
+        { name: 'Strawberry with Ice Cream Waffle', price: 420, desc: 'Sweet waffle with strawberry & ice cream.' },
+        { name: 'Brownies with Ice Cream Waffle', price: 480, desc: 'Sweet waffle with brownies & ice cream.' },
+        { name: 'Pancakes (Chocolate)', price: 480, desc: 'Chocolate pancakes.' }
+      ],
+      // ----- BURGERS -----
+      burgers: [
+        { name: 'Chicken Burger', price: 790, desc: 'Chicken burger.' },
+        { name: 'XL Chicken Burger', price: 1090, desc: 'XL chicken burger.' },
+        { name: 'Beef Burger', price: 890, desc: 'Beef burger.' },
+        { name: 'XL Beef Burger', price: 1190, desc: 'XL beef burger.' },
+        { name: 'Egg Burger', price: 780, desc: 'Egg burger.' },
+        { name: 'Veg Burger', price: 780, desc: 'Veg burger.' },
+        { name: 'Crispy Chicken with Egg Burger', price: 980, desc: 'Crispy chicken burger with egg.' },
+        { name: 'Grilled Chicken Burger', price: 980, desc: 'Grilled chicken burger.' },
+        { name: 'Double Chicken Burger', price: 1580, desc: 'Double chicken burger.' },
+        { name: 'Add Cheese (Burger)', price: 150, desc: 'Add cheese to burger.' }
+      ],
+      // ----- SUBMARINE -----
+      submarine: [
+        { name: 'Chicken Submarine', price: 840, desc: 'Chicken submarine.' },
+        { name: 'Beef Submarine', price: 940, desc: 'Beef submarine.' },
+        { name: 'Tuna Submarine', price: 980, desc: 'Tuna submarine.' },
+        { name: 'Seafood Submarine', price: 980, desc: 'Seafood submarine.' },
+        { name: 'Crispy Chicken Submarine', price: 980, desc: 'Crispy chicken submarine.' },
+        { name: 'Veg Submarine', price: 800, desc: 'Veg submarine.' },
+        { name: 'Add Cheese (Submarine)', price: 150, desc: 'Add cheese to submarine.' }
+      ],
+      // ----- PASTA -----
+      pasta: [
+        { name: 'Carbonara (Chicken)', price: 690, desc: 'Carbonara pasta with chicken.' },
+        { name: 'Carbonara (Beef)', price: 820, desc: 'Carbonara pasta with beef.' },
+        { name: 'Carbonara (Seafood)', price: 820, desc: 'Carbonara pasta with seafood.' },
+        { name: 'Carbonara (Sausage)', price: 690, desc: 'Carbonara pasta with sausage.' },
+        { name: 'Spicy Pasta (Chicken)', price: 690, desc: 'Spicy pasta with chicken.' },
+        { name: 'Spicy Pasta (Beef)', price: 820, desc: 'Spicy pasta with beef.' },
+        { name: 'Spicy Pasta (Seafood)', price: 820, desc: 'Spicy pasta with seafood.' },
+        { name: 'Spicy Pasta (Sausage)', price: 690, desc: 'Spicy pasta with sausage.' },
+        { name: 'Napolitan (Veg)', price: 650, desc: 'Napolitan pasta veg.' },
+        { name: 'Bolognese (Chicken)', price: 690, desc: 'Bolognese pasta with chicken.' },
+        { name: 'Bolognese (Beef)', price: 820, desc: 'Bolognese pasta with beef.' },
+        { name: 'Marinara (Seafood)', price: 820, desc: 'Marinara pasta with seafood.' }
+      ],
+      // ----- SOUP -----
+      soup: [
+        { name: 'Soup (Veg)', price: 420, desc: 'Vegetable soup.' },
+        { name: 'Soup (Chicken)', price: 480, desc: 'Chicken soup.' },
+        { name: 'Soup (Seafood)', price: 560, desc: 'Seafood soup.' }
+      ],
+      // ----- MEAT PLATTER -----
+      meatPlatter: [
+        { name: 'Meat Platter', price: 1850, desc: 'Includes: Garlic Bread, Crispy Chicken, Green Salad, Kochchi Bites, French Fries, Jumbo Sausage.' }
+      ],
+      // ----- BEVERAGES (UPDATED) -----
+      hybridIceTea: [
+        { name: 'Hybrid Ice Tea (Plain)', price: 460, desc: 'Refreshing iced tea.' },
+        { name: 'Hybrid Ice Tea (Apple)', price: 460, desc: 'Apple flavored iced tea.' },
+        { name: 'Hybrid Ice Tea (Passion)', price: 460, desc: 'Passion fruit iced tea.' },
+        { name: 'Hybrid Ice Tea (Black Currant)', price: 460, desc: 'Black currant iced tea.' }
+      ],
+      jumpStartFrizz: [
+        { name: 'Jump Start Frizz (Lime)', price: 460, desc: 'Lime frizz.' },
+        { name: 'Jump Start Frizz (Apple)', price: 460, desc: 'Apple frizz.' },
+        { name: 'Jump Start Frizz (Passion)', price: 460, desc: 'Passion frizz.' },
+        { name: 'Jump Start Frizz (Black Currant)', price: 460, desc: 'Black currant frizz.' }
+      ],
+      nitrogenMojito: [
+        { name: 'Nitrogen Mojito (Lime)', price: 560, desc: 'Lime mojito.' },
+        { name: 'Nitrogen Mojito (Apple)', price: 560, desc: 'Apple mojito.' },
+        { name: 'Nitrogen Mojito (Passion)', price: 560, desc: 'Passion mojito.' },
+        { name: 'Nitrogen Mojito (Black Currant)', price: 560, desc: 'Black currant mojito.' },
+        { name: 'Nitrogen Mojito (Ginger)', price: 560, desc: 'Ginger mojito.' }
+      ],
+      octane92: [
+        { name: '92 Octane Shake (Chocolate)', price: 490, desc: 'Chocolate shake.' },
+        { name: '92 Octane Shake (Vanilla)', price: 490, desc: 'Vanilla shake.' },
+        { name: '92 Octane Shake (Milo)', price: 490, desc: 'Milo shake.' },
+        { name: '92 Octane Shake (Faluda)', price: 490, desc: 'Faluda shake.' }
+      ],
+      octane95: [
+        { name: '95 Octane Shake (Oreo)', price: 780, desc: 'Oreo shake.' },
+        { name: '95 Octane Shake (Cake)', price: 780, desc: 'Cake shake.' },
+        { name: '95 Octane Shake (Brownies)', price: 780, desc: 'Brownie shake.' },
+        { name: '95 Octane Shake (Caramel)', price: 780, desc: 'Caramel shake.' }
+      ],
+      coolantJuice: [
+        { name: 'Coolant Fruit Juice (Watermelon)', price: 460, desc: 'Watermelon juice.' },
+        { name: 'Coolant Fruit Juice (Wood Apple)', price: 460, desc: 'Wood apple juice.' },
+        { name: 'Coolant Fruit Juice (Mango)', price: 460, desc: 'Mango juice.' },
+        { name: 'Coolant Fruit Juice (Lime)', price: 460, desc: 'Lime juice.' },
+        { name: 'Coolant Fruit Juice (Papaya)', price: 460, desc: 'Papaya juice.' },
+        { name: 'Coolant Fruit Juice (Pineapple)', price: 460, desc: 'Pineapple juice.' },
+        { name: 'Coolant Fruit Juice (Avocado)', price: 460, desc: 'Avocado juice.' }
+      ],
+      softDrinks: [
+        { name: 'EGB (Soft Drink)', price: 200, desc: 'EGB soft drink.' },
+        { name: 'Pepsi (Soft Drink)', price: 200, desc: 'Pepsi soft drink.' },
+        { name: '7UP (Soft Drink)', price: 200, desc: '7UP soft drink.' }
+      ],
+      smoothies: [
+        { name: 'Smoothie (Avocado)', price: 780, desc: 'Avocado smoothie.' },
+        { name: 'Smoothie (Mango)', price: 780, desc: 'Mango smoothie.' },
+        { name: 'Smoothie (Pineapple)', price: 780, desc: 'Pineapple smoothie.' },
+        { name: 'Smoothie (Passion)', price: 780, desc: 'Passion fruit smoothie.' }
+      ],
+      mocktails: [
+        { name: 'Mocktail (Blue Lagoon)', price: 980, desc: 'Blue Lagoon mocktail.' },
+        { name: 'Mocktail (Strawberry)', price: 980, desc: 'Strawberry mocktail.' }
+      ],
+      hotBeverages: [
+        { name: 'Supercharged Hot Chocolate', price: 680, desc: 'Supercharged hot chocolate.' },
+        { name: 'Cadbury Hot Chocolate', price: 550, desc: 'Cadbury hot chocolate.' },
+        { name: 'Americano', price: 650, desc: 'Americano coffee.' },
+        { name: 'Cappuccino', price: 650, desc: 'Cappuccino coffee.' }
+      ],
+      tea: [
+        { name: 'Jump Start Tea', price: 230, desc: 'Jump start tea.' },
+        { name: 'Milk Tea', price: 210, desc: 'Classic milk tea.' },
+        { name: 'Mint Tea', price: 230, desc: 'Mint tea.' },
+        { name: 'Green Tea', price: 230, desc: 'Green tea.' },
+        { name: 'Plain Tea', price: 210, desc: 'Plain tea.' }
+      ]
+    };
+
+    // ============================================================
+    // DISCOUNT LISTENER (same as original)
+    // ============================================================
+    function listenDiscounts() {
+      if (discountsUnsubscribe) discountsUnsubscribe();
+      discountsUnsubscribe = db.collection('discounts')
+        .where('status', '==', 'Active')
+        .onSnapshot(snap => {
+          const now = new Date();
+          let found = null;
+          snap.forEach(doc => {
+            const d = doc.data();
+            if (d.startDate && d.endDate) {
+              const start = new Date(d.startDate);
+              const end = new Date(d.endDate);
+              if (start <= now && end >= now) {
+                found = d;
+              }
+            }
+          });
+          activeDiscount = found;
+          renderFullMenu();
+        }, err => console.error('Discount listener error:', err));
+    }
+
+    // ============================================================
+    // FAVOURITES (same as original)
+    // ============================================================
+    function listenFavourites() {
+      if (favUnsubscribe) favUnsubscribe();
+      if (!currentUser) {
+        favourites = loadFavouritesFromLocalStorage();
+        renderFullMenu();
+        return;
+      }
+      favUnsubscribe = db.collection('favourites').doc(currentUser.uid)
+        .onSnapshot(doc => {
+          if (doc.exists && doc.data().items) {
+            favourites = doc.data().items || [];
+          } else {
+            favourites = [];
+          }
+          saveFavouritesToLocalStorage();
+          renderFullMenu();
+        }, err => {
+          console.error('Favourites listener error:', err);
+          favourites = loadFavouritesFromLocalStorage();
+          renderFullMenu();
+        });
+    }
+
+    function loadFavouritesFromLocalStorage() {
+      try {
+        return JSON.parse(localStorage.getItem('brickLaneFavourites')) || [];
+      } catch { return []; }
+    }
+
+    function saveFavouritesToLocalStorage() {
+      localStorage.setItem('brickLaneFavourites', JSON.stringify(favourites));
+    }
+
+    function saveFavouritesToFirestore() {
+      if (!currentUser) return;
+      db.collection('favourites').doc(currentUser.uid).set({
+        items: favourites,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(err => console.error('Error saving favourites:', err));
+    }
+
+    function toggleFavourite(itemData) {
+      const index = favourites.findIndex(f => f.name === itemData.name);
+      if (index > -1) {
+        favourites.splice(index, 1);
+        showOrderNotification('Removed', `${itemData.name} removed from favourites.`, '♡', false);
+      } else {
+        favourites.push({ name: itemData.name, price: itemData.price, desc: itemData.desc });
+        showOrderNotification('Added to Favourites', `${itemData.name} added to your favourites.`, '❤️', true);
+      }
+      saveFavouritesToLocalStorage();
+      saveFavouritesToFirestore();
+      renderFullMenu();
+    }
+
+    function isFavourite(itemName) {
+      return favourites.some(f => f.name === itemName);
+    }
+
+    // ============================================================
+    // RENDER FULL MENU (Blizz + Drinks/Desserts)
+    // ============================================================
+    function renderFullMenu() {
+      const sidesGrid = document.getElementById('sidesGrid');
+      const superFriesGrid = document.getElementById('superFriesGrid');
+      const engineKottuGrid = document.getElementById('engineKottuGrid');
+      const triptronicRiceGrid = document.getElementById('triptronicRiceGrid');
+      const triptronicNoodlesGrid = document.getElementById('triptronicNoodlesGrid');
+      const wafflesGrid = document.getElementById('wafflesGrid');
+      const burgersGrid = document.getElementById('burgersGrid');
+      const submarineGrid = document.getElementById('submarineGrid');
+      const pastaGrid = document.getElementById('pastaGrid');
+      const soupGrid = document.getElementById('soupGrid');
+      const meatPlatterGrid = document.getElementById('meatPlatterGrid');
+
+      // beverage grids
+      const hybridIceTeaGrid = document.getElementById('hybridIceTeaGrid');
+      const jumpStartFrizzGrid = document.getElementById('jumpStartFrizzGrid');
+      const nitrogenMojitoGrid = document.getElementById('nitrogenMojitoGrid');
+      const octane92Grid = document.getElementById('octane92Grid');
+      const octane95Grid = document.getElementById('octane95Grid');
+      const coolantJuiceGrid = document.getElementById('coolantJuiceGrid');
+      const softDrinksGrid = document.getElementById('softDrinksGrid');
+      const smoothiesGrid = document.getElementById('smoothiesGrid');
+      const mocktailsGrid = document.getElementById('mocktailsGrid');
+      const hotBeveragesGrid = document.getElementById('hotBeveragesGrid');
+      const teaGrid = document.getElementById('teaGrid');
+
+      function renderItems(items, container) {
+        container.innerHTML = '';
+        items.forEach(item => {
+          let price = item.price;
+          let discountPct = 0;
+          let discountLabel = '';
+
+          if (activeDiscount) {
+            const itemName = activeDiscount.itemName || '';
+            const shouldApply = !itemName || 
+                                item.name.toLowerCase().includes(itemName.toLowerCase()) || 
+                                itemName === '' ||
+                                itemName.toLowerCase() === 'all items';
+            if (shouldApply) {
+              discountPct = activeDiscount.discountPercent || 0;
+              price = price * (1 - discountPct / 100);
+              price = Math.round(price * 100) / 100;
+              discountLabel = `<span class="menu-discount-badge">🔥 ${discountPct}% OFF</span>`;
+            }
+          }
+
+          const fav = isFavourite(item.name);
+
+          const card = document.createElement('div');
+          card.className = 'menu-item-card';
+          card.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-display text-xl text-cream">${item.name} ${discountLabel}</h3>
+              <span class="item-price">LKR ${price.toFixed(2)}</span>
+            </div>
+            <p class="text-cream/60 text-sm mb-3 flex-1">${item.desc}</p>
+            <div class="item-actions">
+              <button class="item-add-btn" data-name="${item.name}" data-price="${price}" data-desc="${item.desc}">
+                + Add to Order
+              </button>
+              <button class="item-fav-btn ${fav ? 'is-fav' : ''}" data-name="${item.name}" data-price="${price}" data-desc="${item.desc}" aria-label="Favourite">
+                <i class="fas fa-heart"></i>
+              </button>
+            </div>
+          `;
+          container.appendChild(card);
+
+          card.querySelector('.item-add-btn').addEventListener('click', function() {
+            const itemData = {
+              name: this.dataset.name,
+              price: parseFloat(this.dataset.price),
+              desc: this.dataset.desc
+            };
+            addToCart(itemData);
+          });
+
+          card.querySelector('.item-fav-btn').addEventListener('click', function() {
+            const itemData = {
+              name: this.dataset.name,
+              price: parseFloat(this.dataset.price),
+              desc: this.dataset.desc
+            };
+            if (!currentUser) {
+              showOrderNotification('Login Required', 'Please log in to save favourites.', '🔐', false);
+              openAuthModal();
+              return;
+            }
+            toggleFavourite(itemData);
+          });
+        });
+      }
+
+      renderItems(BLIZZ_MENU.sides, sidesGrid);
+      renderItems(BLIZZ_MENU.superFries, superFriesGrid);
+      renderItems(BLIZZ_MENU.engineKottu, engineKottuGrid);
+      renderItems(BLIZZ_MENU.triptronicRice, triptronicRiceGrid);
+      renderItems(BLIZZ_MENU.triptronicNoodles, triptronicNoodlesGrid);
+      renderItems(BLIZZ_MENU.waffles, wafflesGrid);
+      renderItems(BLIZZ_MENU.burgers, burgersGrid);
+      renderItems(BLIZZ_MENU.submarine, submarineGrid);
+      renderItems(BLIZZ_MENU.pasta, pastaGrid);
+      renderItems(BLIZZ_MENU.soup, soupGrid);
+      renderItems(BLIZZ_MENU.meatPlatter, meatPlatterGrid);
+
+      // beverages
+      renderItems(BLIZZ_MENU.hybridIceTea, hybridIceTeaGrid);
+      renderItems(BLIZZ_MENU.jumpStartFrizz, jumpStartFrizzGrid);
+      renderItems(BLIZZ_MENU.nitrogenMojito, nitrogenMojitoGrid);
+      renderItems(BLIZZ_MENU.octane92, octane92Grid);
+      renderItems(BLIZZ_MENU.octane95, octane95Grid);
+      renderItems(BLIZZ_MENU.coolantJuice, coolantJuiceGrid);
+      renderItems(BLIZZ_MENU.softDrinks, softDrinksGrid);
+      renderItems(BLIZZ_MENU.smoothies, smoothiesGrid);
+      renderItems(BLIZZ_MENU.mocktails, mocktailsGrid);
+      renderItems(BLIZZ_MENU.hotBeverages, hotBeveragesGrid);
+      renderItems(BLIZZ_MENU.tea, teaGrid);
+    }
+
+    // ============================================================
+    // CART FUNCTIONS (same as original)
+    // ============================================================
+    function loadCartFromLocalStorage() {
+      const saved = localStorage.getItem('brickLaneCart');
+      if (saved) {
+        try { cart = JSON.parse(saved); updateCartUI(); } catch(e) { cart = []; }
+      }
+    }
+
+    function saveCartToLocalStorage() {
+      localStorage.setItem('brickLaneCart', JSON.stringify(cart));
+    }
+
+    function addToCart(item) {
+      const existing = cart.find(i => i.name === item.name);
+      if (existing) {
+        existing.quantity += 1;
+        existing.price = item.price;
+      } else {
+        cart.push({ name: item.name, price: item.price, quantity: 1, desc: item.desc || '' });
+      }
+      updateCartUI();
+      saveCartToLocalStorage();
+      saveCartToFirestore();
+      showOrderNotification('Added to Cart', `${item.name} added to your order.`, '🛒', true);
+    }
+
+    function removeFromCart(itemName) {
+      cart = cart.filter(i => i.name !== itemName);
+      updateCartUI();
+      saveCartToLocalStorage();
+      saveCartToFirestore();
+    }
+
+    function updateQuantity(itemName, delta) {
+      const item = cart.find(i => i.name === itemName);
+      if (!item) return;
+      item.quantity += delta;
+      if (item.quantity <= 0) { removeFromCart(itemName); return; }
+      updateCartUI();
+      saveCartToLocalStorage();
+      saveCartToFirestore();
+    }
+
+    function getCartTotal() {
+      const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+      const serviceFee = subtotal * 0.10;
+      return { subtotal, serviceFee, total: subtotal + serviceFee };
+    }
+
+    function updateCartUI() {
+      const cartItems = document.getElementById('cartItems');
+      const emptyCart = document.getElementById('emptyCart');
+      const summary = document.getElementById('cartSummary');
+      const checkoutBtn = document.getElementById('checkoutBtn');
+      const cartCount = document.getElementById('cartCount');
+      const pickupBanner = document.getElementById('pickupBanner');
+
+      if (cart.length === 0) {
+        emptyCart.classList.remove('hidden');
+        cartItems.classList.add('hidden');
+        summary.classList.add('hidden');
+        checkoutBtn.classList.add('hidden');
+        pickupBanner.classList.add('hidden');
+        cartCount.classList.add('hidden');
+        return;
+      }
+
+      emptyCart.classList.add('hidden');
+      cartItems.classList.remove('hidden');
+      summary.classList.remove('hidden');
+      checkoutBtn.classList.remove('hidden');
+      pickupBanner.classList.remove('hidden');
+
+      cartItems.innerHTML = cart.map(item => `
+        <div class="cart-item flex items-center gap-3 p-3 rounded-xl bg-char border border-cream/5">
+          <div class="flex-1">
+            <p class="font-medium text-sm">${item.name}</p>
+            <p class="text-cream/50 text-xs">LKR ${item.price.toFixed(2)}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="quantity-btn" onclick="updateQuantity('${item.name}', -1)">−</button>
+            <span class="text-sm font-mono w-6 text-center">${item.quantity}</span>
+            <button class="quantity-btn" onclick="updateQuantity('${item.name}', 1)">+</button>
+          </div>
+          <button onclick="removeFromCart('${item.name}')" class="text-cream/30 hover:text-crimson transition text-sm ml-1">✕</button>
+        </div>
+      `).join('');
+
+      const totals = getCartTotal();
+      document.getElementById('cartSubtotal').textContent = `LKR ${totals.subtotal.toFixed(2)}`;
+      document.getElementById('cartServiceFee').textContent = `LKR ${totals.serviceFee.toFixed(2)}`;
+      document.getElementById('cartTotal').textContent = `LKR ${totals.total.toFixed(2)}`;
+
+      const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
+      cartCount.textContent = totalItems;
+      cartCount.classList.remove('hidden');
+    }
+
+    function saveCartToFirestore() {
+      if (!currentUser) return;
+      db.collection('carts').doc(currentUser.uid).set({
+        items: cart,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(err => console.error('Error saving cart:', err));
+    }
+
+    function loadCartFromFirestore() {
+      if (!currentUser) return;
+      db.collection('carts').doc(currentUser.uid).get()
+        .then(doc => {
+          if (doc.exists && doc.data().items) {
+            cart = doc.data().items;
+            saveCartToLocalStorage();
+            updateCartUI();
+          }
+        })
+        .catch(err => console.error('Error loading cart:', err));
+    }
+
+    // ============================================================
+    // ORDER NOTIFICATION (same as original)
+    // ============================================================
+    function showOrderNotification(title, message, icon = '✅', isSuccess = true) {
+      const existing = document.querySelector('.order-notification-success');
+      if (existing) existing.remove();
+      const notif = document.createElement('div');
+      notif.className = 'order-notification-success';
+      notif.innerHTML = `
+        <div class="notif-icon">${icon}</div>
+        <div class="notif-content">
+          <div class="notif-title">${title}</div>
+          <div class="notif-message">${message}</div>
+        </div>
+        <button class="notif-close" aria-label="Close notification">&times;</button>
+      `;
+      document.body.appendChild(notif);
+      const timer = setTimeout(() => { if (notif.parentNode) notif.remove(); }, 5000);
+      notif.querySelector('.notif-close').addEventListener('click', () => {
+        clearTimeout(timer);
+        if (notif.parentNode) notif.remove();
+      });
+    }
+
+    // ============================================================
+    // PLACE ORDER (same as original)
+    // ============================================================
+    function placeOrder() {
+      if (!currentUser) {
+        showOrderNotification('Authentication Required', 'Please log in to place your order.', '🔐', false);
+        openAuthModal();
+        return;
+      }
+      if (cart.length === 0) {
+        showOrderNotification('Cart Empty', 'Add items to your cart before ordering.', '🛒', false);
+        return;
+      }
+
+      const totals = getCartTotal();
+      const orderItems = cart.map(item => ({ name: item.name, price: item.price, quantity: item.quantity }));
+      const orderId = 'ORD-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+
+      const orderData = {
+        orderId, userId: currentUser.uid, userEmail: currentUser.email || 'guest@example.com',
+        userName: currentUser.displayName || currentUser.email || 'Guest',
+        items: orderItems, subtotal: totals.subtotal, serviceFee: totals.serviceFee, total: totals.total,
+        status: 'Confirmed', orderType: 'Pickup', paymentMethod: 'Online',
+        branch: 'Melbourne CBD', branchAddress: '33 Guildford Ln, Melbourne VIC 3000',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        statusHistory: [{ status: 'Confirmed', timestamp: firebase.firestore.FieldValue.serverTimestamp() }]
+      };
+
+      const telegramMessage = `
+🛎️ <b>New Order at Brick Lane (Blizz Menu)!</b>
+🆔 <b>Order ID:</b> ${orderId}
+👤 <b>Customer:</b> ${orderData.userName}
+📧 <b>Email:</b> ${orderData.userEmail}
+📍 <b>Branch:</b> ${orderData.branch}
+<b>Items:</b>
+${orderItems.map(i => `  • ${i.name} x${i.quantity} = LKR ${(i.price * i.quantity).toFixed(2)}`).join('\n')}
+💰 <b>Subtotal:</b> LKR ${totals.subtotal.toFixed(2)}
+💵 <b>Service Fee (10%):</b> LKR ${totals.serviceFee.toFixed(2)}
+🟡 <b>TOTAL:</b> LKR ${totals.total.toFixed(2)}
+🔔 <i>Please prepare this order for pickup.</i>
+      `;
+
+      function finish() {
+        cart = []; updateCartUI(); saveCartToLocalStorage(); saveCartToFirestore(); closeCart();
+      }
+
+      showOrderNotification('Placing Order...', 'Please wait...', '⏳', true);
+      db.collection('orders').add(orderData)
+        .then(() => {
+          finish();
+          showOrderNotification('🎉 Order Confirmed!', `Order #${orderId} placed. Total: LKR ${totals.total.toFixed(2)}`, '✅', true);
+          sendTelegramNotification(telegramMessage);
+        })
+        .catch((err) => {
+          sendTelegramNotification(`⚠️ <b>ORDER NOT SAVED</b> (${err.code || err.message})\n` + telegramMessage);
+          finish();
+          showOrderNotification('⚠️ Order Sent', `ID: ${orderId}. Tell staff.`, '⚠️', false);
+        });
+    }
+
+    function sendTelegramNotification(message) {
+      const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'HTML' })
+      }).catch(err => console.error('Telegram error:', err));
+    }
+
+    // ============================================================
+    // CART CONTROLS (same as original)
+    // ============================================================
+    function openCart() {
+      document.getElementById('cartOverlay').classList.remove('hidden');
+      document.getElementById('cartSidebar').classList.remove('translate-x-full');
+    }
+    function closeCart() {
+      document.getElementById('cartOverlay').classList.add('hidden');
+      document.getElementById('cartSidebar').classList.add('translate-x-full');
+      document.getElementById('orderSuccess').classList.add('hidden');
+      document.getElementById('cartContent').classList.remove('hidden');
+    }
+
+    document.getElementById('cartTrigger').addEventListener('click', openCart);
+    document.getElementById('cartClose').addEventListener('click', closeCart);
+    document.getElementById('cartOverlay').addEventListener('click', closeCart);
+    document.getElementById('checkoutBtn').addEventListener('click', placeOrder);
+
+    // ============================================================
+    // MOBILE NAV (same as original)
+    // ============================================================
+    document.getElementById('mobileToggle').addEventListener('click', () => {
+      document.getElementById('mobileMenu').classList.toggle('hidden');
+    });
+    document.getElementById('mobileOrderBtn').addEventListener('click', () => {
+      document.getElementById('mobileMenu').classList.add('hidden');
+      openCart();
+    });
+
+    // ============================================================
+    // AUTH MODAL (same as original)
+    // ============================================================
+    const authOverlay = document.getElementById('authOverlay');
+    const authClose = document.getElementById('authClose');
+    const tabLogin = document.getElementById('tabLogin');
+    const tabSignup = document.getElementById('tabSignup');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const authError = document.getElementById('authError');
+
+    function showAuthError(msg) { authError.textContent = msg; authError.classList.add('show'); }
+    function clearAuthError() { authError.textContent = ''; authError.classList.remove('show'); }
+    function openAuthModal() { authOverlay.classList.remove('hidden'); clearAuthError(); document.body.style.overflow = 'hidden'; }
+    function closeAuthModal() { authOverlay.classList.add('hidden'); document.body.style.overflow = ''; }
+
+    authClose.addEventListener('click', closeAuthModal);
+    authOverlay.addEventListener('click', (e) => { if (e.target === authOverlay) closeAuthModal(); });
+
+    function setAuthTab(mode) {
+      clearAuthError();
+      if (mode === 'login') {
+        tabLogin.className = 'tab-btn active';
+        tabSignup.className = 'tab-btn inactive';
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+      } else {
+        tabSignup.className = 'tab-btn active';
+        tabLogin.className = 'tab-btn inactive';
+        signupForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+      }
+    }
+    tabLogin.addEventListener('click', () => setAuthTab('login'));
+    tabSignup.addEventListener('click', () => setAuthTab('signup'));
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearAuthError();
+      auth.signInWithEmailAndPassword(
+        document.getElementById('loginEmail').value,
+        document.getElementById('loginPassword').value
+      ).then(() => closeAuthModal()).catch(err => showAuthError(err.message));
+    });
+
+    signupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearAuthError();
+      const name = document.getElementById('suName').value;
+      const countryCode = document.getElementById('suCountryCode').value;
+      const phone = countryCode + document.getElementById('suPhone').value;
+      const email = document.getElementById('suEmail').value;
+      const password = document.getElementById('suPassword').value;
+      const confirm = document.getElementById('suPasswordConfirm').value;
+      if (password !== confirm) { showAuthError('Passwords do not match.'); return; }
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((cred) => {
+          return cred.user.updateProfile({ displayName: name }).then(() => {
+            return db.collection('users').doc(cred.user.uid).set({ name, phone, email }, { merge: true });
+          });
+        })
+        .then(() => closeAuthModal())
+        .catch(err => showAuthError(err.message));
+    });
+
+    document.getElementById('googleAuthBtn').addEventListener('click', () => {
+      clearAuthError();
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).then(() => closeAuthModal()).catch(err => showAuthError(err.message));
+    });
+
+    document.getElementById('appleAuthBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      showOrderNotification('Coming Soon', 'Apple Sign-In will be available in a future update.', '🍎', false);
+    });
+
+    // ============================================================
+    // PROFILE LINKS (same as original)
+    // ============================================================
+    function setupProfileLinks() {
+      const profileLink = document.getElementById('profileLink');
+      const mobileProfileLink = document.getElementById('mobileProfileLink');
+      function handleProfileClick(e) {
+        e.preventDefault();
+        if (currentUser) window.location.href = 'account.html';
+        else openAuthModal();
+      }
+      profileLink.addEventListener('click', handleProfileClick);
+      mobileProfileLink.addEventListener('click', handleProfileClick);
+    }
+
+    function updateMobileProfile() {
+      const icon = document.getElementById('mobileProfileIcon');
+      const text = document.getElementById('mobileProfileText');
+      if (currentUser) {
+        icon.textContent = (currentUser.displayName || currentUser.email || 'G').charAt(0).toUpperCase();
+        text.textContent = 'Account';
+      } else {
+        icon.textContent = 'M';
+        text.textContent = 'Account';
+      }
+    }
+
+    // ============================================================
+    // AUTH STATE (same as original)
+    // ============================================================
+    auth.onAuthStateChanged((user) => {
+      currentUser = user;
+      const icon = document.getElementById('profileIcon');
+      const initial = document.getElementById('profileInitial');
+      if (user) {
+        const displayName = user.displayName || user.email || 'Guest';
+        icon.classList.add('hidden');
+        initial.classList.remove('hidden');
+        initial.textContent = displayName.charAt(0).toUpperCase();
+        updateMobileProfile();
+        loadCartFromFirestore();
+        listenFavourites();
+      } else {
+        icon.classList.remove('hidden');
+        initial.classList.add('hidden');
+        updateMobileProfile();
+        loadCartFromLocalStorage();
+        favourites = loadFavouritesFromLocalStorage();
+        renderFullMenu();
+        if (favUnsubscribe) { favUnsubscribe(); favUnsubscribe = null; }
+      }
+    });
+
+    // ============================================================
+    // FOOD / BEVERAGES VIEW TOGGLE
+    // ============================================================
+    const menuToggleWrap = document.getElementById('menuToggleWrap');
+    const foodToggleBtn = document.getElementById('foodToggleBtn');
+    const beverageToggleBtn = document.getElementById('beverageToggleBtn');
+    const foodView = document.getElementById('foodView');
+    const beverageView = document.getElementById('beverageView');
+    let currentMenuView = 'food';
+
+    function switchMenuView(view) {
+      if (view === currentMenuView) return;
+      currentMenuView = view;
+
+      const showEl = view === 'food' ? foodView : beverageView;
+      const hideEl = view === 'food' ? beverageView : foodView;
+
+      foodToggleBtn.classList.toggle('active', view === 'food');
+      beverageToggleBtn.classList.toggle('active', view === 'beverages');
+      menuToggleWrap.classList.toggle('view-beverages', view === 'beverages');
+
+      // fade out current section
+      hideEl.classList.remove('is-visible');
+      hideEl.classList.add('is-entering');
+
+      setTimeout(() => {
+        hideEl.classList.add('is-hidden');
+
+        // prep incoming section then fade it in
+        showEl.classList.remove('is-hidden');
+        showEl.classList.add('is-entering');
+        // force reflow so the transition runs
+        void showEl.offsetWidth;
+        showEl.classList.remove('is-entering');
+        showEl.classList.add('is-visible');
+      }, 350);
+    }
+
+    foodToggleBtn.addEventListener('click', () => switchMenuView('food'));
+    beverageToggleBtn.addEventListener('click', () => switchMenuView('beverages'));
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.getElementById('year').textContent = new Date().getFullYear();
+    loadCartFromLocalStorage();
+    setupProfileLinks();
+    listenDiscounts();
+    setTimeout(renderFullMenu, 500);
+  </script>
+</body>
+</html>

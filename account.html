@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blizz Café - Profile</title>
+  <meta name="description" content="Manage your Blizz Café account — profile details, orders and table bookings." />
+  <link rel="icon" type="image/png" sizes="32x32" href="gallery2/logo.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="gallery2/logo.png" />
+  <link rel="apple-touch-icon" href="gallery2/logo.png" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#0a0b0d',
+            char: '#15171b',
+            char2: '#1b1e23',
+            brickline: '#2a2118',
+            gold: '#f4b93e',
+            crimson: '#c8102e',
+            cream: '#f5f0e6',
+            smoke: '#9a9a9f',
+          },
+          fontFamily: {
+            display: ['"Fraunces"', 'serif'],
+            body: ['"Manrope"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- Firebase v10 Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --ink: #0a0b0d;
+      --char: #15171b;
+      --char2: #1b1e23;
+      --brickline: #2a2118;
+      --gold: #f4b93e;
+      --crimson: #c8102e;
+      --cream: #f5f0e6;
+      --smoke: #9a9a9f;
+    }
+    * { scroll-behavior: smooth; }
+    body {
+      background: var(--ink);
+      font-family: 'Manrope', sans-serif;
+      color: var(--cream);
+    }
+    h1, h2, h3, h4, .font-display { font-family: 'Fraunces', serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .brick-texture {
+      background-image:
+        repeating-linear-gradient(0deg, rgba(244, 185, 62, 0.03) 0px, rgba(244, 185, 62, 0.03) 1px, transparent 1px, transparent 34px),
+        repeating-linear-gradient(90deg, rgba(244, 185, 62, 0.03) 0px, rgba(244, 185, 62, 0.03) 1px, transparent 1px, transparent 64px);
+      background-position: 0 0, 32px 17px;
+    }
+
+    .glass-nav {
+      background: rgba(10, 11, 13, 0.7);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(244, 185, 62, 0.15);
+    }
+
+    .dropdown-menu {
+      background: rgba(10, 11, 13, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(244, 185, 62, 0.2);
+      border-radius: 1.2rem;
+      padding: 0.6rem 0;
+      min-width: 200px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+    }
+    .dropdown-menu a {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.6rem 1.2rem;
+      color: rgba(245, 240, 230, 0.8);
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: 0.2s;
+      text-decoration: none;
+      border-left: 2px solid transparent;
+    }
+    .dropdown-menu a:hover {
+      background: rgba(244, 185, 62, 0.08);
+      color: var(--gold);
+      border-left-color: var(--gold);
+    }
+    .dropdown-menu a i {
+      width: 20px;
+      color: var(--gold);
+    }
+
+    .nav-link { transition: color 0.2s; }
+    .nav-link:hover { color: var(--gold); }
+
+    .side-tab {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1.1rem;
+      border-radius: 0.9rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: rgba(245, 240, 230, 0.65);
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .side-tab:hover { color: var(--cream); background: rgba(255,255,255,0.04); }
+    .side-tab.active {
+      color: var(--gold);
+      background: rgba(244, 185, 62, 0.1);
+      border-color: rgba(244, 185, 62, 0.3);
+    }
+    .side-tab .tab-icon {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .side-tab.active .tab-icon { background: rgba(244,185,62,0.2); }
+
+    .field-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--smoke);
+      display: block;
+      margin-bottom: 0.4rem;
+      font-weight: 700;
+    }
+    .field-input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      background: #1c1f24;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0.85rem;
+      color: var(--cream);
+      outline: none;
+      transition: border 0.25s;
+      font-size: 0.92rem;
+    }
+    .field-input:focus { border-color: var(--gold); }
+    .field-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .card {
+      background: var(--char);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 1.25rem;
+    }
+
+    .status-confirmed { background: rgba(244, 185, 62, 0.15); color: #f4b93e; border-color: rgba(244, 185, 62, 0.3); }
+    .status-packed { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3); }
+    .status-picked { background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3); }
+    .status-complete { background: rgba(107, 114, 128, 0.15); color: #9ca3af; border-color: rgba(107, 114, 128, 0.3); }
+    .status-booked { background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3); }
+
+    .page-section { display: none; }
+    .page-section.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      z-index: 9999;
+      background: rgba(26, 30, 36, 0.95);
+      border: 1px solid rgba(244, 185, 62, 0.3);
+      border-radius: 1rem;
+      padding: 1rem 1.3rem;
+      max-width: 340px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      backdrop-filter: blur(12px);
+      animation: slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes slideUp { 0% { opacity:0; transform: translateY(20px);} 100% { opacity:1; transform: translateY(0);} }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(244,185,62,0.2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .minimal-footer { background: #1A1A1A; color: white; padding: 80px 0 40px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .footer-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    .footer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; margin-bottom: 60px; }
+    .footer-logo { display: flex; align-items: center; margin-bottom: 20px; }
+    .coffee-animation { position: relative; display: inline-block; margin-right: 12px; }
+    .coffee-icon { font-size: 32px; color: #D4A574; animation: coffeeFloat 3s ease-in-out infinite; transform-origin: center; }
+    .coffee-steam { position: absolute; width: 4px; background: rgba(212, 165, 116, 0.5); border-radius: 2px; animation: steamRise 2.5s ease-in-out infinite; }
+    .steam-1 { height: 16px; top: -10px; left: 6px; animation-delay: 0s; }
+    .steam-2 { height: 12px; top: -7px; left: 18px; animation-delay: 0.8s; }
+    .steam-3 { height: 14px; top: -8px; left: 30px; animation-delay: 1.6s; }
+    @keyframes coffeeFloat { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(3deg); } }
+    @keyframes steamRise { 0% { opacity: 0; transform: translateY(0) scale(0.8); } 30% { opacity: 0.8; transform: translateY(-10px) scale(1); } 70% { opacity: 0.5; transform: translateY(-20px) scale(1.1); } 100% { opacity: 0; transform: translateY(-30px) scale(1.2); } }
+    .logo-text { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 700; color: #FFFFFF; letter-spacing: 2px; }
+    .footer-description { font-size: 14px; color: #999; line-height: 1.6; margin-bottom: 20px; }
+    .social-links { display: flex; gap: 16px; margin-top: 20px; }
+    .social-link { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.3s ease; }
+    .social-link:hover { background: #D4A574; transform: translateY(-3px); }
+    .footer-heading { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: white; }
+    .footer-links { list-style: none; }
+    .footer-links li { margin-bottom: 12px; }
+    .footer-links a, .footer-link-btn { color: #999; text-decoration: none; font-size: 14px; transition: all 0.3s ease; background: none; border: none; cursor: pointer; font-family: 'Manrope', sans-serif; text-align: left; padding: 0; }
+    .footer-links a:hover, .footer-link-btn:hover { color: #D4A574; padding-left: 8px; }
+    .footer-links i { margin-right: 8px; color: #D4A574; }
+    .footer-bottom { padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.08); text-align: center; color: #999; font-size: 14px; }
+    .footer-bottom a { color: #D4A574; text-decoration: none; font-weight: 600; }
+    .footer-bottom a:hover { text-decoration: underline; }
+    @media (max-width: 992px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr; } }
+
+    .dropdown-toggle-mobile {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: none;
+      color: var(--cream);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 6px 10px;
+      border-radius: 40px;
+      transition: background 0.2s;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .dropdown-toggle-mobile:hover { background: rgba(255,255,255,0.05); }
+    .dropdown-toggle-mobile i { color: var(--gold); }
+
+    .dropdown-menu-mobile {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: rgba(10, 11, 13, 0.94);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(244, 185, 62, 0.2);
+      border-radius: 1.2rem;
+      padding: 0.6rem 0;
+      min-width: 220px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+      display: none;
+      z-index: 100;
+    }
+    .dropdown-menu-mobile.open { display: block; }
+    .dropdown-menu-mobile a {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.7rem 1.2rem;
+      color: rgba(245, 240, 230, 0.8);
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: 0.2s;
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .dropdown-menu-mobile a:active {
+      background: rgba(244, 185, 62, 0.15);
+    }
+    .dropdown-menu-mobile a:hover {
+      background: rgba(244, 185, 62, 0.08);
+      color: var(--gold);
+      border-left-color: var(--gold);
+    }
+    .dropdown-menu-mobile a i { width: 20px; color: var(--gold); }
+    .dropdown-menu-mobile .menu-divider {
+      border-top: 1px solid rgba(245, 240, 230, 0.08);
+      margin: 4px 12px;
+    }
+    .dropdown-menu-mobile a.menu-back {
+      color: var(--gold);
+    }
+    .dropdown-menu-mobile a.menu-back i {
+      color: var(--gold);
+    }
+
+    /* Favourites styles */
+    .fav-item-card {
+      background: var(--char2);
+      border-radius: 0;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .fav-item-card:first-child {
+      border-radius: 1rem 1rem 0 0;
+    }
+    .fav-item-card:last-child {
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-radius: 0 0 1rem 1rem;
+    }
+    .fav-item-card:only-child {
+      border-radius: 1rem;
+    }
+    .fav-item-card:hover {
+      border-color: rgba(244, 185, 62, 0.2);
+    }
+    .fav-item-card .fav-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .fav-item-card .fav-info h4 {
+      font-family: 'Fraunces', serif;
+      font-size: 1rem;
+      color: var(--cream);
+    }
+    .fav-item-card .fav-info p {
+      color: var(--smoke);
+      font-size: 0.8rem;
+      margin-top: 0.1rem;
+    }
+    .fav-item-card .fav-price {
+      color: var(--gold);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+    .fav-item-card .fav-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .fav-item-card .fav-actions button {
+      padding: 0.4rem 0.9rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .fav-item-card .fav-actions .fav-order-btn {
+      background: rgba(244, 185, 62, 0.15);
+      border-color: rgba(244, 185, 62, 0.2);
+      color: var(--gold);
+    }
+    .fav-item-card .fav-actions .fav-order-btn:hover {
+      background: var(--gold);
+      color: var(--ink);
+    }
+    .fav-item-card .fav-actions .fav-remove-btn {
+      background: rgba(200, 16, 46, 0.1);
+      border-color: rgba(200, 16, 46, 0.15);
+      color: #c8102e;
+    }
+    .fav-item-card .fav-actions .fav-remove-btn:hover {
+      background: rgba(200, 16, 46, 0.2);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--smoke);
+    }
+    .empty-state .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+      opacity: 0.4;
+    }
+    .empty-state p {
+      font-size: 0.95rem;
+    }
+    .empty-state .empty-sub {
+      font-size: 0.8rem;
+      opacity: 0.6;
+      margin-top: 0.25rem;
+    }
+
+    /* Favourites container - no gap between items */
+    .fav-items-container {
+      display: flex;
+      flex-direction: column;
+      border-radius: 1rem;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+  </style>
+</head>
+
+<body class="bg-ink text-cream antialiased brick-texture">
+
+  <!-- =========================================================
+  NAVIGATION
+  ========================================================= -->
+  <header class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-6xl">
+    <nav class="glass-nav rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2 shrink-0" title="Back to Blizz Café home">
+        <img src="img/logo.webp" alt="Blizz Café Logo" class="h-8 w-auto sm:h-10 object-contain rounded-md bg-transparent">
+      </a>
+
+      <div class="hidden sm:block font-display text-lg text-cream/90">My Account</div>
+
+      <div class="relative sm:hidden">
+        <button id="dropdownToggle" class="dropdown-toggle-mobile" aria-label="Account menu">
+          <i class="fas fa-user-circle text-xl"></i>
+          <i class="fas fa-chevron-down text-[10px]"></i>
+        </button>
+        <div id="dropdownMenu" class="dropdown-menu-mobile">
+          <a href="#" data-tab="account" class="menu-item">
+            <i class="fas fa-user"></i> Account Information
+          </a>
+          <a href="#" data-tab="favourites" class="menu-item">
+            <i class="fas fa-heart"></i> Favourites
+          </a>
+          <a href="#" data-tab="orders" class="menu-item">
+            <i class="fas fa-shopping-bag"></i> My Orders
+          </a>
+          <a href="#" data-tab="bookings" class="menu-item">
+            <i class="fas fa-calendar-check"></i> Table Bookings
+          </a>
+          <a href="#" id="mobileLogoutBtn" class="menu-item">
+            <i class="fas fa-sign-out-alt"></i> Log Out
+          </a>
+          <div class="menu-divider"></div>
+          <a href="index.html" class="menu-back">
+            <i class="fas fa-arrow-left"></i> Back to Main Site
+          </a>
+        </div>
+      </div>
+
+      <a href="index.html" class="hidden sm:flex items-center gap-2 bg-char/70 border border-gold/20 hover:border-gold/50 text-cream/80 hover:text-gold transition-colors rounded-full px-4 py-2 text-sm font-semibold">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Back to Main Site</span>
+      </a>
+    </nav>
+  </header>
+
+  <!-- =========================================================
+  TOAST
+  ========================================================= -->
+  <div id="toast" class="toast hidden">
+    <div class="flex items-start gap-3">
+      <div id="toastIcon" class="text-2xl">✅</div>
+      <div class="flex-1">
+        <p id="toastTitle" class="font-semibold text-sm">Saved</p>
+        <p id="toastMessage" class="text-cream/60 text-xs mt-0.5">Your changes were saved.</p>
+      </div>
+      <button onclick="hideToast()" class="text-cream/40 hover:text-gold transition">✕</button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+  LOADING / LOGIN-REQUIRED STATE
+  ========================================================= -->
+  <div id="loadingState" class="min-h-screen flex flex-col items-center justify-center gap-4 px-6">
+    <div class="spinner"></div>
+    <p class="text-cream/50 text-sm">Checking your session…</p>
+  </div>
+
+  <div id="loginRequiredState" class="hidden min-h-screen flex flex-col items-center justify-center gap-5 px-6 text-center">
+    <div class="w-16 h-16 rounded-full bg-crimson/15 border border-crimson/30 flex items-center justify-center">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c8102e" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <h1 class="font-display text-2xl">Please log in to view your account</h1>
+    <p class="text-cream/50 text-sm max-w-sm">Log in on the main site to manage your details, orders and table bookings.</p>
+    <a href="index.html" class="bg-gold text-ink font-bold px-6 py-3 rounded-full hover:brightness-110 transition">Go to Login</a>
+  </div>
+
+  <!-- =========================================================
+  MAIN ACCOUNT AREA
+  ========================================================= -->
+  <main id="accountApp" class="hidden pt-28 sm:pt-32 pb-20 px-4 sm:px-6 max-w-6xl mx-auto">
+
+    <div class="flex items-center gap-4 mb-8">
+      <div id="avatarCircle" class="w-14 h-14 rounded-full bg-gradient-to-br from-gold to-crimson flex items-center justify-center font-bold text-ink text-xl">G</div>
+      <div>
+        <h1 id="welcomeName" class="font-display text-2xl sm:text-3xl">Welcome back</h1>
+        <p id="welcomeEmail" class="text-cream/50 text-sm"></p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
+
+      <!-- Sidebar tabs (desktop) -->
+      <aside class="hidden lg:flex lg:flex-col gap-2">
+        <div class="side-tab active" data-tab="account" onclick="goToTab('account')">
+          <span class="tab-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          Account Information
+        </div>
+        <div class="side-tab" data-tab="favourites" onclick="goToTab('favourites')">
+          <span class="tab-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+          Favourites
+        </div>
+        <div class="side-tab" data-tab="orders" onclick="goToTab('orders')">
+          <span class="tab-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
+          My Orders
+        </div>
+        <div class="side-tab" data-tab="bookings" onclick="goToTab('bookings')">
+          <span class="tab-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+          Table Bookings
+        </div>
+        <div class="side-tab !text-crimson/80 hover:!text-crimson" data-tab="logout" onclick="doLogout()">
+          <span class="tab-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></span>
+          Log Out
+        </div>
+      </aside>
+
+      <!-- ============== ACCOUNT INFORMATION PAGE ============== -->
+      <section id="page-account" class="page-section active">
+        <div class="card p-5 sm:p-8">
+          <h2 class="font-display text-xl mb-1">Account Information</h2>
+          <p class="text-cream/50 text-sm mb-6">Updates are saved to your profile in real time.</p>
+
+          <form id="accountForm" class="space-y-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label class="field-label">First Name</label>
+                <input type="text" id="firstName" class="field-input" placeholder="John" required>
+              </div>
+              <div>
+                <label class="field-label">Last Name</label>
+                <input type="text" id="lastName" class="field-input" placeholder="Doe" required>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label class="field-label">Phone Number</label>
+                <input type="tel" id="phoneNumber" class="field-input" placeholder="+61 4xx xxx xxx">
+              </div>
+              <div>
+                <label class="field-label">WhatsApp Number</label>
+                <input type="tel" id="whatsappNumber" class="field-input" placeholder="+61 4xx xxx xxx">
+              </div>
+            </div>
+
+            <div>
+              <label class="field-label">Email Address</label>
+              <div class="flex gap-2">
+                <input type="email" id="emailAddress" class="field-input flex-1" placeholder="you@example.com">
+                <button type="button" id="verifyEmailNote" class="hidden text-xs text-gold whitespace-nowrap"></button>
+              </div>
+              <p class="text-[11px] text-cream/40 mt-1.5">Changing your email may require you to log in again to confirm it's you.</p>
+            </div>
+
+            <div class="h-px bg-cream/10 my-2"></div>
+
+            <div>
+              <label class="field-label">Delivery / Home Address</label>
+              <input type="text" id="addressLine" class="field-input" placeholder="Street, suburb, city">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label class="field-label">Postal Code</label>
+                <input type="text" id="postalCode" class="field-input" placeholder="3000">
+              </div>
+              <div>
+                <label class="field-label">Location (Google Maps)</label>
+                <div class="flex gap-2">
+                  <button type="button" onclick="useMyLocation()" class="field-input flex items-center justify-center gap-2 text-sm font-semibold text-gold hover:brightness-110 cursor-pointer">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-7.58 8-13A8 8 0 0 0 4 9c0 5.42 8 13 8 13z"/><circle cx="12" cy="9" r="3"/></svg>
+                    Use My Current Location
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="mapPreviewWrap" class="hidden">
+              <label class="field-label">Saved Location Preview</label>
+              <div class="rounded-2xl overflow-hidden border border-cream/10">
+                <iframe id="mapPreview" width="100%" height="220" style="border:0;" loading="lazy"></iframe>
+              </div>
+              <a id="openInMapsLink" href="#" target="_blank" class="inline-flex items-center gap-1 text-xs text-gold hover:underline mt-2">
+                <i class="fas fa-map-marker-alt"></i> Open in Google Maps
+              </a>
+            </div>
+            <p id="noLocationNote" class="text-xs text-cream/40">No saved location yet — tap "Use My Current Location" to connect your address with Google Maps.</p>
+
+            <div class="pt-2 flex items-center gap-3">
+              <button type="submit" id="saveAccountBtn" class="bg-gold text-ink font-bold px-7 py-3 rounded-full hover:brightness-110 transition">
+                Save Changes
+              </button>
+              <span id="saveStatus" class="text-xs text-cream/40"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============== FAVOURITES PAGE ============== -->
+      <section id="page-favourites" class="page-section">
+        <div class="card p-5 sm:p-8">
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="font-display text-xl">Favourites</h2>
+            <span class="text-sm text-cream/40">❤️</span>
+          </div>
+          <p class="text-cream/50 text-sm mb-6">Your favourite menu items — order them anytime.</p>
+
+          <div id="favouritesList">
+            <!-- Will be populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== ORDERS PAGE ============== -->
+      <section id="page-orders" class="page-section">
+        <div class="card p-5 sm:p-8">
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="font-display text-xl">My Orders</h2>
+            <span class="w-2 h-2 rounded-full bg-gold pulse-dot-static"></span>
+          </div>
+          <p class="text-cream/50 text-sm mb-6">Updates live as your order status changes.</p>
+
+          <h3 class="text-sm font-semibold text-cream/70 mb-3">Active Orders</h3>
+          <div id="activeOrdersList" class="space-y-3 mb-8">
+            <p class="text-cream/40 text-sm">Loading orders…</p>
+          </div>
+
+          <h3 class="text-sm font-semibold text-cream/70 mb-3">Order History</h3>
+          <div id="completedOrdersList" class="space-y-3">
+            <p class="text-cream/40 text-sm">Loading history…</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== TABLE BOOKINGS PAGE ============== -->
+      <section id="page-bookings" class="page-section">
+        <div class="card p-5 sm:p-8">
+          <h2 class="font-display text-xl mb-1">Table Bookings</h2>
+          <p class="text-cream/50 text-sm mb-6">All the tables you've reserved at Blizz Café.</p>
+
+          <div id="bookingsList" class="space-y-3">
+            <p class="text-cream/40 text-sm">Loading bookings…</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- FOOTER - BLIZZ CAFÉ (background colour animation removed) -->
+  <footer class="minimal-footer">
+    <!-- footer-glow removed to stop colour animation -->
+    <div class="footer-container">
+      <div class="footer-grid">
+
+        <div>
+          <div class="footer-logo">
+            <div class="coffee-animation">
+              <i class="fas fa-mug-hot coffee-icon"></i>
+              <div class="coffee-steam steam-1"></div>
+              <div class="coffee-steam steam-2"></div>
+              <div class="coffee-steam steam-3"></div>
+            </div>
+            <span class="logo-text">BLIZZ CAFÉ</span>
+          </div>
+          <p class="footer-description">
+            A cozy café slinging honest breakfasts and slow-drip coffee from a hidden corner of Kandy. No pretense — just brick walls, good light, and a kitchen that opens early.
+          </p>
+          <div class="social-links">
+            <a href="https://www.facebook.com/theblizzcafe" target="_blank" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/blizz_cafe_" target="_blank" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.tiktok.com/@blizz.cafe" target="_blank" class="social-link"><i class="fab fa-tiktok"></i></a>
+            <a href="#" target="_blank" class="social-link"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Explore</h4>
+          <ul class="footer-links">
+            <li><a href="index.html#about" class="footer-link-btn">About Us</a></li>
+            <li><a href="index.html#menu" class="footer-link-btn">Menu</a></li>
+            <li><a href="menu.html" class="footer-link-btn text-gold">Full Menu</a></li>
+            <li><a href="index.html#book" class="footer-link-btn">Book a Table</a></li>
+            <li><a href="index.html#gallery" class="footer-link-btn">Gallery</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Legal</h4>
+          <ul class="footer-links">
+            <li><a href="#" class="footer-link-btn">Privacy Policy</a></li>
+            <li><a href="#" class="footer-link-btn">Terms of Service</a></li>
+            <li><a href="#" class="footer-link-btn">Allergen Info</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Follow</h4>
+          <ul class="footer-links" style="list-style: none; color: #999;">
+            <li><a href="https://www.instagram.com/blizz_cafe_" target="_blank" class="footer-link-btn">Instagram</a></li>
+            <li><a href="https://www.facebook.com/theblizzcafe" target="_blank" class="footer-link-btn">Facebook</a></li>
+            <li><a href="https://www.tiktok.com/@blizz.cafe" target="_blank" class="footer-link-btn">TikTok</a></li>
+            <li><i class="fas fa-map-marker-alt"></i> Kandy, Sri Lanka</li>
+            <li><i class="fas fa-phone"></i> +94 (77) 121 62 61</li>
+            <li><i class="fas fa-phone"></i> +94 (81) 760 16 99</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p>
+          &copy; <span id="year"></span> Blizz Café. All rights reserved. |
+          DESIGNED & DEVELOPED BY <a href="http://wa.me/713171006" target="_blank">MASH SOLUTIONS</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+
+  <script>
+    // ============================================================
+    // FIREBASE INITIALISATION
+    // ============================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyB_UdWrxjbuhPiFBSOZGo_mGIIdalUZbx8",
+      authDomain: "blizzkandy.firebaseapp.com",
+      projectId: "blizzkandy",
+      storageBucket: "blizzkandy.firebasestorage.app",
+      messagingSenderId: "705369840142",
+      appId: "1:705369840142:web:310d32d621a8e835c5ba5f",
+      measurementId: "G-GDCLPQVDJ6"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    let currentUser = null;
+    let userDocUnsub = null;
+    let ordersUnsub = null;
+    let bookingsUnsub = null;
+    let favUnsub = null;
+    let savedLocation = null;
+    let isEditingForm = false;
+    let favourites = [];
+
+    // ============================================================
+    // TOAST HELPER
+    // ============================================================
+    function showToast(title, message, icon = '✅') {
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastMessage').textContent = message;
+      const toast = document.getElementById('toast');
+      toast.classList.remove('hidden');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(hideToast, 4500);
+    }
+    function hideToast() { document.getElementById('toast').classList.add('hidden'); }
+
+    // ============================================================
+    // DROPDOWN TOGGLE (mobile)
+    // ============================================================
+    function closeDropdown() {
+      document.getElementById('dropdownMenu').classList.remove('open');
+    }
+
+    document.getElementById('dropdownToggle').addEventListener('click', function(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('dropdownMenu');
+      menu.classList.toggle('open');
+    });
+
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('dropdownMenu');
+      const toggle = document.getElementById('dropdownToggle');
+      if (menu && toggle && !menu.contains(e.target) && !toggle.contains(e.target)) {
+        menu.classList.remove('open');
+      }
+    });
+
+    document.querySelectorAll('.menu-item').forEach(function(item) {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var tab = this.getAttribute('data-tab');
+        if (tab) {
+          goToTab(tab);
+        }
+        closeDropdown();
+      });
+    });
+
+    document.getElementById('mobileLogoutBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeDropdown();
+      doLogout();
+    });
+
+    // ============================================================
+    // TAB NAVIGATION
+    // ============================================================
+    const TABS = ['account', 'favourites', 'orders', 'bookings'];
+    function goToTab(tab) {
+      if (!TABS.includes(tab)) tab = 'account';
+      window.location.hash = tab;
+      setTimeout(renderTab, 10);
+      closeDropdown();
+    }
+    function renderTab() {
+      const tab = (window.location.hash || '#account').replace('#', '');
+      const finalTab = TABS.includes(tab) ? tab : 'account';
+      
+      document.querySelectorAll('.side-tab').forEach(el => {
+        el.classList.toggle('active', el.dataset.tab === finalTab);
+      });
+      
+      document.querySelectorAll('.page-section').forEach(el => {
+        el.classList.toggle('active', el.id === 'page-' + finalTab);
+      });
+      
+      document.querySelectorAll('.dropdown-menu-mobile .menu-item').forEach(el => {
+        const tabAttr = el.getAttribute('data-tab');
+        if (tabAttr) {
+          el.style.borderLeftColor = (tabAttr === finalTab) ? 'var(--gold)' : 'transparent';
+          el.style.color = (tabAttr === finalTab) ? 'var(--gold)' : 'rgba(245,240,230,0.8)';
+        }
+      });
+      
+      if (finalTab === 'favourites') {
+        renderFavourites();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.addEventListener('hashchange', renderTab);
+
+    function doLogout() {
+      auth.signOut().then(() => { window.location.href = 'index.html'; });
+    }
+
+    // ============================================================
+    // AUTH STATE
+    // ============================================================
+    auth.onAuthStateChanged((user) => {
+      currentUser = user;
+      document.getElementById('loadingState').classList.add('hidden');
+
+      if (!user) {
+        document.getElementById('accountApp').classList.add('hidden');
+        document.getElementById('loginRequiredState').classList.remove('hidden');
+        if (userDocUnsub) { userDocUnsub(); userDocUnsub = null; }
+        if (ordersUnsub) { ordersUnsub(); ordersUnsub = null; }
+        if (bookingsUnsub) { bookingsUnsub(); bookingsUnsub = null; }
+        if (favUnsub) { favUnsub(); favUnsub = null; }
+        return;
+      }
+
+      document.getElementById('loginRequiredState').classList.add('hidden');
+      document.getElementById('accountApp').classList.remove('hidden');
+
+      const displayName = user.displayName || user.email || 'Guest';
+      document.getElementById('avatarCircle').textContent = displayName.charAt(0).toUpperCase();
+      document.getElementById('welcomeName').textContent = 'Welcome back, ' + displayName.split(' ')[0];
+      document.getElementById('welcomeEmail').textContent = user.email || '';
+      document.getElementById('emailAddress').value = user.email || '';
+
+      renderTab();
+      listenToUserDoc();
+      listenToOrders();
+      listenToBookings();
+      listenToFavourites();
+    });
+
+    // ============================================================
+    // FAVOURITES FUNCTIONS - FIXED to match menu.html
+    // ============================================================
+    function listenToFavourites() {
+      if (favUnsub) favUnsub();
+      if (!currentUser) {
+        favourites = loadFavouritesFromLocalStorage();
+        renderFavourites();
+        return;
+      }
+      
+      // Listen to the SAME collection as menu.html: favourites/{uid}
+      favUnsub = db.collection('favourites').doc(currentUser.uid)
+        .onSnapshot(doc => {
+          if (doc.exists && doc.data().items) {
+            favourites = doc.data().items || [];
+          } else {
+            favourites = [];
+          }
+          saveFavouritesToLocalStorage();
+          renderFavourites();
+        }, err => {
+          console.error('Favourites listener error:', err);
+          favourites = loadFavouritesFromLocalStorage();
+          renderFavourites();
+        });
+    }
+
+    function loadFavouritesFromLocalStorage() {
+      try {
+        return JSON.parse(localStorage.getItem('brickLaneFavourites')) || [];
+      } catch { return []; }
+    }
+
+    function saveFavouritesToLocalStorage() {
+      localStorage.setItem('brickLaneFavourites', JSON.stringify(favourites));
+    }
+
+    function saveFavouritesToFirestore() {
+      if (!currentUser) return;
+      db.collection('favourites').doc(currentUser.uid).set({
+        items: favourites,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(err => console.error('Error saving favourites:', err));
+    }
+
+    function removeFavourite(itemName) {
+      if (!currentUser) {
+        // If not logged in, remove from local
+        favourites = favourites.filter(f => f.name !== itemName);
+        saveFavouritesToLocalStorage();
+        renderFavourites();
+        showToast('Removed', itemName + ' removed from favourites (local).', '♡');
+        return;
+      }
+      
+      favourites = favourites.filter(f => f.name !== itemName);
+      saveFavouritesToLocalStorage();
+      saveFavouritesToFirestore();
+      renderFavourites();
+      showToast('Removed', itemName + ' removed from favourites.', '♡');
+    }
+
+    // Expose functions to window for inline onclick
+    window.removeFavourite = removeFavourite;
+    window.addFavouriteToCart = function(item) {
+      try {
+        let cart = JSON.parse(localStorage.getItem('blizzCafeCart')) || [];
+        // Also check if there's a cart in Firestore or use the same key as menu.html
+        // menu.html uses 'brickLaneCart' - let's use that
+        let cartItems = JSON.parse(localStorage.getItem('brickLaneCart')) || [];
+        const existing = cartItems.find(i => i.name === item.name);
+        if (existing) {
+          existing.quantity += 1;
+        } else {
+          cartItems.push({ 
+            name: item.name, 
+            price: item.price || 0, 
+            quantity: 1, 
+            desc: item.desc || ''
+          });
+        }
+        localStorage.setItem('brickLaneCart', JSON.stringify(cartItems));
+        showToast('Added to Cart', item.name + ' added to your order.', '🛒');
+        // If we're on the main site, also update the cart UI there
+        if (typeof window.updateCartUI === 'function') {
+          window.updateCartUI();
+        }
+      } catch (e) {
+        console.error('Error adding to cart:', e);
+        showToast('Error', 'Could not add item to cart.', '⚠️');
+      }
+    };
+
+    function renderFavourites() {
+      const container = document.getElementById('favouritesList');
+      if (!container) return;
+
+      if (!currentUser) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🔐</div>
+            <p>Please log in to see your favourites.</p>
+            <p class="empty-sub">Favourites are saved to your account.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (!favourites || favourites.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">❤️</div>
+            <p>You haven't added any favourites yet.</p>
+            <p class="empty-sub">Browse the menu and tap the ♡ heart icon on items you love.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="fav-items-container">
+          ${favourites.map(item => `
+            <div class="fav-item-card">
+              <div class="fav-info">
+                <h4>${item.name}</h4>
+                <p>${item.desc || ''}</p>
+              </div>
+              <div class="fav-price">Rs. ${(item.price || 0).toFixed(0)}</div>
+              <div class="fav-actions">
+                <button class="fav-order-btn" onclick="window.addFavouriteToCart && window.addFavouriteToCart({name:'${item.name.replace(/'/g, "\\'")}', price:${item.price || 0}, desc:'${(item.desc || '').replace(/'/g, "\\'")}'})">
+                  Order
+                </button>
+                <button class="fav-remove-btn" onclick="window.removeFavourite && window.removeFavourite('${item.name.replace(/'/g, "\\'")}')">
+                  ✕
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // ============================================================
+    // ACCOUNT INFORMATION
+    // ============================================================
+    function listenToUserDoc() {
+      if (userDocUnsub) userDocUnsub();
+      userDocUnsub = db.collection('users').doc(currentUser.uid)
+        .onSnapshot(doc => {
+          if (isEditingForm) return;
+          const data = doc.data() || {};
+          fillAccountForm(data);
+        }, err => console.error('Error loading profile:', err));
+    }
+
+    function fillAccountForm(data) {
+      let first = data.firstName || '';
+      let last = data.lastName || '';
+      if (!first && !last && data.name) {
+        const parts = data.name.split(' ');
+        first = parts[0] || '';
+        last = parts.slice(1).join(' ') || '';
+      }
+      document.getElementById('firstName').value = first;
+      document.getElementById('lastName').value = last;
+      document.getElementById('phoneNumber').value = data.phone || '';
+      document.getElementById('whatsappNumber').value = data.whatsapp || '';
+      document.getElementById('addressLine').value = data.address || '';
+      document.getElementById('postalCode').value = data.postalCode || '';
+
+      if (data.location && data.location.lat && data.location.lng) {
+        savedLocation = { lat: data.location.lat, lng: data.location.lng };
+        showMapPreview(savedLocation);
+      }
+    }
+
+    function showMapPreview(loc) {
+      document.getElementById('mapPreviewWrap').classList.remove('hidden');
+      document.getElementById('noLocationNote').classList.add('hidden');
+      document.getElementById('mapPreview').src = 'https://www.google.com/maps?q=' + loc.lat + ',' + loc.lng + '&output=embed';
+      document.getElementById('openInMapsLink').href = 'https://www.google.com/maps?q=' + loc.lat + ',' + loc.lng;
+    }
+
+    function useMyLocation() {
+      if (!navigator.geolocation) {
+        showToast('Not Supported', 'Your browser does not support location access.', '⚠️');
+        return;
+      }
+      showToast('Locating…', 'Requesting your current location.', '📍');
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          savedLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          showMapPreview(savedLocation);
+          showToast('Location Captured', 'Your current location was linked to Google Maps. Save changes to keep it.', '✅');
+        },
+        function(err) {
+          showToast('Location Blocked', 'Please allow location access in your browser to connect Google Maps.', '⚠️');
+        }
+      );
+    }
+
+    document.getElementById('accountForm').addEventListener('focusin', function() { isEditingForm = true; });
+    document.getElementById('accountForm').addEventListener('focusout', function() {
+      setTimeout(function() { isEditingForm = false; }, 200);
+    });
+
+    document.getElementById('accountForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      var saveBtn = document.getElementById('saveAccountBtn');
+      var saveStatus = document.getElementById('saveStatus');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+
+      var firstName = document.getElementById('firstName').value.trim();
+      var lastName = document.getElementById('lastName').value.trim();
+      var phone = document.getElementById('phoneNumber').value.trim();
+      var whatsapp = document.getElementById('whatsappNumber').value.trim();
+      var newEmail = document.getElementById('emailAddress').value.trim();
+      var address = document.getElementById('addressLine').value.trim();
+      var postalCode = document.getElementById('postalCode').value.trim();
+
+      var payload = {
+        firstName: firstName,
+        lastName: lastName,
+        name: (firstName + ' ' + lastName).trim(),
+        phone: phone,
+        whatsapp: whatsapp,
+        address: address,
+        postalCode: postalCode,
+        email: currentUser.email,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      if (savedLocation) payload.location = savedLocation;
+
+      try {
+        await db.collection('users').doc(currentUser.uid).set(payload, { merge: true });
+        await currentUser.updateProfile({ displayName: payload.name || currentUser.email });
+
+        if (newEmail && newEmail !== currentUser.email) {
+          try {
+            await currentUser.updateEmail(newEmail);
+            await db.collection('users').doc(currentUser.uid).set({ email: newEmail }, { merge: true });
+            document.getElementById('welcomeEmail').textContent = newEmail;
+          } catch (emailErr) {
+            if (emailErr.code === 'auth/requires-recent-login') {
+              showToast('Re-login Required', 'To change your email, please log out and log back in, then try again.', '⚠️');
+            } else {
+              showToast('Email Not Updated', emailErr.message, '⚠️');
+            }
+          }
+        }
+
+        document.getElementById('welcomeName').textContent = 'Welcome back, ' + (firstName || currentUser.email);
+        document.getElementById('avatarCircle').textContent = (firstName || currentUser.email || 'G').charAt(0).toUpperCase();
+
+        showToast('Saved', 'Your account details were updated.', '✅');
+        saveStatus.textContent = 'Last saved just now';
+      } catch (err) {
+        console.error('Save error:', err);
+        showToast('Save Failed', err.message, '⚠️');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Changes';
+        isEditingForm = false;
+      }
+    });
+
+    // ============================================================
+    // ORDERS
+    // ============================================================
+    function getStatusClass(status) {
+      switch (status) {
+        case 'Confirmed': return 'status-confirmed';
+        case 'Packed': return 'status-packed';
+        case 'Picked Up': return 'status-picked';
+        case 'Complete': return 'status-complete';
+        default: return 'status-confirmed';
+      }
+    }
+
+    function listenToOrders() {
+      if (ordersUnsub) ordersUnsub();
+      if (!currentUser) return;
+      ordersUnsub = db.collection('orders')
+        .where('userId', '==', currentUser.uid)
+        .orderBy('createdAt', 'desc')
+        .onSnapshot(function(snapshot) {
+          var active = [];
+          var completed = [];
+          snapshot.forEach(function(doc) {
+            var data = doc.data();
+            data.id = doc.id;
+            if (data.status === 'Complete') completed.push(data);
+            else active.push(data);
+          });
+          renderOrderList(active, 'activeOrdersList', 'No active orders right now.');
+          renderOrderList(completed, 'completedOrdersList', 'No past orders yet.');
+        }, function(err) {
+          console.error('Error loading orders:', err);
+          document.getElementById('activeOrdersList').innerHTML = '<p class="text-cream/40 text-sm">Could not load orders.</p>';
+        });
+    }
+
+    function renderOrderList(orders, containerId, emptyText) {
+      var container = document.getElementById(containerId);
+      if (!container) return;
+      if (orders.length === 0) {
+        container.innerHTML = '<p class="text-cream/40 text-sm">' + emptyText + '</p>';
+        return;
+      }
+      container.innerHTML = orders.map(function(order) {
+        var itemsList = (order.items || []).map(function(i) { return i.name + ' × ' + (i.quantity || 1); }).join(', ');
+        var date = order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleString() : 'Just now';
+        return `
+          <div class="bg-char2 rounded-2xl p-4 border border-cream/5">
+            <div class="flex justify-between items-start gap-3">
+              <div class="min-w-0">
+                <p class="font-mono text-xs text-gold mb-1">${order.orderId || order.id}</p>
+                <p class="font-semibold text-sm">${itemsList || 'Order items'}</p>
+                <p class="text-cream/50 text-xs mt-1">Rs. ${(order.total || 0).toFixed(0)} · ${order.branch || ''}</p>
+                <p class="text-cream/30 text-[11px] mt-1">${date}</p>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${getStatusClass(order.status)} shrink-0">${order.status || 'Confirmed'}</span>
+            </div>
+            <button class="mt-3 text-gold text-xs font-semibold hover:underline flex items-center gap-1" onclick='downloadOrderInvoice(${JSON.stringify(order).replace(/'/g, "&#39;")})'>
+              <i class="fas fa-file-invoice"></i> Download Invoice (PDF)
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function downloadOrderInvoice(order) {
+      var { jsPDF } = window.jspdf;
+      var doc = new jsPDF();
+      var gold = [244, 185, 62];
+      var dark = [20, 20, 20];
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.setTextColor(dark[0], dark[1], dark[2]);
+      doc.text('BLIZZ CAFÉ', 14, 20);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(120, 120, 120);
+      doc.text('Kandy, Sri Lanka', 14, 26);
+      doc.text('+94 (77) 121 62 61  |  +94 (81) 760 16 99', 14, 31);
+
+      doc.setDrawColor(gold[0], gold[1], gold[2]);
+      doc.setLineWidth(0.6);
+      doc.line(14, 36, 196, 36);
+
+      doc.setFontSize(14);
+      doc.setTextColor(dark[0], dark[1], dark[2]);
+      doc.setFont('helvetica', 'bold');
+      doc.text('INVOICE', 14, 46);
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      var date = order.createdAt ? new Date(order.createdAt.seconds * 1000) : new Date();
+      doc.text('Order ID: ' + (order.orderId || order.id), 14, 54);
+      doc.text('Date: ' + date.toLocaleString(), 14, 60);
+      doc.text('Customer: ' + (order.userName || ''), 14, 66);
+      doc.text('Email: ' + (order.userEmail || ''), 14, 72);
+      doc.text('Branch: ' + (order.branch || ''), 120, 54);
+      doc.text('Status: ' + (order.status || ''), 120, 60);
+      doc.text('Type: ' + (order.orderType || 'Pickup'), 120, 66);
+
+      var y = 84;
+      doc.setFillColor(dark[0], dark[1], dark[2]);
+      doc.rect(14, y - 6, 182, 8, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Item', 18, y);
+      doc.text('Qty', 140, y);
+      doc.text('Price', 160, y);
+      doc.text('Amount', 178, y);
+      y += 8;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(dark[0], dark[1], dark[2]);
+      (order.items || []).forEach(function(item) {
+        doc.text(String(item.name || ''), 18, y);
+        doc.text(String(item.quantity || 1), 140, y);
+        doc.text('Rs. ' + (item.price || 0).toFixed(0), 160, y);
+        doc.text('Rs. ' + ((item.price || 0) * (item.quantity || 1)).toFixed(0), 178, y);
+        y += 7;
+      });
+
+      y += 4;
+      doc.setDrawColor(220, 220, 220);
+      doc.line(14, y, 196, y);
+      y += 8;
+
+      doc.text('Subtotal', 140, y);
+      doc.text('Rs. ' + (order.subtotal || 0).toFixed(0), 178, y);
+      y += 7;
+      doc.text('Service Fee', 140, y);
+      doc.text('Rs. ' + (order.serviceFee || 0).toFixed(0), 178, y);
+      y += 8;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('TOTAL', 140, y);
+      doc.text('Rs. ' + (order.total || 0).toFixed(0), 178, y);
+
+      y += 20;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(150, 150, 150);
+      doc.text('Thank you for ordering from Blizz Café.', 14, y);
+
+      doc.save('BlizzCafe-Invoice-' + (order.orderId || order.id) + '.pdf');
+    }
+
+    // ============================================================
+    // TABLE BOOKINGS
+    // ============================================================
+    function listenToBookings() {
+      if (bookingsUnsub) bookingsUnsub();
+      if (!currentUser) return;
+      bookingsUnsub = db.collection('bookings')
+        .where('uid', '==', currentUser.uid)
+        .orderBy('createdAt', 'desc')
+        .onSnapshot(function(snapshot) {
+          var bookings = [];
+          snapshot.forEach(function(doc) {
+            var data = doc.data();
+            data.id = doc.id;
+            bookings.push(data);
+          });
+          renderBookingsList(bookings);
+        }, function(err) {
+          console.error('Error loading bookings:', err);
+          document.getElementById('bookingsList').innerHTML = '<p class="text-cream/40 text-sm">Could not load bookings.</p>';
+        });
+    }
+
+    function renderBookingsList(bookings) {
+      var container = document.getElementById('bookingsList');
+      if (!container) return;
+      if (bookings.length === 0) {
+        container.innerHTML = '<p class="text-cream/40 text-sm">You have no table bookings yet.</p>';
+        return;
+      }
+      container.innerHTML = bookings.map(function(b) {
+        var date = b.createdAt ? new Date(b.createdAt.seconds * 1000).toLocaleString() : '';
+        return `
+          <div class="bg-char2 rounded-2xl p-4 border border-cream/5">
+            <div class="flex justify-between items-start gap-3">
+              <div class="min-w-0">
+                <p class="font-mono text-xs text-gold mb-1">${b.bookingId || b.id}</p>
+                <p class="font-semibold text-sm">${b.date || ''} at ${b.time || ''} · ${b.guests || ''}</p>
+                <p class="text-cream/50 text-xs mt-1">${b.name || ''} · ${b.phone || ''}</p>
+                <p class="text-cream/30 text-[11px] mt-1">Booked ${date}</p>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border status-booked shrink-0">Booked</span>
+            </div>
+            <button class="mt-3 text-gold text-xs font-semibold hover:underline flex items-center gap-1" onclick='downloadBookingInvoice(${JSON.stringify(b).replace(/'/g, "&#39;")})'>
+              <i class="fas fa-file-invoice"></i> Download Booking Invoice (PDF)
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function downloadBookingInvoice(booking) {
+      var { jsPDF } = window.jspdf;
+      var doc = new jsPDF();
+      var gold = [244, 185, 62];
+      var dark = [20, 20, 20];
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.setTextColor(dark[0], dark[1], dark[2]);
+      doc.text('BLIZZ CAFÉ', 14, 20);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(120, 120, 120);
+      doc.text('Kandy, Sri Lanka', 14, 26);
+      doc.text('+94 (77) 121 62 61  |  +94 (81) 760 16 99', 14, 31);
+
+      doc.setDrawColor(gold[0], gold[1], gold[2]);
+      doc.setLineWidth(0.6);
+      doc.line(14, 36, 196, 36);
+
+      doc.setFontSize(14);
+      doc.setTextColor(dark[0], dark[1], dark[2]);
+      doc.setFont('helvetica', 'bold');
+      doc.text('TABLE BOOKING CONFIRMATION', 14, 46);
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      var date = booking.createdAt ? new Date(booking.createdAt.seconds * 1000) : new Date();
+      doc.text('Booking ID: ' + (booking.bookingId || booking.id), 14, 56);
+      doc.text('Booked On: ' + date.toLocaleString(), 14, 62);
+      doc.text('Guest Name: ' + (booking.name || ''), 14, 68);
+      doc.text('Phone: ' + (booking.phone || ''), 14, 74);
+      doc.text('Email: ' + (booking.email || ''), 14, 80);
+
+      doc.text('Date: ' + (booking.date || ''), 120, 56);
+      doc.text('Time: ' + (booking.time || ''), 120, 62);
+      doc.text('Guests: ' + (booking.guests || ''), 120, 68);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('Special Requests:', 14, 92);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(booking.specialRequest || 'None'), 14, 98);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('Additional Notes:', 14, 108);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(booking.additionalRequests || 'None'), 14, 114);
+
+      doc.setFontSize(9);
+      doc.setTextColor(150, 150, 150);
+      doc.text('We look forward to hosting you at Blizz Café.', 14, 135);
+
+      doc.save('BlizzCafe-Booking-' + (booking.bookingId || booking.id) + '.pdf');
+    }
+
+    // ============================================================
+    // INITIAL SETUP
+    // ============================================================
+    console.log('✅ Account page initialized with Firebase');
+    console.log('✅ Favourites stored in favourites/{uid} collection (matching menu.html)');
+    console.log('✅ Orders stored in orders collection with userId filter');
+    console.log('✅ Bookings stored in bookings collection with uid filter');
+  </script>
+</body>
+</html>

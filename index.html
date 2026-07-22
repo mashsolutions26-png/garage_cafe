@@ -1,0 +1,4963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Garage Café</title>
+  <meta name="description" content="THE GARAGE CAFE — a cozy café in Kandy, Sri Lanka. Book a table, browse the menu, and check today's hours." />
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon.png" />
+  <link rel="apple-touch-icon" href="img/favicon.png" />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H5RMLCQD7W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-H5RMLCQD7W');
+  </script>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#0a0b0d',
+            char: '#15171b',
+            char2: '#1b1e23',
+            brickline: '#2a2118',
+            gold: '#f4b93e',
+            crimson: '#c8102e',
+            cream: '#f5f0e6',
+            smoke: '#9a9a9f',
+          },
+          fontFamily: {
+            display: ['"Fraunces"', 'serif'],
+            body: ['"Manrope"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- Firebase v10 Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --ink: #0a0b0d;
+      --char: #15171b;
+      --char2: #1b1e23;
+      --brickline: #2a2118;
+      --gold: #f4b93e;
+      --crimson: #c8102e;
+      --cream: #f5f0e6;
+      --smoke: #9a9a9f;
+    }
+    * {
+      scroll-behavior: smooth;
+    }
+    body {
+      background: var(--ink);
+      font-family: 'Manrope', sans-serif;
+      color: var(--cream);
+    }
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Fraunces', serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .brick-texture {
+      background-image:
+        repeating-linear-gradient(0deg, rgba(244, 185, 62, 0.03) 0px, rgba(244, 185, 62, 0.03) 1px, transparent 1px, transparent 34px),
+        repeating-linear-gradient(90deg, rgba(244, 185, 62, 0.03) 0px, rgba(244, 185, 62, 0.03) 1px, transparent 1px, transparent 64px);
+      background-position: 0 0, 32px 17px;
+    }
+
+    .glass-nav {
+      background: rgba(10, 11, 13, 0.55);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(244, 185, 62, 0.15);
+    }
+
+    .glow-gold {
+      box-shadow: 0 0 0 1px rgba(244, 185, 62, 0.4), 0 0 30px -4px rgba(244, 185, 62, 0.35);
+    }
+    .glow-crimson {
+      box-shadow: 0 0 0 1px rgba(200, 16, 46, 0.5), 0 0 30px -4px rgba(200, 16, 46, 0.45);
+    }
+
+    .pulse-dot {
+      animation: pulseDot 1.8s ease-in-out infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .45; transform: scale(.75); }
+    }
+
+    .clock-digit {
+      text-shadow: 0 0 18px rgba(244, 185, 62, 0.45), 0 0 40px rgba(244, 185, 62, 0.15);
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .snap-x-cards { scroll-snap-type: x mandatory; }
+    .snap-card { scroll-snap-align: start; }
+
+    .fade-el { transition: opacity .6s ease; }
+
+    @keyframes drift {
+      0% { transform: translateX(-10%); }
+      100% { transform: translateX(10%); }
+    }
+    .footer-drift {
+      animation: drift 14s ease-in-out infinite alternate;
+      background: radial-gradient(ellipse at 30% 50%, rgba(244, 185, 62, 0.10), transparent 60%),
+                  radial-gradient(ellipse at 75% 40%, rgba(200, 16, 46, 0.10), transparent 55%);
+    }
+
+    input:focus, button:focus, a:focus {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+    }
+
+    .thin-scroll::-webkit-scrollbar { width: 6px; }
+    .thin-scroll::-webkit-scrollbar-thumb { background: rgba(244, 185, 62, 0.35); border-radius: 4px; }
+
+    /* Nav bar: hidden on the home page until the user scrolls, then slides/fades in */
+    #siteHeader {
+      opacity: 0;
+      transform: translateY(-24px);
+      pointer-events: none;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    #siteHeader.nav-visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* ===== HERO BACKGROUND WITH herologo.png ===== */
+    .hero-bg {
+      background-color: var(--ink);
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-image: url('img/background.webp');
+    }
+
+    .hero-overlay {
+      background: linear-gradient(
+        115deg,
+        rgba(10, 11, 13, 0.92) 15%,
+        rgba(10, 11, 13, 0.50) 45%,
+        rgba(10, 11, 13, 0.10) 75%,
+        rgba(10, 11, 13, 0) 100%
+      );
+    }
+
+    /* mobile optimization: shifted left so the cafe name in the photo stays visible */
+    @media (max-width: 768px) {
+      .hero-bg {
+        background-size: cover;
+        background-position: 55.50% 51%;
+        background-repeat: no-repeat;
+      }
+      .hero-overlay {
+        background: linear-gradient(
+          to bottom,
+          rgba(10, 11, 13, 0.25) 0%,
+          rgba(10, 11, 13, 0.60) 50%,
+          rgba(10, 11, 13, 0.90) 100%
+        );
+      }
+    }
+
+    /* Extra small screens - shifted further left to keep the cafe name in frame */
+    @media (max-width: 480px) {
+      .hero-bg {
+        background-position: 38% 50%;
+        background-size: auto 100%;
+      }
+      .hero-overlay {
+        background: linear-gradient(
+          to bottom,
+          rgba(10, 11, 13, 0.15) 0%,
+          rgba(10, 11, 13, 0.50) 40%,
+          rgba(10, 11, 13, 0.92) 85%,
+          rgba(10, 11, 13, 0.98) 100%
+        );
+      }
+    }
+
+    /* Very small phones */
+    @media (max-width: 380px) {
+      .hero-bg {
+        background-position: 32% 50%;
+        background-size: auto 100%;
+      }
+    }
+
+    .nav-link {
+      position: relative;
+      transition: color 0.2s ease;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 0;
+      height: 2px;
+      background: var(--gold);
+      transition: width 0.3s ease;
+    }
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    .nav-link:hover {
+      color: var(--gold);
+    }
+
+    .footer-link {
+      transition: color 0.2s ease, transform 0.2s ease;
+      display: inline-block;
+    }
+    .footer-link:hover {
+      color: var(--gold);
+      transform: translateX(4px);
+    }
+
+    #mobileMenu {
+      transition: all 0.3s ease;
+      transform-origin: top;
+    }
+    #mobileMenu.hidden {
+      opacity: 0;
+      transform: scaleY(0.95);
+      pointer-events: none;
+    }
+    #mobileMenu:not(.hidden) {
+      opacity: 1;
+      transform: scaleY(1);
+      pointer-events: auto;
+    }
+
+    .schedule-card {
+      transition: all 0.2s ease;
+    }
+    .schedule-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(244, 185, 62, 0.4);
+    }
+
+    .special-row {
+      display: grid;
+      grid-template-columns: 34px 1fr auto;
+      grid-template-areas: "day content price";
+      align-items: center;
+      column-gap: 0.75rem;
+      row-gap: 0.35rem;
+    }
+    .special-row .special-day     { grid-area: day; }
+    .special-row .special-content { grid-area: content; min-width: 0; }
+    .special-row .special-price   { grid-area: price; }
+
+    @media (max-width: 639px) {
+      .special-row {
+        grid-template-columns: auto 1fr;
+        grid-template-areas:
+          "day price"
+          "content content";
+      }
+      .special-row .special-price { justify-self: end; }
+    }
+
+    .booking-extra-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    .booking-extra-row select {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      background: #1c1f24;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0.75rem;
+      color: #f5f0e6;
+      outline: none;
+      transition: border 0.3s;
+      font-size: 0.9rem;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+    }
+    .booking-extra-row select:focus { border-color: #f4b93e; }
+    .booking-extra-row select option { background: #141619; color: #f5f0e6; }
+    .booking-extra-row label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      color: #b0a99b;
+      display: block;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+    }
+    .booking-extra-row .select-wrapper { position: relative; }
+    .booking-extra-row .select-wrapper::after {
+      content: '▾';
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #b0a99b;
+      pointer-events: none;
+      font-size: 0.8rem;
+    }
+    @media (max-width: 768px) {
+      .booking-extra-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .booking-extra-row { grid-template-columns: 1fr; gap: 0.75rem; }
+    }
+
+    .location-card {
+      background: rgba(255,255,255,0.03);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.3s ease;
+    }
+    .location-card:hover {
+      border-color: rgba(244,185,62,0.3);
+      transform: translateY(-4px);
+    }
+    .location-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(200,16,46,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+      animation: iconPulse 3s ease-in-out infinite;
+    }
+    @keyframes iconPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+    .social-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .social-icon:hover {
+      background: rgba(200,16,46,0.2);
+      border-color: #f4b93e;
+      transform: scale(1.1);
+    }
+
+    .status-confirmed { background: rgba(244, 185, 62, 0.15); color: #f4b93e; border-color: rgba(244, 185, 62, 0.3); }
+    .status-packed { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3); }
+    .status-picked { background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3); }
+    .status-complete { background: rgba(107, 114, 128, 0.15); color: #9ca3af; border-color: rgba(107, 114, 128, 0.3); }
+
+    .notification-banner {
+      animation: slideDown 0.4s ease;
+    }
+    @keyframes slideDown {
+      0% { opacity: 0; transform: translateY(-20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    #cartSidebar {
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      max-width: 400px;
+      width: 100%;
+    }
+    #cartSidebar.translate-x-full {
+      transform: translateX(100%);
+    }
+    
+    .cart-item {
+      transition: all 0.2s ease;
+    }
+    .cart-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    
+    .quantity-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      color: #f5f0e6;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .quantity-btn:hover {
+      background: rgba(244, 185, 62, 0.2);
+      border-color: #f4b93e;
+      color: #f4b93e;
+    }
+    .quantity-btn:active {
+      transform: scale(0.92);
+    }
+
+    .pickup-badge {
+      background: rgba(200, 16, 46, 0.2);
+      color: #c8102e;
+      border: 1px solid rgba(200, 16, 46, 0.3);
+      border-radius: 9999px;
+      padding: 0.25rem 1rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .pickup-only-banner {
+      background: linear-gradient(135deg, rgba(200, 16, 46, 0.15), rgba(200, 16, 46, 0.05));
+      border: 1px solid rgba(200, 16, 46, 0.25);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .empty-cart-emoji {
+      font-size: 4rem;
+      opacity: 0.3;
+    }
+
+    .order-success-popup {
+      animation: popIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.92) translateY(10px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .gallery-main {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 2rem;
+      border: 1px solid rgba(244, 185, 62, 0.15);
+      background: #0a0b0d;
+    }
+    .gallery-track {
+      display: flex;
+      transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
+    }
+    .gallery-slide {
+      min-width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+    .gallery-slide img {
+      width: 100%;
+      max-height: 520px;
+      object-fit: cover;
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 40px -12px rgba(0,0,0,0.8);
+      transition: transform 0.6s ease, opacity 0.6s ease;
+      transform: scale(0.92);
+      opacity: 0.6;
+      filter: grayscale(0.4);
+    }
+    .gallery-slide.active img {
+      transform: scale(1);
+      opacity: 1;
+      filter: grayscale(0);
+      box-shadow: 0 0 0 1px rgba(244, 185, 62, 0.2), 0 30px 50px -20px rgba(244, 185, 62, 0.25);
+    }
+    .gallery-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .gallery-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 0;
+    }
+    .gallery-dot.active {
+      background: #f4b93e;
+      width: 28px;
+      box-shadow: 0 0 12px rgba(244, 185, 62, 0.4);
+    }
+    .gallery-dot:hover {
+      background: rgba(244, 185, 62, 0.5);
+    }
+    .gallery-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(10, 11, 13, 0.7);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(244, 185, 62, 0.2);
+      color: #f5f0e6;
+      width: 44px;
+      height: 44px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 10;
+      font-size: 1.25rem;
+    }
+    .gallery-btn:hover {
+      background: rgba(244, 185, 62, 0.2);
+      border-color: #f4b93e;
+      transform: translateY(-50%) scale(1.05);
+    }
+    .gallery-btn.prev { left: 1rem; }
+    .gallery-btn.next { right: 1rem; }
+    @media (max-width: 640px) {
+      .gallery-slide { padding: 1rem; }
+      .gallery-slide img { max-height: 300px; }
+      .gallery-btn { width: 36px; height: 36px; font-size: 1rem; }
+      .gallery-btn.prev { left: 0.5rem; }
+      .gallery-btn.next { right: 0.5rem; }
+    }
+    
+    .mobile-account-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f4b93e, #c8102e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0a0b0d;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      flex-shrink: 0;
+    }
+    .mobile-account-icon:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(244, 185, 62, 0.3);
+    }
+    
+    .mobile-location-selector {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .mobile-location-selector:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(244, 185, 62, 0.3);
+    }
+
+    /* AUTO SLIDER */
+    .auto-slider-section {
+      padding: 4vw 0 2vw;
+      border-bottom: 1px solid #2a2a2a;
+      background: #0b0b0b;
+    }
+
+    .auto-slider-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 6vw 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .auto-slider-head h2 {
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .auto-slider-head h2 span { color: #d4a42a; }
+    .auto-slider-head p {
+      color: #9a9a94;
+      font-size: 0.85rem;
+      max-width: 28ch;
+    }
+
+    .viewport {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border-top: 1px solid #2a2a2a;
+      border-bottom: 1px solid #2a2a2a;
+      cursor: grab;
+      touch-action: pan-y;
+    }
+    .viewport.dragging {
+      cursor: grabbing;
+    }
+
+    .viewport::before,
+    .viewport::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 90px;
+      pointer-events: none;
+      z-index: 4;
+      transition: opacity 0.2s;
+    }
+    .viewport::before {
+      left: 0;
+      background: linear-gradient(to right, #0b0b0b 20%, transparent 90%);
+    }
+    .viewport::after {
+      right: 0;
+      background: linear-gradient(to left, #0b0b0b 20%, transparent 90%);
+    }
+
+    .viewport .track {
+      display: flex;
+      gap: 16px;
+      padding: 16px 6vw;
+      width: max-content;
+      will-change: transform;
+      user-select: none;
+    }
+
+    .slide {
+      flex: 0 0 auto;
+      width: 260px;
+      height: 340px;
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      overflow: hidden;
+      position: relative;
+      transition: border-color 0.25s;
+    }
+    .slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+      -webkit-user-drag: none;
+      transition: transform 0.7s ease;
+    }
+    .slide:hover img {
+      transform: scale(1.04);
+    }
+    .slide:hover {
+      border-color: #d4a42a;
+    }
+
+    @media (max-width: 700px) {
+      .slide {
+        width: 190px;
+        height: 250px;
+      }
+      .viewport .track {
+        gap: 12px;
+        padding: 12px 5vw;
+      }
+      .viewport::before,
+      .viewport::after {
+        width: 40px;
+      }
+    }
+    @media (max-width: 480px) {
+      .slide {
+        width: 150px;
+        height: 200px;
+      }
+      .viewport::before,
+      .viewport::after {
+        width: 30px;
+      }
+    }
+
+    /* ============================================================
+       FOOTER — THE GARAGE CAFE (redesigned to match site theme)
+       ============================================================ */
+    .minimal-footer {
+      position: relative;
+      background: var(--ink);
+      color: var(--cream);
+      padding: 96px 0 40px;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    /* animated gold->crimson shimmer line at the very top of the footer */
+    .minimal-footer::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(244,185,62,0.9) 20%,
+        rgba(200,16,46,0.9) 50%,
+        rgba(244,185,62,0.9) 80%,
+        transparent 100%);
+      background-size: 200% 100%;
+      animation: footerShimmer 6s linear infinite;
+    }
+
+    @keyframes footerShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* soft drifting glow blobs behind the footer content, reuses .footer-drift keyframes */
+    .footer-glow {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: .8;
+    }
+
+    .footer-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+      margin-bottom: 56px;
+    }
+
+    /* scroll-reveal for each footer column */
+    .footer-grid > div {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1);
+    }
+    .footer-grid > div.in-view { opacity: 1; transform: translateY(0); }
+    .footer-grid > div:nth-child(1) { transition-delay: 0s; }
+    .footer-grid > div:nth-child(2) { transition-delay: .08s; }
+    .footer-grid > div:nth-child(3) { transition-delay: .16s; }
+    .footer-grid > div:nth-child(4) { transition-delay: .24s; }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .coffee-animation {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      margin-right: 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, rgba(244,185,62,0.18), rgba(244,185,62,0.02) 70%);
+      border: 1px solid rgba(244,185,62,0.25);
+    }
+
+    .coffee-icon {
+      font-size: 20px;
+      color: var(--gold);
+      animation: coffeeFloat 3s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    .coffee-steam {
+      position: absolute;
+      width: 3px;
+      background: linear-gradient(to top, rgba(244,185,62,0.7), transparent);
+      border-radius: 2px;
+      animation: steamRise 2.5s ease-in-out infinite;
+    }
+
+    .steam-1 { height: 14px; top: -6px; left: 14px; animation-delay: 0s; }
+    .steam-2 { height: 11px; top: -3px; left: 22px; animation-delay: 0.8s; }
+    .steam-3 { height: 13px; top: -4px; left: 30px; animation-delay: 1.6s; }
+
+    @keyframes coffeeFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-5px) rotate(4deg); }
+    }
+
+    @keyframes steamRise {
+      0% { opacity: 0; transform: translateY(0) scale(0.8); }
+      30% { opacity: 0.8; transform: translateY(-8px) scale(1); }
+      70% { opacity: 0.4; transform: translateY(-16px) scale(1.1); }
+      100% { opacity: 0; transform: translateY(-24px) scale(1.2); }
+    }
+
+    .logo-text {
+      font-family: 'Fraunces', serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      background: linear-gradient(90deg, var(--cream) 0%, var(--gold) 45%, var(--cream) 55%, var(--gold) 100%);
+      background-size: 250% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: textShimmer 7s linear infinite;
+    }
+
+    @keyframes textShimmer {
+      0% { background-position: 0% 0; }
+      100% { background-position: -250% 0; }
+    }
+
+    .footer-description {
+      font-size: 14px;
+      color: var(--smoke);
+      line-height: 1.7;
+      margin-bottom: 22px;
+      max-width: 32ch;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .social-link {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(244, 185, 62, 0.06);
+      border: 1px solid rgba(244, 185, 62, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cream);
+      text-decoration: none;
+      overflow: hidden;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1), border-color .35s ease, color .35s ease, box-shadow .35s ease;
+    }
+
+    .social-link::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--gold), var(--crimson));
+      opacity: 0;
+      transition: opacity .35s ease;
+      z-index: -1;
+    }
+
+    .social-link:hover {
+      transform: translateY(-4px) scale(1.08);
+      border-color: transparent;
+      color: var(--ink);
+      box-shadow: 0 8px 20px -6px rgba(244, 185, 62, 0.5);
+    }
+
+    .social-link:hover::before {
+      opacity: 1;
+    }
+
+    .footer-heading {
+      position: relative;
+      font-family: 'Fraunces', serif;
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 22px;
+      color: var(--cream);
+      display: inline-block;
+      padding-bottom: 10px;
+    }
+
+    .footer-heading::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 2px;
+      width: 28px;
+      background: linear-gradient(90deg, var(--gold), var(--crimson));
+      border-radius: 2px;
+      transition: width .4s ease;
+    }
+
+    .footer-grid > div:hover .footer-heading::after {
+      width: 48px;
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 13px;
+      font-size: 14px;
+      color: var(--smoke);
+    }
+
+    .footer-links a,
+    .footer-link-btn {
+      position: relative;
+      color: var(--smoke);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color .3s ease, transform .3s ease;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Manrope', sans-serif;
+      text-align: left;
+      padding: 0;
+      display: inline-block;
+    }
+
+    .footer-links a::after,
+    .footer-link-btn::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -3px;
+      width: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--gold), var(--crimson));
+      transition: width .35s ease;
+    }
+
+    .footer-links a:hover,
+    .footer-link-btn:hover {
+      color: var(--gold);
+      transform: translateX(4px);
+    }
+
+    .footer-links a:hover::after,
+    .footer-link-btn:hover::after {
+      width: 100%;
+    }
+
+    .footer-links i {
+      margin-right: 8px;
+      color: var(--gold);
+      width: 14px;
+      text-align: center;
+    }
+
+    .footer-bottom {
+      position: relative;
+      padding-top: 32px;
+      margin-top: 8px;
+      border-top: 1px solid rgba(244, 185, 62, 0.12);
+      text-align: center;
+      color: var(--smoke);
+      font-size: 13px;
+      letter-spacing: .2px;
+    }
+
+    .footer-bottom a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color .3s ease;
+    }
+
+    .footer-bottom a:hover {
+      color: var(--crimson);
+      text-decoration: underline;
+    }
+
+    /* back-to-top button */
+    .back-to-top {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--gold), var(--crimson));
+      color: var(--ink);
+      border: none;
+      cursor: pointer;
+      z-index: 60;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(16px);
+      transition: opacity .35s ease, transform .35s ease, visibility .35s;
+      box-shadow: 0 10px 24px -6px rgba(0,0,0,0.5);
+    }
+
+    .back-to-top.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .back-to-top:hover {
+      transform: translateY(-4px) scale(1.06);
+    }
+
+    @media (max-width: 992px) {
+      .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+      .minimal-footer {
+        padding: 72px 0 32px;
+      }
+    }
+
+    /* ===== ORDER NOTIFICATION — COMPACT + AUTO CLOSE ===== */
+    .order-notification-success {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      background: #1a1e24;
+      border: 1px solid rgba(244, 185, 62, 0.25);
+      border-radius: 14px;
+      padding: 14px 18px;
+      max-width: 360px;
+      min-width: 260px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+      animation: slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      backdrop-filter: blur(12px);
+      background: rgba(26, 30, 36, 0.95);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .order-notification-success .notif-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .order-notification-success .notif-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .order-notification-success .notif-title {
+      font-weight: 700;
+      color: #f4b93e;
+      font-size: 14px;
+      margin-bottom: 2px;
+      line-height: 1.3;
+    }
+    .order-notification-success .notif-message {
+      color: #b0b0b0;
+      font-size: 12px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .order-notification-success .notif-close {
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0 0 0 8px;
+      transition: color 0.2s;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .order-notification-success .notif-close:hover {
+      color: #f4b93e;
+    }
+
+    @keyframes slideUp {
+      0% { opacity: 0; transform: translateY(24px) scale(0.95); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 500px) {
+      .order-notification-success {
+        right: 12px;
+        left: 12px;
+        min-width: unset;
+        max-width: unset;
+        bottom: 16px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        gap: 10px;
+      }
+      .order-notification-success .notif-icon {
+        font-size: 20px;
+      }
+      .order-notification-success .notif-title {
+        font-size: 13px;
+      }
+      .order-notification-success .notif-message {
+        font-size: 11px;
+      }
+      .order-notification-success .notif-close {
+        font-size: 16px;
+        padding-left: 6px;
+      }
+    }
+
+    #authOverlay {
+      background: rgba(10, 11, 13, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+    }
+    #authOverlay .glass-nav {
+      background: rgba(26, 30, 36, 0.95);
+      border: 1px solid rgba(244, 185, 62, 0.2);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+      max-width: 440px;
+      width: 100%;
+      border-radius: 28px;
+    }
+    #authOverlay .glass-nav input {
+      background: #0f1115;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 0.9rem 1.2rem;
+      color: #f5f0e6;
+      font-size: 0.95rem;
+      transition: border 0.3s ease;
+    }
+    #authOverlay .glass-nav input:focus {
+      border-color: #f4b93e;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(244, 185, 62, 0.15);
+    }
+    #authOverlay .glass-nav input::placeholder {
+      color: #6a6a6f;
+    }
+    #authOverlay .glass-nav .tab-btn {
+      transition: all 0.25s ease;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.6rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      text-align: center;
+      flex: 1;
+    }
+    #authOverlay .glass-nav .tab-btn.active {
+      background: #f4b93e;
+      color: #0a0b0d;
+    }
+    #authOverlay .glass-nav .tab-btn.inactive {
+      color: #9a9a9f;
+    }
+    #authOverlay .glass-nav .tab-btn.inactive:hover {
+      color: #f5f0e6;
+    }
+    #authOverlay .glass-nav .submit-btn {
+      background: #f4b93e;
+      color: #0a0b0d;
+      font-weight: 700;
+      padding: 0.9rem;
+      border-radius: 9999px;
+      width: 100%;
+      transition: all 0.25s ease;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #authOverlay .glass-nav .submit-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 30px rgba(244, 185, 62, 0.3);
+    }
+    #authOverlay .glass-nav .google-btn {
+      background: #f5f0e6;
+      color: #0a0b0d;
+      font-weight: 600;
+      padding: 0.9rem;
+      border-radius: 9999px;
+      width: 100%;
+      transition: all 0.25s ease;
+      border: none;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    #authOverlay .glass-nav .google-btn:hover {
+      transform: scale(1.02);
+      background: #ffffff;
+    }
+    #authOverlay .glass-nav .google-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    #authOverlay .glass-nav .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    #authOverlay .glass-nav .divider-line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    #authOverlay .glass-nav .divider-text {
+      color: #6a6a6f;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    #authOverlay .glass-nav .auth-error {
+      background: rgba(200, 16, 46, 0.12);
+      border: 1px solid rgba(200, 16, 46, 0.25);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #f87171;
+      font-size: 0.85rem;
+      display: none;
+    }
+    #authOverlay .glass-nav .auth-error.show {
+      display: block;
+    }
+    #authOverlay .glass-nav .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1.25rem;
+      color: #6a6a6f;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    #authOverlay .glass-nav .close-btn:hover {
+      color: #f4b93e;
+    }
+    #phonePromptOverlay {
+      background: rgba(10, 11, 13, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+    }
+    #phonePromptOverlay .glass-nav {
+      background: rgba(26, 30, 36, 0.95);
+      border: 1px solid rgba(244, 185, 62, 0.2);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+      border-radius: 28px;
+    }
+    #phonePromptOverlay .glass-nav input {
+      background: #0f1115;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 0.9rem 1.2rem;
+      color: #f5f0e6;
+      font-size: 0.95rem;
+      transition: border 0.3s ease;
+    }
+    #phonePromptOverlay .glass-nav input:focus {
+      border-color: #f4b93e;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(244, 185, 62, 0.15);
+    }
+    #phonePromptOverlay .glass-nav input::placeholder {
+      color: #6a6a6f;
+    }
+    #phonePromptOverlay .glass-nav .submit-btn {
+      background: #f4b93e;
+      color: #0a0b0d;
+      font-weight: 700;
+      padding: 0.9rem;
+      border-radius: 9999px;
+      width: 100%;
+      transition: all 0.25s ease;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #phonePromptOverlay .glass-nav .submit-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 30px rgba(244, 185, 62, 0.3);
+    }
+    #phonePromptOverlay .glass-nav .auth-error {
+      background: rgba(200, 16, 46, 0.12);
+      border: 1px solid rgba(200, 16, 46, 0.25);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #f87171;
+      font-size: 0.85rem;
+      display: none;
+      margin-bottom: 0.75rem;
+    }
+    #phonePromptOverlay .glass-nav .auth-error.show {
+      display: block;
+    }
+    #phonePromptOverlay .glass-nav .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1.25rem;
+      color: #6a6a6f;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    #phonePromptOverlay .glass-nav .close-btn:hover {
+      color: #f4b93e;
+    }
+    .apple-btn {
+      background: #000;
+      color: #fff;
+      font-weight: 600;
+      padding: 0.9rem;
+      border-radius: 9999px;
+      width: 100%;
+      transition: all 0.25s ease;
+      border: none;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    .apple-btn:hover {
+      transform: scale(1.02);
+      background: #1a1a1a;
+    }
+    .apple-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .discount-nav-banner {
+      background: linear-gradient(135deg, rgba(200, 16, 46, 0.2), rgba(244, 185, 62, 0.15));
+      border: 1px solid rgba(244, 185, 62, 0.3);
+      border-radius: 9999px;
+      padding: 0.25rem 1.2rem 0.25rem 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #f4b93e;
+      white-space: nowrap;
+      backdrop-filter: blur(4px);
+      transition: all 0.3s ease;
+    }
+    .discount-nav-banner:hover {
+      background: linear-gradient(135deg, rgba(200, 16, 46, 0.3), rgba(244, 185, 62, 0.25));
+      transform: scale(1.02);
+    }
+    .discount-nav-banner .countdown-tag {
+      background: rgba(0,0,0,0.4);
+      border-radius: 9999px;
+      padding: 0.1rem 0.6rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: #fff;
+      letter-spacing: 0.05em;
+    }
+    @media (max-width: 640px) {
+      .discount-nav-banner { font-size: 0.6rem; padding: 0.2rem 0.8rem 0.2rem 0.5rem; }
+      .discount-nav-banner .countdown-tag { font-size: 0.55rem; padding: 0.05rem 0.4rem; }
+    }
+
+    .global-discount-banner {
+      display: none !important;
+    }
+
+    .discount-badge-image {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: linear-gradient(135deg, #e21e3c, #a10d24);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 0.4rem 0.9rem;
+      border-radius: 9999px;
+      z-index: 5;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      box-shadow: 0 6px 16px rgba(200, 16, 46, 0.5), 0 0 0 1px rgba(255,255,255,0.12) inset;
+      border: 1px solid rgba(255,255,255,0.2);
+      pointer-events: none;
+      transform: rotate(3deg);
+    }
+
+    #menuDiscountIndicator {
+      display: none;
+    }
+    #menuDiscountIndicator.active {
+      display: inline-flex;
+    }
+
+    .discount-special-section {
+      padding: 4rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .discount-special-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: stretch;
+      background: #121317;
+      border-radius: 3rem;
+      border: 1px solid rgba(244,185,62,0.2);
+      overflow: hidden;
+    }
+    .discount-special-grid .image-side {
+      position: relative;
+      min-height: 320px;
+      background: #0f1115;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .discount-special-grid .image-side img {
+      width: 100%;
+      height: 100%;
+      max-height: 420px;
+      object-fit: cover;
+      border-radius: 2rem;
+      box-shadow: 0 20px 40px -8px rgba(0,0,0,0.8);
+      border: 1px solid rgba(244,185,62,0.15);
+    }
+    .discount-special-grid .details-side {
+      padding: 2rem 2.5rem 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .discount-special-grid .details-side .badge-tag {
+      display: inline-block;
+      background: rgba(200,16,46,0.15);
+      border: 1px solid rgba(200,16,46,0.3);
+      border-radius: 9999px;
+      padding: 0.2rem 1rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #c8102e;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      align-self: flex-start;
+    }
+    .discount-special-grid .details-side .dish-name {
+      font-family: 'Fraunces', serif;
+      font-size: 2.2rem;
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+      color: #f5f0e6;
+    }
+    .discount-special-grid .details-side .dish-desc {
+      color: #b0b0b0;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      max-width: 90%;
+    }
+    .discount-special-grid .details-side .discount-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .discount-special-grid .details-side .discount-meta .meta-item {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    .discount-special-grid .details-side .discount-meta .meta-item strong {
+      color: #f4b93e;
+      font-weight: 600;
+    }
+    .discount-special-grid .details-side .discount-meta .meta-item .value {
+      font-family: 'JetBrains Mono', monospace;
+      color: #f4b93e;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .discount-special-grid .details-side .countdown-block {
+      background: rgba(244,185,62,0.06);
+      border-radius: 9999px;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid rgba(244,185,62,0.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      color: #f4b93e;
+      margin-top: 0.25rem;
+    }
+    .discount-special-grid .details-side .countdown-block span {
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    @media (max-width: 820px) {
+      .discount-special-grid {
+        grid-template-columns: 1fr;
+        border-radius: 2rem;
+      }
+      .discount-special-grid .image-side {
+        min-height: 220px;
+        padding: 1rem;
+      }
+      .discount-special-grid .image-side img {
+        max-height: 280px;
+        border-radius: 1.5rem;
+      }
+      .discount-special-grid .details-side {
+        padding: 1.5rem 1.5rem 2rem;
+      }
+      .discount-special-grid .details-side .dish-name {
+        font-size: 1.8rem;
+      }
+      .discount-special-grid .details-side .dish-desc {
+        max-width: 100%;
+        font-size: 0.95rem;
+      }
+      .discount-special-grid .details-side .discount-meta {
+        gap: 0.8rem 1.5rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .discount-special-grid .details-side .dish-name {
+        font-size: 1.4rem;
+      }
+      .discount-special-grid .details-side .countdown-block {
+        font-size: 0.9rem;
+        padding: 0.3rem 1rem;
+      }
+    }
+
+    .full-menu-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: linear-gradient(135deg, rgba(244, 185, 62, 0.15), rgba(200, 16, 46, 0.10));
+      border: 1px solid rgba(244, 185, 62, 0.3);
+      border-radius: 9999px;
+      padding: 0.75rem 2rem 0.75rem 1.75rem;
+      color: #f4b93e;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    .full-menu-btn:hover {
+      background: linear-gradient(135deg, rgba(244, 185, 62, 0.25), rgba(200, 16, 46, 0.20));
+      transform: translateX(4px);
+      border-color: #f4b93e;
+      box-shadow: 0 0 30px rgba(244, 185, 62, 0.15);
+    }
+    .full-menu-btn .arrow-icon {
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+    .full-menu-btn:hover .arrow-icon {
+      transform: translateX(4px);
+    }
+    .menu-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 640px) {
+      .full-menu-btn {
+        padding: 0.6rem 1.25rem 0.6rem 1rem;
+        font-size: 0.8rem;
+      }
+    }
+
+    .menu-page .menu-item-card {
+      background: #1a1c22;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.3s ease;
+    }
+    .menu-page .menu-item-card:hover {
+      border-color: rgba(244, 185, 62, 0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    }
+    .menu-page .menu-item-card .item-price {
+      color: #f4b93e;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .menu-page .menu-item-card .item-add-btn {
+      background: rgba(244, 185, 62, 0.12);
+      border: 1px solid rgba(244, 185, 62, 0.2);
+      border-radius: 9999px;
+      padding: 0.4rem 1rem;
+      color: #f4b93e;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .menu-page .menu-item-card .item-add-btn:hover {
+      background: #f4b93e;
+      color: #0a0b0d;
+    }
+    .menu-page .menu-item-card .item-option {
+      color: #9a9a9f;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+    .menu-page .menu-item-card .item-option span {
+      color: #f4b93e;
+    }
+
+    .favourite-btn {
+      background: none;
+      border: none;
+      color: #9a9a9f;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 4px;
+      font-size: 1.1rem;
+      line-height: 1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+    }
+    .favourite-btn:hover {
+      color: #f4b93e;
+      transform: scale(1.1);
+    }
+    .favourite-btn.is-favourite {
+      color: #c8102e;
+    }
+    .favourite-btn.is-favourite:hover {
+      color: #c8102e;
+    }
+
+    .menu-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .menu-item-name-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .google-btn.coming-soon {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .google-btn.coming-soon:hover {
+      background: #f5f0e6;
+      transform: none !important;
+    }
+
+    .mobile-cart-float {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 60;
+      display: none;
+      width: 60px;
+      height: 60px;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, #f4b93e, #e6a82a);
+      box-shadow: 0 8px 28px rgba(244, 185, 62, 0.45), 0 0 0 1px rgba(244, 185, 62, 0.3);
+      color: #0a0b0d;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 26px;
+      font-weight: 700;
+    }
+    .mobile-cart-float:hover {
+      transform: scale(1.06);
+      box-shadow: 0 12px 36px rgba(244, 185, 62, 0.55);
+    }
+    .mobile-cart-float:active {
+      transform: scale(0.94);
+    }
+    .mobile-cart-float .cart-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #c8102e;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      width: 22px;
+      height: 22px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(200,16,46,0.5);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    @media (max-width: 1023px) {
+      .mobile-cart-float {
+        display: flex;
+      }
+      #cartTrigger {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .mobile-cart-float {
+        width: 54px;
+        height: 54px;
+        font-size: 22px;
+        bottom: 20px;
+        right: 20px;
+      }
+      .mobile-cart-float .cart-badge {
+        font-size: 10px;
+        width: 20px;
+        height: 20px;
+        top: -2px;
+        right: -2px;
+      }
+    }
+
+    img.lazy-load {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    img.lazy-load.loaded {
+      opacity: 1;
+    }
+
+    .booking-error {
+      background: rgba(200, 16, 46, 0.12);
+      border: 1px solid rgba(200, 16, 46, 0.25);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #f87171;
+      font-size: 0.85rem;
+      display: none;
+      margin-top: 0.5rem;
+    }
+    .booking-error.show {
+      display: block;
+    }
+
+    input[type="date"]:invalid,
+    input[type="time"]:invalid {
+      border-color: rgba(200, 16, 46, 0.5);
+    }
+    input[type="date"]:valid,
+    input[type="time"]:valid {
+      border-color: rgba(244, 185, 62, 0.3);
+    }
+
+    .seating-selector {
+      background: #0f1115;
+      border-radius: 1.2rem;
+      padding: 0.25rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      gap: 0.25rem;
+    }
+    .seating-selector .seat-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 0.6rem 0.2rem;
+      border-radius: 1rem;
+      color: #9a9a9f;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-align: center;
+    }
+    .seating-selector .seat-btn.active {
+      background: #f4b93e;
+      color: #0a0b0d;
+      box-shadow: 0 0 20px rgba(244,185,62,0.25);
+    }
+    .seating-selector .seat-btn:not(.active):hover {
+      color: #f5f0e6;
+    }
+
+    /* Logo larger */
+    .nav-logo {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+    }
+    @media (min-width: 640px) {
+      .nav-logo {
+        height: 56px;
+      }
+    }
+
+    /* ADD TO CART DROPDOWN FOR PICKUP / ON SHOP */
+    .order-type-selector {
+      background: #0f1115;
+      border-radius: 1.2rem;
+      padding: 0.25rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+    }
+    .order-type-selector .type-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 0.6rem 0.2rem;
+      border-radius: 1rem;
+      color: #9a9a9f;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-align: center;
+    }
+    .order-type-selector .type-btn.active {
+      background: #f4b93e;
+      color: #0a0b0d;
+      box-shadow: 0 0 20px rgba(244,185,62,0.25);
+    }
+    .order-type-selector .type-btn:not(.active):hover {
+      color: #f5f0e6;
+    }
+
+    .table-selector {
+      display: none;
+      margin-top: 0.5rem;
+    }
+    .table-selector.active {
+      display: block;
+    }
+    .table-selector select {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      background: #1c1f24;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0.75rem;
+      color: #f5f0e6;
+      outline: none;
+      transition: border 0.3s;
+      font-size: 0.9rem;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+    }
+    .table-selector select:focus { border-color: #f4b93e; }
+    .table-selector select option { background: #141619; color: #f5f0e6; }
+    .table-selector label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      color: #b0a99b;
+      display: block;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+    }
+
+    .menu-item-card .order-options {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* Combo price styling for daily specials */
+    .combo-savings {
+      color: #34d399;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(52, 211, 153, 0.12);
+      padding: 0.1rem 0.6rem;
+      border-radius: 9999px;
+      display: inline-block;
+      margin-top: 0.15rem;
+    }
+    .combo-details {
+      color: #b0b0b0;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    .actual-price-strike {
+      text-decoration: line-through;
+      color: #6a6a6f;
+      font-size: 0.75rem;
+      margin-right: 0.4rem;
+    }
+    .combo-price {
+      color: #f4b93e;
+      font-weight: 700;
+    }
+    .combo-savings-badge {
+      display: inline-block;
+      background: rgba(52, 211, 153, 0.15);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      border-radius: 9999px;
+      padding: 0.1rem 0.6rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #34d399;
+      margin-left: 0.3rem;
+    }
+    .combo-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      margin-top: 0.2rem;
+    }
+    .combo-item {
+      color: #9a9a9f;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .combo-item::before {
+      content: '•';
+      color: #f4b93e;
+    }
+    .combo-subtitle {
+      color: #b0a99b;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.15rem;
+    }
+    .combo-badge {
+      display: inline-block;
+      background: rgba(244, 185, 62, 0.12);
+      border: 1px solid rgba(244, 185, 62, 0.2);
+      border-radius: 9999px;
+      padding: 0.05rem 0.6rem;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: #f4b93e;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-left: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <header id="siteHeader" class="fixed inset-x-0 top-4 z-50 flex justify-center px-3 sm:px-4">
+    <div class="w-full max-w-6xl">
+      <nav class="glass-nav rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-2 shrink-0">
+          <img src="img/logo.webp" alt="THE GARAGE CAFE Logo" class="nav-logo rounded-md bg-transparent" loading="lazy">
+        </a>
+
+        <div class="hidden lg:flex items-center gap-8 font-medium text-sm text-cream/80">
+          <a href="index.html#about" class="nav-link">About Us</a>
+          <a href="index.html#menu" class="nav-link">Menu</a>
+          <a href="index.html#book" class="nav-link">Book a Table</a>
+          <a href="index.html#gallery" class="nav-link">Gallery</a>
+          <div id="discountNavBanner" class="discount-nav-banner" style="display:none;">
+            <span>🔥</span>
+            <span id="discountNavLabel">Limited Offer</span>
+            <span class="countdown-tag" id="discountNavCountdown">--:--:--</span>
+            <a href="index.html#menu" class="text-cream/80 hover:text-gold transition text-xs font-medium">Order Now</a>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+          <button id="cartTrigger" class="relative w-9 h-9 flex items-center justify-center rounded-full bg-char/70 border border-gold/20 hover:border-gold/50 transition-colors" aria-label="View cart">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <span id="cartCount" class="absolute -top-1.5 -right-1.5 bg-crimson text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
+          </button>
+
+          <a id="profileLink" href="#" class="w-9 h-9 rounded-full bg-gradient-to-br from-gold to-crimson flex items-center justify-center font-bold text-ink text-sm hover:opacity-90 transition-opacity">
+            <svg id="profileIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0a0b0d" stroke-width="2.4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span id="profileInitial" class="hidden"></span>
+          </a>
+
+          <button id="mobileToggle" class="lg:hidden w-9 h-9 flex items-center justify-center rounded-full bg-char/70 border border-gold/20 transition hover:border-gold/50">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+        </div>
+      </nav>
+
+      <div id="mobileMenu" class="hidden lg:hidden glass-nav mt-2 rounded-2xl px-6 py-6 flex flex-col gap-5 text-sm font-medium">
+        <div class="flex flex-col gap-4 mt-2">
+          <a href="index.html#menu" class="nav-link">Menu</a>
+          <a href="index.html#about" class="nav-link">About</a>
+          <a href="index.html#hours" class="nav-link">Hours</a>
+          <a href="index.html#book" class="nav-link">Book a Table</a>
+          <a href="index.html#gallery" class="nav-link">Gallery</a>
+          <a href="menu.html" class="nav-link text-gold">Full Menu →</a>
+          <div id="discountNavBannerMobile" class="discount-nav-banner" style="display:none; align-self:flex-start;">
+            <span>🔥</span>
+            <span id="discountNavLabelMobile">Limited Offer</span>
+            <span class="countdown-tag" id="discountNavCountdownMobile">--:--:--</span>
+            <a href="index.html#menu" class="text-cream/80 hover:text-gold transition text-xs font-medium">Order Now</a>
+          </div>
+        </div>
+
+        <div class="h-px bg-cream/10 my-2"></div>
+
+        <div class="flex items-center justify-between mt-2">
+          <a id="mobileProfileLink" href="#" class="flex items-center gap-3 text-cream/80 hover:text-gold transition">
+            <div class="mobile-account-icon" id="mobileProfileIcon">M</div>
+            <span id="mobileProfileText">Account</span>
+          </a>
+          
+          <button id="mobileOrderBtn" class="bg-crimson text-white font-bold px-6 py-2.5 rounded-full hover:brightness-110 transition shadow-lg shadow-crimson/20">
+            Order Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- FLOATING CART BUTTON — MOBILE ONLY -->
+  <button id="mobileCartFloat" class="mobile-cart-float" aria-label="Open cart">
+    🛒
+    <span id="mobileCartBadge" class="cart-badge hidden">0</span>
+  </button>
+
+  <!-- NOTIFICATION BANNER -->
+  <div id="notificationBanner" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-lg hidden">
+    <div class="bg-char2 border border-gold/30 rounded-2xl p-4 shadow-2xl notification-banner flex items-center gap-3">
+      <div id="notificationIcon" class="w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center text-xl">📦</div>
+      <div class="flex-1">
+        <p id="notificationTitle" class="font-semibold text-sm">Order Status Updated</p>
+        <p id="notificationMessage" class="text-cream/60 text-xs">Your order is ready for pickup!</p>
+      </div>
+      <button id="notificationClose" class="text-cream/40 hover:text-gold transition">✕</button>
+    </div>
+  </div>
+
+  <!-- HERO with herologo.png background -->
+  <section id="home" class="relative min-h-screen flex items-center overflow-hidden hero-bg">
+    <div class="absolute inset-0 hero-overlay"></div>
+    <div class="absolute inset-0 brick-texture opacity-20"></div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-6 sm:px-10 pt-32 pb-20 w-full">
+      <div class="max-w-xl">
+        <span class="inline-flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-gold/90 border border-gold/30 rounded-full px-3 py-1 mb-6 bg-ink/40 backdrop-blur-sm">
+          Cozy & Modern Cafe Vibe
+        </span>
+        <h1 class="font-display text-5xl sm:text-6xl md:text-7xl leading-[0.95] mb-6">
+          Big hunger,<br /><span class="italic text-gold">Heavy plates</span>
+        </h1>
+        <p class="text-cream/80 text-base sm:text-lg mb-8 leading-relaxed max-w-lg">
+          Located in the heart of Kandy, THE GARAGE CAFE brings you an electrifying dining experience with our signature dishes, refreshing beverages, and vibrant atmosphere.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="index.html#book" class="bg-gold text-ink font-semibold px-6 py-3 rounded-full hover:brightness-110 transition glow-gold">Book a Table</a>
+          <a href="index.html#menu" class="border border-cream/25 text-cream px-6 py-3 rounded-full hover:border-gold/60 hover:text-gold transition">View Menu</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE STATUS / COUNTDOWN / WEEKLY SCHEDULE -->
+  <section id="hours" class="relative py-24 px-6 sm:px-10 brick-texture border-t border-brickline">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-12">
+        <span class="text-xs tracking-[0.25em] uppercase text-gold/80">
+          Live at <span id="branchLabelHours" class="font-semibold text-gold">Kandy</span>
+        </span>
+        <h2 class="font-display text-4xl sm:text-5xl mt-3">Are we open right now?</h2>
+      </div>
+
+      <div class="bg-char rounded-3xl border border-gold/15 p-8 sm:p-12 text-center mb-8">
+        <div id="statusBadge" class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 text-sm font-semibold">
+          <span id="statusDot" class="w-2.5 h-2.5 rounded-full pulse-dot"></span>
+          <span id="statusText">Checking hours…</span>
+        </div>
+        <div id="countdownClock" class="font-mono clock-digit text-6xl sm:text-8xl font-bold tracking-tight text-gold">--:--:--</div>
+        <p id="countdownLabel" class="text-cream/50 mt-3 text-sm uppercase tracking-widest">loading</p>
+      </div>
+
+      <!-- Weekly Schedule Grid -->
+      <div id="scheduleGrid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3"></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about" class="py-24 px-6 sm:px-10 border-t border-brickline">
+    <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
+      <div>
+        <span class="text-xs tracking-[0.25em] uppercase text-gold/80">About Us</span>
+        <h2 class="font-display text-4xl sm:text-5xl mt-3 mb-6">Fueling Good Vibes & Bold Flavors</h2>
+        <p class="text-cream/70 leading-relaxed mb-4">Established in 2019 in the heart of Kandy, The Garage Cafe was born from a simple vision: to create the ultimate industrial-cool hangout spot. Inspired by classic garage aesthetics—blending raw metallic accents, cozy rustic lighting, and vintage automotive charm—our space is built for those who love high-energy vibes and great comfort food.</p>
+        <p class="text-cream/70 leading-relaxed mb-4">Whether you're looking to pit-stop for a quick coffee break, tune out the busy city noise, or rev up your engines over a feast with friends, our warm and laid-back space is designed for pure relaxation.</p>
+        <p class="text-cream/70 leading-relaxed">Behind our garage doors, the real magic happens in the kitchen. Driven by a passion for bold tastes, we specialize in heavy, honest comfort food packed with rich Sri Lankan spices that hit the spot every single time.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <img src="img/p18.webp" class="rounded-2xl object-cover h-64 w-full lazy-load" alt="cafe interior" loading="lazy">
+        <img src="img/p12.webp" class="rounded-2xl object-cover h-64 w-full mt-8 lazy-load" alt="coffee" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <!-- DAILY SPECIAL — WEEKLY LUNCH SPECIALS (UPDATED WITH COMBO OFFERS) -->
+  <section id="dailySpecial" class="py-24 px-6 sm:px-10 border-t border-brickline">
+    <div class="max-w-6xl mx-auto">
+      <div class="mb-10">
+        <span class="text-xs tracking-[0.25em] uppercase text-gold/80">Every Day · Limited-Time Combo Deals</span>
+        <h2 class="font-display text-4xl sm:text-5xl mt-3 leading-tight">
+          <span class="text-cream">Weekly Combo</span><br>
+          <span class="text-crimson">Specials</span>
+        </h2>
+        <p class="text-cream/60 mt-4 max-w-xl">A different combo deal every day of the week — because lunch break shouldn't break the bank.</p>
+      </div>
+
+      <div class="grid lg:grid-cols-[1fr_1.3fr] gap-8 items-start">
+        <!-- FEATURED CARD -->
+        <div class="bg-char rounded-3xl border border-crimson/20 p-6 sm:p-7">
+          <div class="relative">
+            <img id="specialImg" src="" alt="" class="rounded-2xl object-cover h-64 w-full fade-el lazy-load" loading="lazy">
+            <span class="absolute top-4 left-4 bg-crimson text-white text-[11px] font-bold tracking-wide px-3 py-1.5 rounded-full">TODAY'S FEATURE</span>
+          </div>
+          <div class="mt-6">
+            <h3 id="specialName" class="font-display text-2xl sm:text-3xl mb-2 fade-el">—</h3>
+            <div id="specialComboItems" class="combo-items mb-3 fade-el"></div>
+            <p id="specialDesc" class="text-cream/60 text-sm mb-3 fade-el">—</p>
+            <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
+              <div>
+                <span id="specialActualPrice" class="actual-price-strike text-cream/40">—</span>
+                <span id="specialPrice" class="font-mono text-3xl text-gold font-bold combo-price">—</span>
+                <span id="specialSavings" class="combo-savings-badge">—</span>
+              </div>
+              <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-gold border border-gold/40 rounded-full px-3 py-1.5 shrink-0">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/></svg>
+                TODAY ONLY
+              </span>
+            </div>
+            <button id="specialAddBtn" class="w-full bg-crimson text-white font-bold py-3.5 rounded-full hover:brightness-110 transition shadow-lg shadow-crimson/20">Add Combo to Order</button>
+          </div>
+        </div>
+
+        <!-- WEEKLY LIST -->
+        <div id="weeklySpecialsList" class="bg-char rounded-3xl border border-brickline p-3 sm:p-4">
+          <!-- injected by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DISCOUNT SPECIAL — TWO COLUMN -->
+  <section id="discountSpecial" class="discount-special-section border-t border-brickline">
+    <div class="discount-special-grid" id="discountSpecialGrid">
+      <div class="image-side">
+        <img id="discountSpecialImg" src="img/herologo.png" alt="discount dish" class="rounded-[2rem] lazy-load" loading="lazy">
+      </div>
+      <div class="details-side">
+        <span class="badge-tag">🔥 Limited Offer</span>
+        <h3 class="dish-name" id="discountSpecialName">Quesadilla with Tomatoes</h3>
+        <p class="dish-desc" id="discountSpecialDesc">Grilled flour tortilla filled with melted cheese, fresh tomatoes, and a hint of chipotle. Served with salsa verde.</p>
+        <div class="discount-meta">
+          <div class="meta-item">
+            <strong>Discount</strong> <span class="value" id="discountSpecialPercent">20%</span>
+          </div>
+          <div class="meta-item">
+            <strong>Ends</strong> <span class="value" id="discountSpecialEnds">2025-06-20 23:59</span>
+          </div>
+        </div>
+        <div class="countdown-block">
+          <span>⏳</span> 
+          <span id="discountSpecialCountdown">--:--:--</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENU (Landing Page - 6 most selling items) -->
+  <section id="menu" class="py-24 px-6 sm:px-10 border-t border-brickline brick-texture">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-14">
+        <span class="text-xs tracking-[0.25em] uppercase text-gold/80">The Menu</span>
+        <h2 class="font-display text-4xl sm:text-5xl mt-3">Most Selling Menu Items</h2>
+        <div id="menuDiscountIndicator" class="mt-3 inline-flex items-center gap-2 bg-crimson/10 border border-crimson/30 rounded-full px-4 py-1.5 text-sm text-crimson" style="display:none;">
+          <span>🔥</span>
+          <span id="menuDiscountText">Limited time discount!</span>
+        </div>
+        <div class="mt-8">
+          <a href="menu.html" class="full-menu-btn">
+            View Full Menu
+            <span class="arrow-icon">→</span>
+          </a>
+        </div>
+      </div>
+      <div id="menuGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+    </div>
+  </section>
+
+  <!-- BOOK A TABLE — UPDATED with new fields and layout -->
+  <section id="book" class="py-24 px-6 sm:px-10 border-t border-brickline">
+    <div class="max-w-6xl mx-auto text-center mb-10">
+      <span class="text-xs tracking-[0.25em] uppercase text-gold/80">Reservations</span>
+      <h2 class="font-display text-4xl sm:text-5xl mt-3">Book a table.</h2>
+      <p class="text-cream/60 mt-3">Save a seat at <span id="branchLabelBook">Kandy</span>. We'll confirm by email.</p>
+    </div>
+
+    <div class="max-w-5xl mx-auto grid lg:grid-cols-5 gap-6 items-start">
+      <form id="bookingForm" class="lg:col-span-3 bg-char border border-gold/15 rounded-3xl p-8 grid sm:grid-cols-2 gap-4">
+        <input required type="text" placeholder="Full name" class="bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60 sm:col-span-2">
+        
+        <div class="sm:col-span-2 flex gap-2">
+          <select id="countryCode" class="bg-ink border border-cream/15 rounded-xl px-2 py-3 text-sm focus:border-gold/60 w-1/3">
+            <option value="+94" selected>🇱🇰 +94</option>
+            <option value="+61">🇦🇺 +61</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+91">🇮🇳 +91</option>
+            <option value="+86">🇨🇳 +86</option>
+          </select>
+          <input required type="tel" placeholder="Phone number" class="flex-1 bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60">
+        </div>
+
+        <input required type="date" id="bookingDate" class="bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60">
+        <input required type="time" id="bookingTime" class="bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60">
+        
+        <div class="relative sm:col-span-2">
+          <select id="guestsSelect" class="w-full bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60 appearance-none">
+            <option value="1 Guest">1 Guest</option>
+            <option value="2 Guests" selected>2 Guests</option>
+            <option value="3 Guests">3 Guests</option>
+            <option value="4 Guests">4 Guests</option>
+            <option value="5 Guests">5 Guests</option>
+            <option value="6 Guests">6 Guests</option>
+            <option value="7 Guests">7 Guests</option>
+            <option value="8 Guests">8 Guests</option>
+            <option value="9 Guests">9 Guests</option>
+            <option value="10 Guests">10 Guests</option>
+            <option value="custom">✏️ Type here…</option>
+          </select>
+          <div id="customGuestsWrapper" class="hidden mt-2">
+            <input type="number" id="customGuestsInput" min="1" max="20" placeholder="Enter number of guests" class="w-full bg-ink border border-gold/40 rounded-xl px-4 py-3 text-sm focus:border-gold/60">
+          </div>
+        </div>
+
+        <!-- New extra fields: seating, table, special requests -->
+        <div class="booking-extra-row sm:col-span-2">
+          <div class="select-wrapper">
+            <label for="bookingSeating">Where would you like to be seated?</label>
+            <select id="bookingSeating" class="w-full">
+              <option value="Upstairs">Upstairs</option>
+              <option value="Downstairs">Downstairs</option>
+            </select>
+          </div>
+          <div class="select-wrapper">
+            <label for="bookingTable">Which table would you like?</label>
+            <select id="bookingTable" class="w-full">
+              <option value="">— Any Table —</option>
+              <option value="Table 1">Table 1</option>
+              <option value="Table 2">Table 2</option>
+              <option value="Table 3">Table 3</option>
+              <option value="Table 4">Table 4</option>
+              <option value="Table 5">Table 5</option>
+              <option value="Table 6">Table 6</option>
+              <option value="Table 7">Table 7</option>
+              <option value="Table 8">Table 8</option>
+            </select>
+          </div>
+          <div class="select-wrapper">
+            <label for="bookingSpecialRequests">Special Requests (optional)</label>
+            <select id="bookingSpecialRequests" class="w-full">
+              <option value="">— Select —</option>
+              <option value="High Chair">High Chair</option>
+              <option value="Birthday">Birthday</option>
+              <option value="Catch-up">Catch-up</option>
+              <option value="Dietary Requirement">Dietary Requirement</option>
+              <option value="Disabled Access">Disabled Access</option>
+            </select>
+          </div>
+        </div>
+
+        <textarea rows="2" placeholder="Additional requests (allergies, booth preference…)" class="sm:col-span-2 bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60 resize-none"></textarea>
+
+        <div id="bookingError" class="booking-error sm:col-span-2"></div>
+
+        <button type="submit" class="sm:col-span-2 bg-gold text-ink font-semibold py-3 rounded-full hover:brightness-110 transition">Confirm Booking</button>
+        <p id="bookingSuccess" class="hidden sm:col-span-2 text-center text-gold text-sm">✓ Table request received — we'll text you a confirmation shortly.</p>
+      </form>
+
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-char border border-gold/15 rounded-3xl p-6">
+          <h3 class="font-display text-xl text-gold mb-3">Hours & Contact</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between border-b border-cream/10 pb-1"><span class="text-cream/60">Mon – Fri</span><span>10:00 AM – 9:00 PM</span></div>
+            <div class="flex justify-between border-b border-cream/10 pb-1"><span class="text-cream/60">Sat – Sun</span><span>10:00 AM – 9:00 PM</span></div>
+          </div>
+          <div class="mt-4 space-y-1 text-sm text-cream/70">
+            <p>📞 <a href="tel:+94771216261" class="hover:text-gold transition">+94 (75) 666 0666</a></p>
+          </div>
+        </div>
+
+        <div class="rounded-2xl overflow-hidden border border-gold/20 shadow-2xl shadow-gold/10 h-56">
+          <iframe
+            class="w-full h-full"
+            style="border:0;"
+            loading="lazy"
+            allowfullscreen
+            referrerpolicy="strict-origin-when-cross-origin"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3957.5521976324067!2d80.62879277448519!3d7.2916796137612065!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae368833dbff259%3A0xc5e7ff7cf25e39ed!2sThe%20Garage%20Caf%C3%A9!5e0!3m2!1sen!2slk!4v1784727053495!5m2!1sen!2slk" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY (AUTO SLIDER ONLY) -->
+  <section id="gallery" class="py-24 border-t border-brickline overflow-hidden">
+    <div class="auto-slider-section mt-16">
+      <div class="auto-slider-head">
+      </div>
+
+      <div class="viewport" id="autoSliderViewport">
+        <div class="track" id="autoSliderTrack">
+          <!-- All images with loading="lazy" -->
+          <div class="slide"><img src="img/p1.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p2.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p3.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p4.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p5.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p6.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p7.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p8.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p9.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p10.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p11.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p12.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p13.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p14.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p15.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p16.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p17.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p18.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p19.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p20.webp" alt="gallery" loading="lazy"></div>
+          <div class="slide"><img src="img/p21.webp" alt="gallery" loading="lazy"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER - THE GARAGE CAFE (background colour animation removed) -->
+  <footer class="minimal-footer">
+    <!-- footer-glow removed to stop colour animation -->
+    <div class="footer-container">
+      <div class="footer-grid">
+
+        <div>
+          <div class="footer-logo">
+            <div class="coffee-animation">
+              <i class="fas fa-mug-hot coffee-icon"></i>
+              <div class="coffee-steam steam-1"></div>
+              <div class="coffee-steam steam-2"></div>
+              <div class="coffee-steam steam-3"></div>
+            </div>
+            <span class="logo-text">THE GARAGE CAFE</span>
+          </div>
+          <p class="footer-description">
+            A cozy café slinging honest breakfasts and slow-drip coffee from a hidden corner of Kandy. No pretense — just brick walls, good light, and a kitchen that opens early.
+          </p>
+          <div class="social-links">
+            <a href="https://www.facebook.com/theblizzcafe" target="_blank" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/blizz_cafe_" target="_blank" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.tiktok.com/@blizz.cafe" target="_blank" class="social-link"><i class="fab fa-tiktok"></i></a>
+            <a href="#" target="_blank" class="social-link"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Explore</h4>
+          <ul class="footer-links">
+            <li><a href="index.html#about" class="footer-link-btn">About Us</a></li>
+            <li><a href="index.html#menu" class="footer-link-btn">Menu</a></li>
+            <li><a href="menu.html" class="footer-link-btn text-gold">Full Menu</a></li>
+            <li><a href="index.html#book" class="footer-link-btn">Book a Table</a></li>
+            <li><a href="index.html#gallery" class="footer-link-btn">Gallery</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Legal</h4>
+          <ul class="footer-links">
+            <li><a href="#" class="footer-link-btn">Privacy Policy</a></li>
+            <li><a href="#" class="footer-link-btn">Terms of Service</a></li>
+            <li><a href="#" class="footer-link-btn">Allergen Info</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Follow</h4>
+          <ul class="footer-links" style="list-style: none; color: #999;">
+            <li><a href="https://www.instagram.com/blizz_cafe_" target="_blank" class="footer-link-btn">Instagram</a></li>
+            <li><a href="https://www.facebook.com/theblizzcafe" target="_blank" class="footer-link-btn">Facebook</a></li>
+            <li><a href="https://www.tiktok.com/@blizz.cafe" target="_blank" class="footer-link-btn">TikTok</a></li>
+            <li><i class="fas fa-map-marker-alt"></i> Kandy, Sri Lanka</li>
+            <li><i class="fas fa-phone"></i> +94 (75) 666 0666</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p>
+          &copy; <span id="year"></span> THE GARAGE CAFE. All rights reserved. |
+          DESIGNED & DEVELOPED BY <a href="http://wa.me/713171006" target="_blank">MASH SOLUTIONS</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+  <!-- CART SIDEBAR -->
+  <div id="cartOverlay" class="hidden fixed inset-0 z-[100] bg-ink/70 backdrop-blur-sm"></div>
+  <aside id="cartSidebar" class="fixed top-0 right-0 h-full w-full sm:max-w-md bg-char2 border-l border-gold/15 z-[101] translate-x-full transition-transform duration-300 thin-scroll overflow-y-auto">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="font-display text-2xl text-gold">Your Order</h2>
+        <button id="cartClose" class="text-cream/50 hover:text-gold transition">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div id="cartContent">
+        <div id="emptyCart" class="text-center py-12">
+          <div class="empty-cart-emoji mb-4">🍽️</div>
+          <p class="text-cream/40 text-sm">Your basket is empty.</p>
+          <p class="text-cream/30 text-xs mt-1">Add something delicious!</p>
+        </div>
+        <div id="cartItems" class="hidden space-y-3 mb-6"></div>
+        <div id="pickupBanner" class="pickup-only-banner hidden">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c8102e" stroke-width="2">
+            <path d="M12 2v4M12 22v-4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M22 12h-4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <div>
+            <span class="text-xs font-bold text-crimson uppercase tracking-wider">Pick Up Only</span>
+            <p class="text-xs text-cream/50">All orders are for in-store pickup only. No delivery available.</p>
+          </div>
+        </div>
+        <div id="promoCodeBox" class="hidden mb-4">
+          <div id="promoApplyRow" class="flex gap-2">
+            <input id="promoCodeInput" type="text" placeholder="Promo code" maxlength="30"
+              class="flex-1 bg-ink border border-cream/15 rounded-xl px-4 py-2.5 text-sm uppercase tracking-wide focus:border-gold/60" />
+            <button id="promoApplyBtn" class="bg-gold/10 text-gold border border-gold/30 rounded-xl px-4 text-sm font-semibold hover:bg-gold hover:text-ink transition">Apply</button>
+          </div>
+          <p id="promoMessage" class="text-xs mt-2 hidden"></p>
+          <div id="promoAppliedRow" class="hidden flex items-center justify-between bg-gold/10 border border-gold/30 rounded-xl px-4 py-2.5 mt-1">
+            <div class="flex items-center gap-2 text-sm text-gold font-semibold">
+              <i class="fa-solid fa-ticket"></i>
+              <span id="promoAppliedCode">CODE</span>
+            </div>
+            <button id="promoRemoveBtn" class="text-cream/50 hover:text-crimson text-xs underline">Remove</button>
+          </div>
+        </div>
+        <div id="cartSummary" class="hidden border-t border-cream/10 pt-4 space-y-2">
+          <div class="flex justify-between text-sm">
+            <span class="text-cream/60">Subtotal</span>
+            <span id="cartSubtotal" class="font-mono text-cream">Rs. 0.00</span>
+          </div>
+          <div id="cartDiscountRow" class="hidden flex justify-between text-sm">
+            <span class="text-gold/80" id="cartDiscountLabel">Discount</span>
+            <span id="cartDiscount" class="font-mono text-gold">- Rs. 0.00</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-cream/60" id="serviceFeeLabel">Service Fee (2%)</span>
+            <span id="cartServiceFee" class="font-mono text-cream">Rs. 0.00</span>
+          </div>
+          <div class="flex justify-between text-lg font-semibold pt-2 border-t border-cream/10">
+            <span>TOTAL</span>
+            <span id="cartTotal" class="font-mono text-gold">Rs. 0.00</span>
+          </div>
+        </div>
+        <button id="checkoutBtn" class="hidden w-full bg-gold text-ink font-semibold py-3 rounded-full hover:brightness-110 transition mt-4">Proceed to Order</button>
+      </div>
+
+      <div id="orderSuccess" class="hidden text-center py-8 order-success-popup">
+        <div class="text-5xl mb-4">✅</div>
+        <h3 class="font-display text-xl text-gold mb-2">Order Placed!</h3>
+        <p class="text-cream/50 text-sm">Your order has been received. We'll notify you when it's ready for pickup.</p>
+        <button id="orderSuccessClose" class="mt-6 text-gold/70 hover:text-gold text-sm transition">Close</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- AUTH MODAL -->
+  <div id="authOverlay" class="hidden fixed inset-0 z-[1000] flex items-center justify-center p-4">
+    <div class="glass-nav rounded-3xl p-8 relative max-h-[90vh] overflow-y-auto thin-scroll">
+      <button id="authClose" class="close-btn" aria-label="Close">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+
+      <div class="flex gap-2 mb-6 bg-char/60 rounded-full p-1">
+        <button id="tabLogin" class="tab-btn active">Log In</button>
+        <button id="tabSignup" class="tab-btn inactive">Sign Up</button>
+      </div>
+
+      <div id="authError" class="auth-error"></div>
+
+      <form id="loginForm" class="space-y-3">
+        <input required type="email" id="loginEmail" placeholder="Email address" class="w-full">
+        <input required type="password" id="loginPassword" placeholder="Password" class="w-full">
+        <button type="submit" class="submit-btn">Log In</button>
+      </form>
+
+      <form id="signupForm" class="hidden space-y-3">
+        <input required type="text" id="suName" placeholder="Full name" class="w-full">
+        <div class="flex gap-2">
+          <select id="suCountryCode" class="bg-ink border border-cream/15 rounded-xl px-2 py-3 text-sm focus:border-gold/60 w-24">
+            <option value="+94">🇱🇰 +94</option>
+            <option value="+61">🇦🇺 +61</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+91">🇮🇳 +91</option>
+          </select>
+          <input required type="tel" id="suPhone" placeholder="Phone number" class="flex-1 bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60">
+        </div>
+        <input required type="email" id="suEmail" placeholder="Email address" class="w-full">
+        <input required type="password" id="suPassword" placeholder="Password" class="w-full">
+        <input required type="password" id="suPasswordConfirm" placeholder="Re-type password" class="w-full">
+        <button type="submit" class="submit-btn">Create Account</button>
+      </form>
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">or</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <button id="googleAuthBtn" class="google-btn">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.6 15.6 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4c-7.4 0-13.8 4.2-17 10.4z"/><path fill="#4CAF50" d="M24 44c5.4 0 10.3-2.1 14-5.5l-6.5-5.5C29.5 34.7 26.9 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.6 5.1C9.1 39.6 16 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.5 5.5C40.5 36.6 44 30.8 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        Continue with Google
+      </button>
+
+      <button id="appleAuthBtn" class="apple-btn mt-3" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Sign in with Apple
+        <span class="text-xs opacity-60 ml-1">(coming soon)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- PHONE NUMBER REQUIRED MODAL (shown before placing an order if the account has no saved phone number) -->
+  <div id="phonePromptOverlay" class="hidden fixed inset-0 z-[1000] flex items-center justify-center p-4">
+    <div class="glass-nav rounded-3xl p-8 relative max-h-[90vh] overflow-y-auto thin-scroll" style="max-width:400px;width:100%;">
+      <button id="phonePromptClose" class="close-btn" aria-label="Close">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+
+      <h3 class="font-display text-2xl mb-2">One more thing…</h3>
+      <p class="text-cream/60 text-sm mb-6">We need a phone number to confirm your order. Add it once and we'll remember it for next time.</p>
+
+      <div id="phonePromptError" class="auth-error"></div>
+
+      <form id="phonePromptForm" class="space-y-3">
+        <div class="flex gap-2">
+          <select id="opCountryCode" class="bg-ink border border-cream/15 rounded-xl px-2 py-3 text-sm focus:border-gold/60 w-24">
+            <option value="+94" selected>🇱🇰 +94</option>
+            <option value="+61">🇦🇺 +61</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+91">🇮🇳 +91</option>
+            <option value="+86">🇨🇳 +86</option>
+          </select>
+          <input required type="tel" id="opPhone" placeholder="Phone number" class="flex-1 bg-ink border border-cream/15 rounded-xl px-4 py-3 text-sm focus:border-gold/60">
+        </div>
+        <button type="submit" class="submit-btn">Continue to Order</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    // ============================================================
+    // LAZY LOAD: Intersection Observer
+    // ============================================================
+    (function lazyLoadImages() {
+      const lazyImages = document.querySelectorAll('img.lazy-load');
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              img.classList.add('loaded');
+              observer.unobserve(img);
+            }
+          });
+        }, { rootMargin: '200px' });
+
+        lazyImages.forEach(img => {
+          const rect = img.getBoundingClientRect();
+          const winHeight = window.innerHeight || document.documentElement.clientHeight;
+          if (rect.top < winHeight + 200) {
+            img.classList.add('loaded');
+          } else {
+            observer.observe(img);
+          }
+        });
+
+        const menuGrid = document.getElementById('menuGrid');
+        if (menuGrid) {
+          const mutationObserver = new MutationObserver(() => {
+            document.querySelectorAll('img.lazy-load:not(.loaded)').forEach(img => {
+              const rect = img.getBoundingClientRect();
+              const winHeight = window.innerHeight || document.documentElement.clientHeight;
+              if (rect.top < winHeight + 200) {
+                img.classList.add('loaded');
+              } else {
+                observer.observe(img);
+              }
+            });
+          });
+          mutationObserver.observe(menuGrid, { childList: true, subtree: true });
+        }
+      } else {
+        lazyImages.forEach(img => img.classList.add('loaded'));
+      }
+    })();
+
+    // ============================================================
+    // FIREBASE INITIALISATION
+    // ============================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyB_UdWrxjbuhPiFBSOZGo_mGIIdalUZbx8",
+      authDomain: "blizzkandy.firebaseapp.com",
+      projectId: "blizzkandy",
+      storageBucket: "blizzkandy.firebasestorage.app",
+      messagingSenderId: "705369840142",
+      appId: "1:705369840142:web:310d32d621a8e835c5ba5f",
+      measurementId: "G-GDCLPQVDJ6"
+    };
+    let auth = null;
+    let db = null;
+    try {
+      firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth();
+      db = firebase.firestore();
+      auth.useDeviceLanguage();
+    } catch (err) {
+      console.error('⚠️ Firebase failed to initialise (site will still work, but login/cart-sync/ordering features may be limited):', err);
+    }
+
+    // Telegram Bot Config
+    const TELEGRAM_BOT_TOKEN = '8978617133:AAH7EZX77R9JuwhHKBOW256xnxTnqDHyHgo';
+    const TELEGRAM_CHAT_ID = '8617382834';
+
+    // ============================================================
+    // BRANCH DATA
+    // ============================================================
+    const BRANCHES = {
+      kandy: {
+        name: 'Kandy',
+        address: 'Kandy, Sri Lanka',
+        schedule: {
+          Mon: { open: '10:00', close: '21:00' },
+          Tue: { open: '10:00', close: '21:00' },
+          Wed: { open: '10:00', close: '21:00' },
+          Thu: { open: '10:00', close: '21:00' },
+          Fri: { open: '10:00', close: '21:00' },
+          Sat: { open: '10:00', close: '21:00' },
+          Sun: { open: '10:00', close: '21:00' },
+        }
+      },
+    };
+
+    let currentBranchKey = 'kandy';
+    let currentUser = null;
+    let currentUserPhone = '';
+    let ordersUnsubscribe = null;
+    let cart = [];
+    let cartUnsubscribe = null;
+    let discountsUnsubscribe = null;
+    let activeDiscount = null;
+    let promoCodesUnsubscribe = null;
+    let promoSettingsUnsubscribe = null;
+    let promoCodesList = [];
+    let promoSystemEnabled = false;
+    let appliedPromo = null; // { code, discountPercent, applyMode, items }
+
+    // ============================================================
+    // LOCALSTORAGE CART FUNCTIONS
+    // ============================================================
+    function loadCartFromLocalStorage() {
+      const savedCart = localStorage.getItem('blizzCafeCart');
+      if (savedCart) {
+        try {
+          cart = JSON.parse(savedCart);
+          updateCartUI();
+        } catch (e) {
+          console.error('Error loading cart from localStorage:', e);
+          cart = [];
+        }
+      }
+      const savedPromoCode = localStorage.getItem('blizzCafePromoCode');
+      if (savedPromoCode) {
+        // will be re-validated once promo codes load from Firestore
+        pendingSavedPromoCode = savedPromoCode;
+      }
+    }
+
+    function saveCartToLocalStorage() {
+      localStorage.setItem('blizzCafeCart', JSON.stringify(cart));
+    }
+
+    let pendingSavedPromoCode = null;
+
+    // ============================================================
+    // SRI LANKA TIME HELPERS
+    // ============================================================
+    const DAY_KEYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    function getSriLankaNow() {
+      const parts = new Intl.DateTimeFormat('en-LK', {
+        timeZone: 'Asia/Colombo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      }).formatToParts(new Date());
+      const get = (t) => parseInt(parts.find(p => p.type === t).value, 10);
+      let hour = get('hour');
+      if (hour === 24) hour = 0;
+      return {
+        year: get('year'),
+        month: get('month'),
+        day: get('day'),
+        hour,
+        minute: get('minute'),
+        second: get('second'),
+        date: new Date(get('year'), get('month') - 1, get('day'), hour, get('minute'), get('second')),
+      };
+    }
+
+    function dayKeyFromDate(d) { return DAY_KEYS[d.getDay()]; }
+
+    function timeStrToMinutes(str) {
+      const [h, m] = str.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function fmtCountdown(totalSeconds) {
+      totalSeconds = Math.max(0, totalSeconds);
+      const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      const s = String(Math.floor(totalSeconds % 60)).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function fmtClock12(hhmm) {
+      const [h, m] = hhmm.split(':').map(Number);
+      const period = h >= 12 ? 'PM' : 'AM';
+      let h12 = h % 12;
+      if (h12 === 0) h12 = 12;
+      return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+    }
+
+    // ============================================================
+    // DISCOUNT LISTENER
+    // ============================================================
+    function listenDiscounts() {
+      if (discountsUnsubscribe) discountsUnsubscribe();
+      
+      discountsUnsubscribe = db.collection('discounts')
+        .where('status', '==', 'Active')
+        .onSnapshot(snap => {
+          const now = new Date();
+          let found = null;
+          
+          snap.forEach(doc => {
+            const d = doc.data();
+            d.id = doc.id;
+            
+            if (d.startDate && d.endDate) {
+              const start = new Date(d.startDate);
+              const end = new Date(d.endDate);
+              
+              if (start <= now && end >= now) {
+                found = d;
+                console.log('✅ Active discount found:', d.name, d.discountPercent + '%');
+              }
+            }
+          });
+          
+          activeDiscount = found;
+          updateDiscountUI();
+          
+          if (found) {
+            markMenuItemsWithDiscount();
+          } else {
+            unmarkMenuItems();
+          }
+          
+        }, err => {
+          console.error('❌ Discount listener error:', err);
+        });
+    }
+
+    // ============================================================
+    // PROMO CODE LISTENERS (real-time sync from Admin Panel)
+    // ============================================================
+    function listenPromoSettings() {
+      if (promoSettingsUnsubscribe) promoSettingsUnsubscribe();
+      promoSettingsUnsubscribe = db.collection('settings').doc('promoSystem').onSnapshot(doc => {
+        promoSystemEnabled = !!(doc.exists && doc.data().enabled);
+        const box = document.getElementById('promoCodeBox');
+        if (box) {
+          if (promoSystemEnabled && cart.length > 0) {
+            box.classList.remove('hidden');
+          } else {
+            box.classList.add('hidden');
+          }
+        }
+        // if promo system was switched off while a code was applied, drop it
+        if (!promoSystemEnabled && appliedPromo) {
+          appliedPromo = null;
+          localStorage.removeItem('blizzCafePromoCode');
+          showPromoMessage('Promo codes are currently unavailable.', false);
+        }
+        updateCartUI();
+      }, () => {});
+    }
+
+    function listenPromoCodes() {
+      if (promoCodesUnsubscribe) promoCodesUnsubscribe();
+      promoCodesUnsubscribe = db.collection('promoCodes').onSnapshot(snap => {
+        promoCodesList = [];
+        snap.forEach(doc => {
+          const d = doc.data();
+          d.id = doc.id;
+          promoCodesList.push(d);
+        });
+
+        // try to restore a previously applied / saved promo code once data is available
+        if (pendingSavedPromoCode && !appliedPromo) {
+          const match = promoCodesList.find(p => p.code === pendingSavedPromoCode && p.status === 'active');
+          if (match && promoSystemEnabled) {
+            appliedPromo = { code: match.code, discountPercent: match.discountPercent, applyMode: match.applyMode, items: match.items || [] };
+          } else {
+            localStorage.removeItem('blizzCafePromoCode');
+          }
+          pendingSavedPromoCode = null;
+        }
+
+        // re-validate an already applied promo in case it was edited/deactivated in admin
+        if (appliedPromo) {
+          const stillValid = promoCodesList.find(p => p.code === appliedPromo.code && p.status === 'active');
+          if (!stillValid) {
+            appliedPromo = null;
+            localStorage.removeItem('blizzCafePromoCode');
+            showPromoMessage('Your promo code is no longer valid and was removed.', false);
+          } else {
+            // keep discount % / apply mode in sync with any admin edits
+            appliedPromo.discountPercent = stillValid.discountPercent;
+            appliedPromo.applyMode = stillValid.applyMode;
+            appliedPromo.items = stillValid.items || [];
+          }
+        }
+
+        updateCartUI();
+      }, () => {});
+    }
+
+    function showPromoMessage(msg, isSuccess) {
+      const el = document.getElementById('promoMessage');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = `text-xs mt-2 ${isSuccess ? 'text-gold' : 'text-crimson'}`;
+      el.classList.remove('hidden');
+    }
+
+    function getPromoDiscountAmount(subtotal) {
+      if (!appliedPromo) return 0;
+      if (appliedPromo.applyMode === 'items' && appliedPromo.items && appliedPromo.items.length) {
+        const eligibleSubtotal = cart.reduce((sum, item) => {
+          return appliedPromo.items.includes(item.name) ? sum + (item.price * item.quantity) : sum;
+        }, 0);
+        return eligibleSubtotal * (appliedPromo.discountPercent / 100);
+      }
+      // full cart
+      return subtotal * (appliedPromo.discountPercent / 100);
+    }
+
+    function applyPromoCode() {
+      const input = document.getElementById('promoCodeInput');
+      const code = (input.value || '').trim().toUpperCase();
+      if (!code) {
+        showPromoMessage('Please enter a promo code.', false);
+        return;
+      }
+      if (!promoSystemEnabled) {
+        showPromoMessage('Promo codes are currently unavailable.', false);
+        return;
+      }
+      const match = promoCodesList.find(p => p.code === code && p.status === 'active');
+      if (!match) {
+        showPromoMessage('Invalid or expired promo code.', false);
+        return;
+      }
+      if (match.applyMode === 'items' && (!match.items || !match.items.length ||
+          !cart.some(item => match.items.includes(item.name)))) {
+        showPromoMessage(`This code only applies to: ${(match.items || []).join(', ') || 'select items'}.`, false);
+        return;
+      }
+      appliedPromo = { code: match.code, discountPercent: match.discountPercent, applyMode: match.applyMode, items: match.items || [] };
+      localStorage.setItem('blizzCafePromoCode', match.code);
+      showPromoMessage(`Promo code applied — ${match.discountPercent}% off!`, true);
+      updateCartUI();
+    }
+
+    function removePromoCode() {
+      appliedPromo = null;
+      localStorage.removeItem('blizzCafePromoCode');
+      const input = document.getElementById('promoCodeInput');
+      if (input) input.value = '';
+      const el = document.getElementById('promoMessage');
+      if (el) el.classList.add('hidden');
+      updateCartUI();
+    }
+
+    document.getElementById('promoApplyBtn')?.addEventListener('click', applyPromoCode);
+    document.getElementById('promoRemoveBtn')?.addEventListener('click', removePromoCode);
+    document.getElementById('promoCodeInput')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); applyPromoCode(); }
+    });
+
+    // ============================================================
+    // UPDATE DISCOUNT UI
+    // ============================================================
+    function updateDiscountUI() {
+      const now = new Date();
+      const navBanner = document.getElementById('discountNavBanner');
+      const navBannerMobile = document.getElementById('discountNavBannerMobile');
+      const menuIndicator = document.getElementById('menuDiscountIndicator');
+      const menuText = document.getElementById('menuDiscountText');
+
+      const specialGrid = document.getElementById('discountSpecialGrid');
+      const specialImg = document.getElementById('discountSpecialImg');
+      const specialName = document.getElementById('discountSpecialName');
+      const specialDesc = document.getElementById('discountSpecialDesc');
+      const specialPercent = document.getElementById('discountSpecialPercent');
+      const specialEnds = document.getElementById('discountSpecialEnds');
+      const specialCountdown = document.getElementById('discountSpecialCountdown');
+
+      if (activeDiscount) {
+        const end = new Date(activeDiscount.endDate);
+        const diff = Math.max(0, Math.floor((end - now) / 1000));
+        const countdown = fmtCountdown(diff);
+        const pct = activeDiscount.discountPercent || 0;
+        const itemName = activeDiscount.itemName || 'select items';
+        const imageUrl = activeDiscount.imageUrl || 'gallery2/Brick8.webp';
+        const desc = activeDiscount.description || 'Delicious special with a limited‑time discount.';
+        
+        console.log('🔥 Showing discount:', pct + '% off', itemName);
+
+        navBanner.style.display = 'inline-flex';
+        document.getElementById('discountNavLabel').textContent = `${pct}% OFF ${itemName}`;
+        document.getElementById('discountNavCountdown').textContent = countdown;
+
+        navBannerMobile.style.display = 'inline-flex';
+        document.getElementById('discountNavLabelMobile').textContent = `${pct}% OFF`;
+        document.getElementById('discountNavCountdownMobile').textContent = countdown;
+
+        menuIndicator.style.display = 'inline-flex';
+        menuText.textContent = `🔥 ${pct}% OFF ${itemName} — grab it before the countdown ends!`;
+
+        specialGrid.style.display = 'grid';
+        specialImg.src = imageUrl;
+        specialImg.alt = itemName;
+        specialName.textContent = itemName;
+        specialDesc.textContent = desc;
+        specialPercent.textContent = pct + '%';
+        specialEnds.textContent = end.toLocaleString('en-LK', { 
+          year: 'numeric', month: 'short', day: 'numeric', 
+          hour: '2-digit', minute: '2-digit' 
+        });
+        specialCountdown.textContent = countdown;
+
+        markMenuItemsWithDiscount();
+
+      } else {
+        console.log('ℹ️ No active discount found');
+        navBanner.style.display = 'none';
+        navBannerMobile.style.display = 'none';
+        menuIndicator.style.display = 'none';
+        specialGrid.style.display = 'none';
+        unmarkMenuItems();
+      }
+    }
+
+    // ============================================================
+    // MARK / UNMARK MENU ITEMS WITH DISCOUNT
+    // ============================================================
+    function markMenuItemsWithDiscount() {
+      if (!activeDiscount) {
+        unmarkMenuItems();
+        return;
+      }
+      
+      const discountPct = activeDiscount.discountPercent || 0;
+      const discountItemName = activeDiscount.itemName || '';
+      const isAllItems = discountItemName.toLowerCase() === 'all items' || discountItemName === '';
+      
+      document.querySelectorAll('.menu-item-card').forEach(card => {
+        const nameEl = card.querySelector('.menu-item-name');
+        const priceEl = card.querySelector('.menu-item-price');
+        let discountBadge = card.querySelector('.menu-discount-badge');
+        let imageBadge = card.querySelector('.discount-badge-image');
+        
+        if (nameEl && priceEl) {
+          const name = nameEl.textContent.trim();
+          const shouldApplyDiscount = isAllItems || 
+                                      name.toLowerCase() === discountItemName.toLowerCase();
+          
+          if (!shouldApplyDiscount) {
+            if (discountBadge) discountBadge.style.display = 'none';
+            if (imageBadge) imageBadge.style.display = 'none';
+            priceEl.textContent = `Rs. ${parseFloat(priceEl.dataset.originalPrice || priceEl.textContent.replace('Rs.', '').replace(',', '').trim()).toFixed(0)}`;
+            priceEl.style.color = '';
+            return;
+          }
+          
+          if (shouldApplyDiscount) {
+            const originalPrice = parseFloat(priceEl.dataset.originalPrice || priceEl.textContent.replace('Rs.', '').replace(',', '').trim());
+            if (!isNaN(originalPrice)) {
+              const discounted = originalPrice * (1 - discountPct / 100);
+              
+              priceEl.textContent = `Rs. ${discounted.toFixed(0)}`;
+              priceEl.style.color = '#f4b93e';
+
+              const imageContainer = card.querySelector('.menu-image-wrap');
+              if (imageContainer) {
+                let imgBadge = imageContainer.querySelector('.discount-badge-image');
+                if (!imgBadge) {
+                  imgBadge = document.createElement('div');
+                  imgBadge.className = 'discount-badge-image';
+                  imageContainer.appendChild(imgBadge);
+                }
+                imgBadge.innerHTML = `<span>🔥</span><span>${discountPct}% OFF</span>`;
+                imgBadge.style.display = 'flex';
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function unmarkMenuItems() {
+      document.querySelectorAll('.menu-discount-badge').forEach(el => {
+        el.style.display = 'none';
+      });
+      document.querySelectorAll('.menu-item-price').forEach(el => {
+        el.style.color = '';
+        if (el.dataset.originalPrice) {
+          el.textContent = `Rs. ${parseFloat(el.dataset.originalPrice).toFixed(0)}`;
+        }
+      });
+      document.querySelectorAll('.discount-badge-image').forEach(el => {
+        el.style.display = 'none';
+      });
+    }
+
+    // ============================================================
+    // COUNTDOWN TICKER FOR DISCOUNTS
+    // ============================================================
+    setInterval(() => {
+      if (activeDiscount) {
+        const now = new Date();
+        const end = new Date(activeDiscount.endDate);
+        const diff = Math.max(0, Math.floor((end - now) / 1000));
+        const countdown = fmtCountdown(diff);
+        
+        document.getElementById('discountNavCountdown').textContent = countdown;
+        document.getElementById('discountNavCountdownMobile').textContent = countdown;
+        document.getElementById('discountSpecialCountdown').textContent = countdown;
+        
+        if (diff <= 0) {
+          listenDiscounts();
+        }
+      }
+    }, 1000);
+
+    // ============================================================
+    // MAIN COUNTDOWN + STATUS BADGE
+    // ============================================================
+    let countdownIntervalId = null;
+
+    function computeStatus(schedule) {
+      const now = getSriLankaNow();
+      const nowMinutes = now.hour * 60 + now.minute + now.second / 60;
+      const todayKey = dayKeyFromDate(now.date);
+      const today = schedule[todayKey];
+      const openMin = timeStrToMinutes(today.open);
+      const closeMin = timeStrToMinutes(today.close);
+
+      if (nowMinutes >= openMin && nowMinutes < closeMin) {
+        const secsToClose = Math.round((closeMin - nowMinutes) * 60);
+        return { isOpen: true, secondsRemaining: secsToClose, targetLabel: `Closes at ${fmtClock12(today.close)}` };
+      }
+
+      if (nowMinutes < openMin) {
+        const secsToOpen = Math.round((openMin - nowMinutes) * 60);
+        return { isOpen: false, secondsRemaining: secsToOpen, targetLabel: `Opens today at ${fmtClock12(today.open)}` };
+      }
+
+      const tomorrow = new Date(now.date);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowKey = dayKeyFromDate(tomorrow);
+      const tomorrowOpen = schedule[tomorrowKey].open;
+      const minutesUntilMidnight = (24 * 60) - nowMinutes;
+      const secsToOpen = Math.round((minutesUntilMidnight + timeStrToMinutes(tomorrowOpen)) * 60);
+      return { isOpen: false, secondsRemaining: secsToOpen, targetLabel: `Opens tomorrow at ${fmtClock12(tomorrowOpen)}` };
+    }
+
+    function renderStatus() {
+      const schedule = BRANCHES[currentBranchKey].schedule;
+      const status = computeStatus(schedule);
+
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+      const badge = document.getElementById('statusBadge');
+      const clock = document.getElementById('countdownClock');
+      const label = document.getElementById('countdownLabel');
+
+      clock.textContent = fmtCountdown(status.secondsRemaining);
+      label.textContent = status.targetLabel;
+
+      if (status.isOpen) {
+        dot.className = 'w-2.5 h-2.5 rounded-full pulse-dot bg-emerald-400';
+        text.textContent = 'OPEN NOW';
+        badge.className =
+          'inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 text-sm font-semibold bg-emerald-400/10 text-emerald-300 border border-emerald-400/30';
+      } else {
+        dot.className = 'w-2.5 h-2.5 rounded-full pulse-dot bg-crimson';
+        text.textContent = 'CLOSED';
+        badge.className =
+          'inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 text-sm font-semibold bg-crimson/10 text-crimson border border-crimson/30';
+      }
+
+      renderScheduleGrid(schedule, status.isOpen);
+    }
+
+    // ============================================================
+    // WEEKLY SCHEDULE CARDS
+    // ============================================================
+    function renderScheduleGrid(schedule, isOpenNow) {
+      const now = getSriLankaNow();
+      const todayKey = dayKeyFromDate(now.date);
+
+      const jsDay = now.date.getDay();
+      const diffToMonday = (jsDay === 0) ? -6 : 1 - jsDay;
+      const monday = new Date(now.date);
+      monday.setDate(monday.getDate() + diffToMonday);
+
+      const order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const grid = document.getElementById('scheduleGrid');
+      grid.innerHTML = '';
+
+      order.forEach((key, i) => {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        const isToday = key === todayKey;
+        const hours = schedule[key];
+        const monthDay = d.toLocaleDateString('en-LK', { month: 'long', day: 'numeric' });
+        const weekdayFull = DAY_LABELS[d.getDay()].toUpperCase();
+
+        const card = document.createElement('div');
+        card.className = `schedule-card rounded-2xl p-4 border transition-all ${isToday ? 'bg-char border-gold glow-gold' : 'bg-char/60 border-cream/10'}`;
+        card.innerHTML = `
+            <p class="text-[10px] tracking-widest uppercase ${isToday ? 'text-gold' : 'text-cream/40'} mb-1">${weekdayFull}</p>
+            <p class="text-xs text-cream/50 mb-3">${monthDay}</p>
+            <p class="font-mono text-sm ${isToday ? 'text-cream' : 'text-cream/70'}">${fmtClock12(hours.open)}</p>
+            <p class="font-mono text-sm ${isToday ? 'text-cream' : 'text-cream/70'}">${fmtClock12(hours.close)}</p>
+            ${isToday
+            ? `<span class="inline-block mt-3 text-[10px] font-bold px-2 py-0.5 rounded-full ${isOpenNow ? 'bg-emerald-400/15 text-emerald-300' : 'bg-crimson/15 text-crimson'}">● ${isOpenNow ? 'OPEN NOW' : 'CLOSED'}</span>`
+            : ''
+          }
+          `;
+        grid.appendChild(card);
+      });
+    }
+
+    // ============================================================
+    // DAILY SPECIAL — UPDATED WITH COMBO OFFERS
+    // ============================================================
+    const DAILY_SPECIALS = {
+      Monday: { 
+        name: 'Fried Rice Energy Pack', 
+        desc: 'Combo Pack: Chicken Fried Rice + Chilled Iced Coffee',
+        items: ['Chicken Fried Rice', 'Chilled Iced Coffee'],
+        comboPrice: 950,
+        actualPrice: 1100,
+        savings: 150,
+        img: 'weeklys/monday.webp'
+      },
+      Tuesday: { 
+        name: 'Mid-Week Kottu Craving', 
+        desc: 'Combo Pack: Cheese & Chicken / Sausage Kottu + Iced Lemon Tea',
+        items: ['Cheese & Chicken / Sausage Kottu', 'Iced Lemon Tea'],
+        comboPrice: 1100,
+        actualPrice: 1250,
+        savings: 150,
+        img: 'weeklys/tuesday.webp'
+      },
+      Wednesday: { 
+        name: 'Middle East Twist', 
+        desc: 'Combo Pack: Chicken Shawarma (with French fries & salad) + Virgin Mojito',
+        items: ['Chicken Shawarma (with fries & salad)', 'Virgin Mojito'],
+        comboPrice: 1350,
+        actualPrice: 1550,
+        savings: 200,
+        img: 'weeklys/wednesday.webp'
+      },
+      Thursday: { 
+        name: 'Pasta & Shake Treat', 
+        desc: 'Combo Pack: Cheese & Chicken Pasta + Vanilla Milkshake',
+        items: ['Cheese & Chicken Pasta', 'Vanilla Milkshake'],
+        comboPrice: 1350,
+        actualPrice: 1550,
+        savings: 200,
+        img: 'weeklys/thursday.webp'
+      },
+      Friday: { 
+        name: 'Weekend Kickoff Burger', 
+        desc: 'Combo Pack: Supreme Beef Burger (with cheese & salad) + Bubble Milk Tea',
+        items: ['Supreme Beef Burger (with cheese & salad)', 'Bubble Milk Tea (Classic)'],
+        comboPrice: 1290,
+        actualPrice: 1500,
+        savings: 210,
+        img: 'weeklys/friday.webp'
+      },
+      Saturday: { 
+        name: 'Biriyani Feast', 
+        desc: 'Combo Pack: Chicken Biriyani (Aromatic basmati) + Traditional Falooda',
+        items: ['Chicken Biriyani (Aromatic basmati)', 'Traditional Falooda'],
+        comboPrice: 1490,
+        actualPrice: 1700,
+        savings: 210,
+        img: 'weeklys/saturday.webp'
+      },
+      Sunday: { 
+        name: 'The Supreme Cheese Finale', 
+        desc: 'Combo Pack: Supreme Cheese Kottu (Loaded with extra cheese) + Milo Dinosaur',
+        items: ['Supreme Cheese Kottu (Loaded with extra cheese)', 'Milo Dinosaur'],
+        comboPrice:1850,
+        actualPrice: 2150,
+        savings: 300,
+        img: 'weeklys/sunday.webp'
+      },
+    };
+
+    let dailySpecialOverrides = {};
+    let dailySpecialsUnsubscribe = null;
+    const WEEK_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const SHORT_DAY = { Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' };
+
+    function getSpecialForDay(weekday) {
+      const defaults = DAILY_SPECIALS[weekday];
+      const override = dailySpecialOverrides[weekday] || {};
+      return {
+        name: override.name || defaults.name,
+        desc: override.desc || defaults.desc,
+        items: override.items || defaults.items,
+        comboPrice: override.comboPrice || defaults.comboPrice,
+        actualPrice: override.actualPrice || defaults.actualPrice,
+        savings: override.savings || defaults.savings,
+        img: defaults.img,
+      };
+    }
+
+    function renderDailySpecial() {
+      const now = getSriLankaNow();
+      const weekday = DAY_LABELS[now.date.getDay()];
+      const today = getSpecialForDay(weekday);
+
+      document.getElementById('specialName').textContent = today.name;
+      
+      // Render combo items
+      const comboItemsEl = document.getElementById('specialComboItems');
+      if (comboItemsEl) {
+        comboItemsEl.innerHTML = today.items.map(item => 
+          `<span class="combo-item">${item}</span>`
+        ).join('');
+      }
+      
+      document.getElementById('specialDesc').textContent = today.desc;
+      
+      // Show actual price with strike-through and combo price
+      const actualPriceEl = document.getElementById('specialActualPrice');
+      const priceEl = document.getElementById('specialPrice');
+      const savingsEl = document.getElementById('specialSavings');
+      
+      if (actualPriceEl) {
+        actualPriceEl.textContent = `Rs. ${today.actualPrice.toFixed(0)}`;
+        actualPriceEl.style.display = 'inline';
+      }
+      priceEl.textContent = `Rs. ${today.comboPrice.toFixed(0)}`;
+      savingsEl.textContent = `Save Rs. ${today.savings.toFixed(0)}!`;
+      
+      document.getElementById('specialImg').src = today.img;
+      document.getElementById('specialImg').alt = today.name;
+
+      const addBtn = document.getElementById('specialAddBtn');
+      if (addBtn) {
+        addBtn.onclick = () => addToCart({ 
+          name: `${today.name} (Combo)`, 
+          desc: today.desc,
+          price: today.comboPrice,
+          isCombo: true,
+          comboItems: today.items,
+          actualPrice: today.actualPrice,
+          savings: today.savings
+        });
+      }
+
+      const listEl = document.getElementById('weeklySpecialsList');
+      if (listEl) {
+        listEl.innerHTML = WEEK_ORDER.map((day) => {
+          const item = getSpecialForDay(day);
+          const isToday = day === weekday;
+          return `
+            <div class="special-row px-3 sm:px-4 py-4 ${isToday ? 'bg-crimson/10 border border-crimson/30 rounded-2xl' : 'border-b border-brickline/60 last:border-b-0'}">
+              <span class="special-day text-[11px] font-bold uppercase ${isToday ? 'text-gold' : 'text-crimson/70'}">${SHORT_DAY[day]}</span>
+              <div class="special-content flex items-baseline gap-x-2 gap-y-0.5 flex-wrap">
+                <span class="font-semibold text-cream">${item.name}</span>
+                ${isToday ? '<span class="text-[10px] font-bold text-gold uppercase tracking-wide">· Today</span>' : ''}
+                <span class="combo-savings">Save Rs. ${item.savings.toFixed(0)}</span>
+                <span class="text-cream/50 text-sm w-full">${item.desc}</span>
+              </div>
+              <div class="special-price text-right">
+                <span class="actual-price-strike text-cream/40 text-xs block">Rs. ${item.actualPrice.toFixed(0)}</span>
+                <span class="font-mono text-gold font-bold">Rs. ${item.comboPrice.toFixed(0)}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function listenDailySpecials() {
+      if (dailySpecialsUnsubscribe) dailySpecialsUnsubscribe();
+      dailySpecialsUnsubscribe = db.collection('dailySpecials').onSnapshot((snap) => {
+        const updated = {};
+        snap.forEach((doc) => {
+          updated[doc.id] = doc.data();
+        });
+        dailySpecialOverrides = updated;
+        renderDailySpecial();
+      }, (err) => {
+        console.error('❌ Daily special listener error:', err);
+      });
+    }
+
+    // ============================================================
+    // FAVOURITES - Firestore
+    // ============================================================
+    let favourites = [];
+
+    function loadFavouritesFromFirestore() {
+      if (!currentUser) {
+        favourites = [];
+        updateFavouriteButtons();
+        return;
+      }
+      db.collection('users').doc(currentUser.uid).collection('favourites')
+        .get()
+        .then(snap => {
+          favourites = [];
+          snap.forEach(doc => {
+            favourites.push(doc.data().itemName);
+          });
+          updateFavouriteButtons();
+        })
+        .catch(err => console.error('Error loading favourites:', err));
+    }
+
+    function toggleFavourite(itemName) {
+      if (!currentUser) {
+        showOrderNotification('Sign in required', 'Please log in to save favourites.', '❤️', false);
+        openAuthModal();
+        return;
+      }
+      const idx = favourites.indexOf(itemName);
+      const userFavRef = db.collection('users').doc(currentUser.uid).collection('favourites');
+      
+      const menuItem = MENU_ITEMS.find(item => item.name === itemName);
+      const price = menuItem ? menuItem.price : 0;
+      const desc = menuItem ? menuItem.desc : '';
+      
+      if (idx > -1) {
+        favourites.splice(idx, 1);
+        userFavRef.doc(itemName).delete().catch(err => console.error('Error removing favourite:', err));
+      } else {
+        favourites.push(itemName);
+        userFavRef.doc(itemName).set({ 
+          itemName, 
+          price: price,
+          desc: desc,
+          userId: currentUser.uid, 
+          addedAt: firebase.firestore.FieldValue.serverTimestamp() 
+        }).catch(err => console.error('Error adding favourite:', err));
+      }
+      updateFavouriteButtons();
+    }
+
+    function updateFavouriteButtons() {
+      document.querySelectorAll('.favourite-btn').forEach(btn => {
+        const itemName = btn.dataset.item;
+        if (favourites.includes(itemName)) {
+          btn.classList.add('is-favourite');
+          btn.innerHTML = '❤️';
+        } else {
+          btn.classList.remove('is-favourite');
+          btn.innerHTML = '♡';
+        }
+      });
+    }
+
+    // ============================================================
+    // MENU DATA + CAROUSEL (Landing page - 6 most selling items)
+    // ============================================================
+    const MENU_ITEMS = [
+      {
+        name: 'Chicken Kottu',
+        price: 850,
+        desc: 'Classic Sri Lankan street food — chopped roti with chicken, egg, and veggies.',
+        image: 'menu/chickenkottu.webp'
+      },
+      {
+        name: 'Sawan (4 Pax)',
+        price: 2700,
+        desc: 'A feast for four — generous portions of our signature dishes.',
+        image: 'menu/4pax.webp'
+      },
+      {
+        name: 'Nasi Goreng',
+        price: 850,
+        desc: 'Indonesian-style fried rice with chicken, egg, and sambal.',
+        image: 'menu/nasi2.webp'
+      },
+      {
+        name: 'Cheese & Chicken Mongolian Rice',
+        price: 1250,
+        desc: 'Stir-fried rice with tender chicken, cheese, and Mongolian spices.',
+        image: 'gallery2/p4.webp'
+      },
+      {
+        name: 'Cheese & Chicken Kottu ',
+        price: 950,
+        desc: 'A delightful combo box with rice, curry, and your choice of protein.',
+        image: 'menu/cheesekottu.webp'
+      },
+      {
+        name: 'Supreme Cheese Kottu',
+        price: 1350,
+        desc: 'The ultimate kottu — loaded with extra cheese, chicken, and spices.',
+        image: 'menu/sucheese1.webp'
+      }
+    ];
+
+    function renderMenu() {
+      const grid = document.getElementById('menuGrid');
+      grid.innerHTML = '';
+      MENU_ITEMS.forEach((item, itemIndex) => {
+        const card = document.createElement('div');
+        card.className = 'bg-char rounded-3xl border border-gold/10 overflow-hidden group menu-item-card';
+        card.dataset.itemName = item.name;
+        card.innerHTML = `
+            <div class="relative menu-image-wrap">
+              <div class="w-full h-56">
+                <img src="${item.image}" class="w-full h-full object-cover lazy-load" alt="${item.name}" loading="lazy">
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="menu-item-header">
+                <div class="menu-item-name-wrap">
+                  <h3 class="font-display text-xl menu-item-name">${item.name}</h3>
+                </div>
+              </div>
+              <div class="flex justify-between items-start mb-2 mt-1">
+                <span class="font-mono text-gold menu-item-price" data-original-price="${item.price.toFixed(0)}">Rs. ${item.price.toFixed(0)}</span>
+              </div>
+              <p class="text-cream/60 text-sm mb-4">${item.desc}</p>
+              <div class="flex flex-col gap-2">
+                <div class="flex items-center gap-2">
+                  <button data-item='${JSON.stringify(item)}' class="add-to-cart flex-1 bg-gold/10 text-gold border border-gold/30 rounded-full py-2 text-sm font-semibold hover:bg-gold hover:text-ink transition">Add to Order</button>
+                  <button class="favourite-btn" data-item="${item.name}" aria-label="Add to favourites">♡</button>
+                </div>
+                <div class="order-options">
+                  <div class="order-type-selector">
+                    <button class="type-btn active" data-type="pickup">Pick Up</button>
+                    <button class="type-btn" data-type="onshop">On Shop</button>
+                  </div>
+                  <div class="table-selector" data-type="onshop">
+                    <label for="tableSelect_${itemIndex}">Select Table</label>
+                    <select id="tableSelect_${itemIndex}" class="w-full">
+                      <option value="Table 1">Table 1</option>
+                      <option value="Table 2">Table 2</option>
+                      <option value="Table 3">Table 3</option>
+                      <option value="Table 4">Table 4</option>
+                      <option value="Table 5">Table 5</option>
+                      <option value="Table 6">Table 6</option>
+                      <option value="Table 7">Table 7</option>
+                      <option value="Table 8">Table 8</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        grid.appendChild(card);
+      });
+
+      // Order type selector logic
+      document.querySelectorAll('.order-type-selector').forEach(group => {
+        const btns = group.querySelectorAll('.type-btn');
+        const card = group.closest('.menu-item-card');
+        const tableSelector = card.querySelector('.table-selector');
+        
+        btns.forEach(btn => {
+          btn.addEventListener('click', function() {
+            btns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const type = this.dataset.type;
+            if (type === 'onshop') {
+              tableSelector.classList.add('active');
+            } else {
+              tableSelector.classList.remove('active');
+            }
+          });
+        });
+      });
+
+      document.querySelectorAll('img.lazy-load:not(.loaded)').forEach(img => {
+        const rect = img.getBoundingClientRect();
+        const winHeight = window.innerHeight || document.documentElement.clientHeight;
+        if (rect.top < winHeight + 200) {
+          img.classList.add('loaded');
+        }
+      });
+
+      document.querySelectorAll('.add-to-cart').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const item = JSON.parse(this.dataset.item);
+          const card = this.closest('.menu-item-card');
+          const typeBtn = card.querySelector('.type-btn.active');
+          const orderType = typeBtn ? typeBtn.dataset.type : 'pickup';
+          let table = 'Pickup';
+          if (orderType === 'onshop') {
+            const tableSelect = card.querySelector('.table-selector select');
+            table = tableSelect ? tableSelect.value : 'Table 1';
+          }
+          addToCart({ ...item, orderType, table });
+        });
+      });
+
+      document.querySelectorAll('.favourite-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const itemName = this.dataset.item;
+          toggleFavourite(itemName);
+        });
+      });
+
+      if (activeDiscount) markMenuItemsWithDiscount();
+      
+      updateFavouriteButtons();
+    }
+
+    // ============================================================
+    // CART FUNCTIONS
+    // ============================================================
+    function addToCart(item) {
+      let price = item.price;
+      if (activeDiscount && !item.isCombo) {
+        const discountItemName = activeDiscount.itemName || '';
+        const isAllItems = discountItemName.toLowerCase() === 'all items' || discountItemName === '';
+        const shouldApplyDiscount = isAllItems || 
+                                    item.name.toLowerCase() === discountItemName.toLowerCase();
+        if (shouldApplyDiscount) {
+          price = price * (1 - (activeDiscount.discountPercent || 0) / 100);
+          price = Math.round(price * 100) / 100;
+        }
+      }
+      
+      const existing = cart.find(i => i.name === item.name);
+      if (existing) {
+        existing.quantity += 1;
+        existing.price = price;
+        existing.orderType = item.orderType || 'pickup';
+        existing.table = item.table || 'Pickup';
+        if (item.isCombo) {
+          existing.isCombo = true;
+          existing.comboItems = item.comboItems;
+          existing.actualPrice = item.actualPrice;
+          existing.savings = item.savings;
+        }
+      } else {
+        cart.push({ 
+          name: item.name, 
+          price: price,
+          quantity: 1, 
+          desc: item.desc,
+          originalPrice: item.price,
+          orderType: item.orderType || 'pickup',
+          table: item.table || 'Pickup',
+          isCombo: item.isCombo || false,
+          comboItems: item.comboItems || [],
+          actualPrice: item.actualPrice || 0,
+          savings: item.savings || 0
+        });
+      }
+      updateCartUI();
+      saveCartToLocalStorage();
+      saveCartToFirestore();
+    }
+
+    function removeFromCart(itemName) {
+      cart = cart.filter(i => i.name !== itemName);
+      updateCartUI();
+      saveCartToLocalStorage();
+      saveCartToFirestore();
+    }
+
+    function updateQuantity(itemName, delta) {
+      const item = cart.find(i => i.name === itemName);
+      if (!item) return;
+      item.quantity += delta;
+      if (item.quantity <= 0) {
+        removeFromCart(itemName);
+        return;
+      }
+      updateCartUI();
+      saveCartToLocalStorage();
+      saveCartToFirestore();
+    }
+
+    function getCartTotal() {
+      // Check if any item is a combo
+      const hasCombo = cart.some(item => item.isCombo === true);
+      
+      // Service fee: 2% for combos, 5% for regular items
+      const serviceRate = hasCombo ? 0.02 : 0.05;
+      
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+      const discount = (promoSystemEnabled && appliedPromo) ? getPromoDiscountAmount(subtotal) : 0;
+      const discountedSubtotal = Math.max(0, subtotal - discount);
+      const serviceFee = discountedSubtotal * serviceRate;
+      
+      // Update label to show correct percentage
+      const label = document.getElementById('serviceFeeLabel');
+      if (label) {
+        label.textContent = `Service Fee (${Math.round(serviceRate * 100)}%)`;
+      }
+      
+      return { subtotal, discount, discountedSubtotal, serviceFee, total: discountedSubtotal + serviceFee, serviceRate };
+    }
+
+    function updateCartUI() {
+      const cartItems = document.getElementById('cartItems');
+      const emptyCart = document.getElementById('emptyCart');
+      const summary = document.getElementById('cartSummary');
+      const checkoutBtn = document.getElementById('checkoutBtn');
+      const cartCount = document.getElementById('cartCount');
+      const pickupBanner = document.getElementById('pickupBanner');
+      const promoBox = document.getElementById('promoCodeBox');
+      
+      const mobileBadge = document.getElementById('mobileCartBadge');
+
+      if (cart.length === 0) {
+        emptyCart.classList.remove('hidden');
+        cartItems.classList.add('hidden');
+        summary.classList.add('hidden');
+        checkoutBtn.classList.add('hidden');
+        pickupBanner.classList.add('hidden');
+        cartCount.classList.add('hidden');
+        mobileBadge.classList.add('hidden');
+        if (promoBox) promoBox.classList.add('hidden');
+        return;
+      }
+
+      emptyCart.classList.add('hidden');
+      cartItems.classList.remove('hidden');
+      summary.classList.remove('hidden');
+      checkoutBtn.classList.remove('hidden');
+      pickupBanner.classList.remove('hidden');
+      if (promoBox) promoBox.classList.toggle('hidden', !promoSystemEnabled);
+
+      cartItems.innerHTML = cart.map(item => `
+        <div class="cart-item flex items-center gap-3 p-3 rounded-xl bg-char border border-cream/5">
+          <div class="flex-1">
+            <p class="font-medium text-sm">${item.name}</p>
+            ${item.isCombo ? `<p class="text-cream/40 text-xs">Combo · Save Rs. ${item.savings.toFixed(0)}</p>` : ''}
+            <p class="text-cream/50 text-xs">Rs. ${item.price.toFixed(0)}</p>
+            <p class="text-cream/40 text-xs">${item.orderType === 'onshop' ? 'Table: ' + item.table : 'Pick Up'}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="quantity-btn" onclick="updateQuantity('${item.name}', -1)">−</button>
+            <span class="text-sm font-mono w-6 text-center">${item.quantity}</span>
+            <button class="quantity-btn" onclick="updateQuantity('${item.name}', 1)">+</button>
+          </div>
+          <button onclick="removeFromCart('${item.name}')" class="text-cream/30 hover:text-crimson transition text-sm ml-1">✕</button>
+        </div>
+      `).join('');
+
+      const totals = getCartTotal();
+      document.getElementById('cartSubtotal').textContent = `Rs. ${totals.subtotal.toFixed(0)}`;
+      document.getElementById('cartServiceFee').textContent = `Rs. ${totals.serviceFee.toFixed(0)}`;
+      document.getElementById('cartTotal').textContent = `Rs. ${totals.total.toFixed(0)}`;
+
+      const discountRow = document.getElementById('cartDiscountRow');
+      const appliedRow = document.getElementById('promoAppliedRow');
+      const applyRow = document.getElementById('promoApplyRow');
+      if (promoSystemEnabled && appliedPromo && totals.discount > 0) {
+        discountRow.classList.remove('hidden');
+        document.getElementById('cartDiscountLabel').textContent = `Discount (${appliedPromo.code})`;
+        document.getElementById('cartDiscount').textContent = `- Rs. ${totals.discount.toFixed(0)}`;
+        if (appliedRow) { appliedRow.classList.remove('hidden'); document.getElementById('promoAppliedCode').textContent = appliedPromo.code; }
+        if (applyRow) applyRow.classList.add('hidden');
+      } else {
+        discountRow.classList.add('hidden');
+        if (appliedRow) appliedRow.classList.add('hidden');
+        if (applyRow) applyRow.classList.remove('hidden');
+      }
+
+      const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
+      cartCount.textContent = totalItems;
+      cartCount.classList.remove('hidden');
+      
+      mobileBadge.textContent = totalItems;
+      mobileBadge.classList.remove('hidden');
+    }
+
+    function saveCartToFirestore() {
+      if (!currentUser) return;
+      db.collection('carts').doc(currentUser.uid).set({
+        items: cart,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(err => console.error('Error saving cart:', err));
+    }
+
+    function loadCartFromFirestore() {
+      if (!currentUser) return;
+      db.collection('carts').doc(currentUser.uid).get()
+        .then(doc => {
+          if (doc.exists && doc.data().items) {
+            cart = doc.data().items;
+            saveCartToLocalStorage();
+            updateCartUI();
+          }
+        })
+        .catch(err => console.error('Error loading cart:', err));
+    }
+
+    // ============================================================
+    // TELEGRAM NOTIFICATION
+    // ============================================================
+    // Escapes HTML special characters so free-text user input (name, phone,
+    // special requests, etc.) can never break Telegram's HTML parse_mode.
+    // Without this, a customer typing "&", "<" or ">" in a request field
+    // would cause Telegram to silently reject the whole message.
+    function escapeTelegramHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function sendTelegramNotification(message, context = '') {
+      const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      const payload = {
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message,
+        parse_mode: 'HTML'
+      };
+      const tag = context ? ` [${context}]` : '';
+      return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+        .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })))
+        .then(({ ok, status, data }) => {
+          // Telegram returns HTTP 200 with ok:false on things like bad
+          // parse_mode HTML or wrong chat id — fetch() alone never treats
+          // that as an error, so without this check failures went unnoticed.
+          if (!ok || data.ok === false) {
+            console.error(`❌ Telegram API rejected the message${tag}:`, status, data);
+            return { success: false, status, data };
+          } else {
+            console.log(`✅ Telegram message sent${tag}`);
+            return { success: true, status, data };
+          }
+        })
+        .catch(err => {
+          console.error(`❌ Telegram network error${tag}:`, err);
+          return { success: false, error: err.message };
+        });
+    }
+
+    function sendBookingTelegram(bookingData) {
+      const n = escapeTelegramHtml(bookingData.name);
+      const ph = escapeTelegramHtml(bookingData.phone);
+      const specialReq = escapeTelegramHtml(bookingData.specialRequest || 'None');
+      const addlReq = escapeTelegramHtml(bookingData.additionalRequests || 'None');
+      const seating = escapeTelegramHtml(bookingData.seating || 'Not specified');
+      const table = escapeTelegramHtml(bookingData.table || 'Any');
+      const guests = escapeTelegramHtml(bookingData.guests);
+
+      const message = `🆕 <b>NEW TABLE BOOKING ORDER</b> 🆕
+
+📅 <b>A new table booking has just been placed!</b>
+
+👤 <b>Name:</b> ${n}
+📞 <b>Phone:</b> ${ph}
+📆 <b>Date:</b> ${bookingData.date}
+🕐 <b>Time:</b> ${bookingData.time}
+👥 <b>Guests:</b> ${guests}
+🪑 <b>Seating:</b> ${seating}
+🍽️ <b>Table:</b> ${table}
+📝 <b>Special Request:</b> ${specialReq}
+📋 <b>Additional Requests:</b> ${addlReq}
+🆔 <b>Booking ID:</b> ${bookingData.bookingId}
+👤 <b>Guest Type:</b> ${escapeTelegramHtml(bookingData.guestType || 'Guest')}
+
+⏱️ <b>Status:</b> Pending
+📅 <b>Created:</b> ${bookingData.createdAt}
+
+🔔 <i>Please prepare the table for this booking.</i>`;
+      return sendTelegramNotification(message, `booking ${bookingData.bookingId}`);
+    }
+
+    // ============================================================
+    // ORDER NOTIFICATION — COMPACT + AUTO CLOSE (3 seconds)
+    // ============================================================
+    function showOrderNotification(title, message, icon = '✅', isSuccess = true) {
+      const existing = document.querySelector('.order-notification-success');
+      if (existing) existing.remove();
+
+      const notif = document.createElement('div');
+      notif.className = 'order-notification-success flex items-center';
+      notif.innerHTML = `
+        <div class="notif-icon">${icon}</div>
+        <div class="notif-content">
+          <div class="notif-title">${title}</div>
+          <div class="notif-message">${message}</div>
+        </div>
+        <button class="notif-close" aria-label="Close notification">&times;</button>
+      `;
+      document.body.appendChild(notif);
+
+      const timer = setTimeout(() => {
+        if (notif.parentNode) notif.remove();
+      }, 3000);
+
+      notif.querySelector('.notif-close').addEventListener('click', () => {
+        clearTimeout(timer);
+        if (notif.parentNode) notif.remove();
+      });
+
+      notif.addEventListener('click', (e) => {
+        if (e.target === notif || e.target.closest('.notif-content')) {
+          clearTimeout(timer);
+          if (notif.parentNode) notif.remove();
+        }
+      });
+    }
+
+    // ============================================================
+    // PLACE ORDER
+    // ============================================================
+    // pendingOrderAfterPhone is set to true whenever we had to pause
+    // checkout to ask for a phone number, so we know to resume the
+    // order automatically once the phone prompt is submitted.
+    let pendingOrderAfterPhone = false;
+
+    function placeOrder() {
+      if (!currentUser) {
+        showOrderNotification('Authentication Required', 'Please log in to place your order.', '🔐', false);
+        openAuthModal();
+        return;
+      }
+
+      if (cart.length === 0) {
+        showOrderNotification('Cart Empty', 'Add items to your cart before ordering.', '🛒', false);
+        return;
+      }
+
+      if (!currentUserPhone) {
+        // No phone number saved on this account yet — ask for one before
+        // continuing. submitOrder() runs automatically once it's submitted.
+        pendingOrderAfterPhone = true;
+        openPhonePromptModal();
+        return;
+      }
+
+      submitOrder(currentUserPhone);
+    }
+
+    function submitOrder(phone) {
+      // Everything below can throw synchronously (bad branch data, missing
+      // fields, etc). Wrapping it means a bug here can never again leave the
+      // UI stuck on "Placing Order..." with nothing happening — the user
+      // always gets a real error message, and we log full details to the
+      // console for debugging.
+      let totals, orderItems, orderId, orderData, telegramMessage;
+      try {
+        totals = getCartTotal();
+        orderItems = cart.map(item => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          orderType: item.orderType || 'pickup',
+          table: item.table || 'Pickup',
+          isCombo: item.isCombo || false,
+          comboItems: item.comboItems || [],
+          savings: item.savings || 0
+        }));
+
+        orderId = 'ORD-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+
+        const branch = BRANCHES[currentBranchKey] || { name: 'THE GARAGE CAFE', address: '' };
+
+        orderData = {
+          orderId: orderId,
+          userId: currentUser.uid,
+          userEmail: currentUser.email || 'guest@example.com',
+          userName: currentUser.displayName || currentUser.email || 'Guest',
+          phone: phone,
+          items: orderItems,
+          subtotal: totals.subtotal,
+          promoCode: (promoSystemEnabled && appliedPromo) ? appliedPromo.code : null,
+          discount: totals.discount || 0,
+          serviceFee: totals.serviceFee,
+          total: totals.total,
+          status: 'Confirmed',
+          orderType: 'Pickup',
+          type: 'PickUp',
+          paymentMethod: 'Online',
+          branch: branch.name,
+          branchAddress: branch.address,
+          createdAt: (window.firebase && firebase.firestore) ? firebase.firestore.FieldValue.serverTimestamp() : new Date(),
+          updatedAt: (window.firebase && firebase.firestore) ? firebase.firestore.FieldValue.serverTimestamp() : new Date(),
+          statusHistory: [{
+            status: 'Confirmed',
+            timestamp: (window.firebase && firebase.firestore) ? firebase.firestore.FieldValue.serverTimestamp() : new Date()
+          }]
+        };
+
+        telegramMessage = `
+🛎️ <b>New Order at THE GARAGE CAFE!</b>
+
+🆔 <b>Order ID:</b> ${escapeTelegramHtml(orderId)}
+👤 <b>Customer:</b> ${escapeTelegramHtml(orderData.userName)}
+📞 <b>Phone:</b> ${escapeTelegramHtml(phone)}
+📧 <b>Email:</b> ${escapeTelegramHtml(orderData.userEmail)}
+📍 <b>Branch:</b> ${escapeTelegramHtml(orderData.branch)}
+
+<b>Items:</b>
+${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} = Rs. ${(i.price * i.quantity).toFixed(0)} (${i.orderType === 'onshop' ? 'Table: ' + escapeTelegramHtml(i.table) : 'Pick Up'})${i.isCombo ? ' [COMBO - Save Rs. ' + i.savings + ']' : ''}`).join('\n')}
+
+💰 <b>Subtotal:</b> Rs. ${totals.subtotal.toFixed(0)}${orderData.promoCode ? `\n🎟️ <b>Promo (${escapeTelegramHtml(orderData.promoCode)}):</b> - Rs. ${totals.discount.toFixed(0)}` : ''}
+💵 <b>Service Fee (${Math.round(totals.serviceRate * 100)}%):</b> Rs. ${totals.serviceFee.toFixed(0)}
+🟡 <b>TOTAL:</b> Rs. ${totals.total.toFixed(0)}
+
+📦 <b>Type:</b> Pick Up Only
+📍 <b>Address:</b> ${escapeTelegramHtml(branch.address)}
+
+🔔 <i>Please prepare this order for pickup.</i>
+      `;
+      } catch (buildErr) {
+        console.error('❌ Order build error (before saving/sending anything):', buildErr);
+        showOrderNotification(
+          '⚠️ Something Went Wrong',
+          `Could not prepare your order (${buildErr.message}). Please try again or contact staff.`,
+          '⚠️',
+          false
+        );
+        return;
+      }
+
+      function finishCartAfterOrder() {
+        cart = [];
+        appliedPromo = null;
+        localStorage.removeItem('blizzCafePromoCode');
+        updateCartUI();
+        saveCartToLocalStorage();
+        try { saveCartToFirestore(); } catch (e) { console.error('⚠️ saveCartToFirestore failed:', e); }
+        closeCart();
+      }
+
+      showOrderNotification('Placing Order...', 'Please wait while we process your order.', '⏳', true);
+
+      // Send the Telegram alert immediately and independently of Firestore.
+      // This guarantees the kitchen is notified even if the database write
+      // fails for any reason (rules, network, offline, etc).
+      try {
+        sendTelegramNotification(telegramMessage);
+      } catch (tgErr) {
+        console.error('❌ Telegram send threw synchronously:', tgErr);
+      }
+
+      if (!db) {
+        console.error('❌ Firestore (db) is not available — Firebase failed to initialise. Order was sent to Telegram but NOT saved, so it will not appear in the admin panel or your account.');
+        finishCartAfterOrder();
+        showOrderNotification(
+          '⚠️ Order Sent, But Not Saved',
+          `We notified the kitchen directly, but the order could not be saved to the system. Please tell staff your order ID: ${orderId}.`,
+          '⚠️',
+          false
+        );
+        return;
+      }
+
+      db.collection('orders').add(orderData)
+        .then((docRef) => {
+          console.log('✅ Order saved to Firestore with ID:', docRef.id);
+          finishCartAfterOrder();
+          showOrderNotification(
+            '🎉 Order Confirmed!',
+            `Order #${orderId} placed successfully. Total: Rs. ${totals.total.toFixed(0)}. We'll notify you when it's ready.`,
+            '✅',
+            true
+          );
+          document.getElementById('cartContent').classList.add('hidden');
+          document.getElementById('orderSuccess').classList.remove('hidden');
+          setTimeout(() => {
+            document.getElementById('orderSuccess').classList.add('hidden');
+            document.getElementById('cartContent').classList.remove('hidden');
+          }, 5000);
+        })
+        .catch((err) => {
+          console.error('❌ Firestore save error:', err.code || '', err.message || err);
+          sendTelegramNotification(
+            `⚠️ <b>ORDER NOT SAVED TO SYSTEM</b> (Firestore error: ${err.code || err.message})\n` + telegramMessage
+          );
+          finishCartAfterOrder();
+          showOrderNotification(
+            '⚠️ Order Sent, But Not Saved',
+            `We notified the kitchen directly, but this order could not be saved (${err.code || err.message}). Please tell staff your order ID: ${orderId}.`,
+            '⚠️',
+            false
+          );
+        });
+    }
+
+    // ============================================================
+    // PHONE PROMPT MODAL (asked once, before checkout, if the
+    // account has no saved phone number yet)
+    // ============================================================
+    const phonePromptOverlay = document.getElementById('phonePromptOverlay');
+    const phonePromptForm = document.getElementById('phonePromptForm');
+    const phonePromptError = document.getElementById('phonePromptError');
+    const phonePromptClose = document.getElementById('phonePromptClose');
+
+    function openPhonePromptModal() {
+      phonePromptError.textContent = '';
+      phonePromptError.classList.remove('show');
+      phonePromptOverlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePhonePromptModal() {
+      phonePromptOverlay.classList.add('hidden');
+      document.body.style.overflow = '';
+      pendingOrderAfterPhone = false;
+    }
+
+    phonePromptClose.addEventListener('click', closePhonePromptModal);
+    phonePromptOverlay.addEventListener('click', (e) => {
+      if (e.target === phonePromptOverlay) closePhonePromptModal();
+    });
+
+    phonePromptForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      phonePromptError.textContent = '';
+      phonePromptError.classList.remove('show');
+
+      const countryCode = document.getElementById('opCountryCode').value;
+      const rawNumber = document.getElementById('opPhone').value.trim();
+
+      if (!rawNumber) {
+        phonePromptError.textContent = 'Please enter a phone number.';
+        phonePromptError.classList.add('show');
+        return;
+      }
+
+      const phone = countryCode + rawNumber;
+
+      // Save it to the account so we never have to ask again.
+      if (currentUser && db) {
+        db.collection('users').doc(currentUser.uid).set({ phone }, { merge: true })
+          .catch(err => console.error('Error saving phone number:', err));
+      }
+
+      currentUserPhone = phone;
+      phonePromptForm.reset();
+      document.getElementById('opCountryCode').value = countryCode;
+      phonePromptOverlay.classList.add('hidden');
+      document.body.style.overflow = '';
+
+      if (pendingOrderAfterPhone) {
+        pendingOrderAfterPhone = false;
+        submitOrder(phone);
+      }
+    });
+
+    // ============================================================
+    // CART SIDEBAR CONTROLS
+    // ============================================================
+    function openCart() {
+      document.getElementById('cartOverlay').classList.remove('hidden');
+      document.getElementById('cartSidebar').classList.remove('translate-x-full');
+    }
+
+    function closeCart() {
+      document.getElementById('cartOverlay').classList.add('hidden');
+      document.getElementById('cartSidebar').classList.add('translate-x-full');
+      document.getElementById('orderSuccess').classList.add('hidden');
+      document.getElementById('cartContent').classList.remove('hidden');
+    }
+
+    document.getElementById('cartTrigger').addEventListener('click', openCart);
+    document.getElementById('cartClose').addEventListener('click', closeCart);
+    document.getElementById('cartOverlay').addEventListener('click', closeCart);
+    document.getElementById('orderSuccessClose').addEventListener('click', () => {
+      document.getElementById('orderSuccess').classList.add('hidden');
+      document.getElementById('cartContent').classList.remove('hidden');
+    });
+    document.getElementById('checkoutBtn').addEventListener('click', placeOrder);
+
+    document.getElementById('mobileCartFloat').addEventListener('click', openCart);
+
+    // ============================================================
+    // NOTIFICATION SYSTEM
+    // ============================================================
+    let notificationTimeout = null;
+
+    function showNotification(title, message, icon = '📦') {
+      const banner = document.getElementById('notificationBanner');
+      const titleEl = document.getElementById('notificationTitle');
+      const messageEl = document.getElementById('notificationMessage');
+      const iconEl = document.getElementById('notificationIcon');
+
+      titleEl.textContent = title;
+      messageEl.textContent = message;
+      iconEl.textContent = icon;
+
+      banner.classList.remove('hidden');
+      clearTimeout(notificationTimeout);
+      notificationTimeout = setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 8000);
+    }
+
+    document.getElementById('notificationClose').addEventListener('click', () => {
+      document.getElementById('notificationBanner').classList.add('hidden');
+      clearTimeout(notificationTimeout);
+    });
+
+    // ============================================================
+    // MOBILE NAV TOGGLE
+    // ============================================================
+    document.getElementById('mobileToggle').addEventListener('click', () => {
+      document.getElementById('mobileMenu').classList.toggle('hidden');
+    });
+
+    // ============================================================
+    // AUTH MODAL LOGIC
+    // ============================================================
+    const authOverlay = document.getElementById('authOverlay');
+    const authClose = document.getElementById('authClose');
+    const tabLogin = document.getElementById('tabLogin');
+    const tabSignup = document.getElementById('tabSignup');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const authError = document.getElementById('authError');
+
+    function showAuthError(msg) {
+      authError.textContent = msg;
+      authError.classList.add('show');
+    }
+
+    function clearAuthError() {
+      authError.textContent = '';
+      authError.classList.remove('show');
+    }
+
+    function openAuthModal() {
+      authOverlay.classList.remove('hidden');
+      clearAuthError();
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeAuthModal() {
+      authOverlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    authClose.addEventListener('click', closeAuthModal);
+    authOverlay.addEventListener('click', (e) => { if (e.target === authOverlay) closeAuthModal(); });
+
+    function setAuthTab(mode) {
+      clearAuthError();
+      if (mode === 'login') {
+        tabLogin.className = 'tab-btn active';
+        tabSignup.className = 'tab-btn inactive';
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+      } else {
+        tabSignup.className = 'tab-btn active';
+        tabLogin.className = 'tab-btn inactive';
+        signupForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+      }
+    }
+    tabLogin.addEventListener('click', () => setAuthTab('login'));
+    tabSignup.addEventListener('click', () => setAuthTab('signup'));
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearAuthError();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => closeAuthModal())
+        .catch(err => showAuthError(err.message));
+    });
+
+    signupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearAuthError();
+      const name = document.getElementById('suName').value;
+      const countryCode = document.getElementById('suCountryCode').value;
+      const phone = countryCode + document.getElementById('suPhone').value;
+      const email = document.getElementById('suEmail').value;
+      const password = document.getElementById('suPassword').value;
+      const confirm = document.getElementById('suPasswordConfirm').value;
+
+      if (password !== confirm) { showAuthError('Passwords do not match.'); return; }
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((cred) => {
+          return cred.user.updateProfile({ displayName: name }).then(() => {
+            return db.collection('users').doc(cred.user.uid).set({ name, phone, email }, { merge: true });
+          });
+        })
+        .then(() => closeAuthModal())
+        .catch(err => showAuthError(err.message));
+    });
+
+    // ============================================================
+    // GOOGLE AUTH - Using popup (falls back to redirect if the
+    // popup is blocked). Popup avoids the third-party-cookie /
+    // storage-partitioning issues that make signInWithRedirect
+    // silently fail to restore the session on many phones/browsers.
+    // ============================================================
+    function resetGoogleBtn(btn) {
+      btn.disabled = false;
+      btn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.6 15.6 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4c-7.4 0-13.8 4.2-17 10.4z"/><path fill="#4CAF50" d="M24 44c5.4 0 10.3-2.1 14-5.5l-6.5-5.5C29.5 34.7 26.9 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.6 5.1C9.1 39.6 16 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.5 5.5C40.5 36.6 44 30.8 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        Continue with Google
+      `;
+    }
+
+    document.getElementById('googleAuthBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+
+      if (this.disabled) return;
+      const btn = this;
+
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Signing in...';
+
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          const user = result.user;
+          return db.collection('users').doc(user.uid).set({
+            name: user.displayName || 'Google User',
+            email: user.email,
+            phone: user.phoneNumber || '',
+            photoURL: user.photoURL || '',
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true }).catch(err => console.error('Error saving Google user:', err))
+            .then(() => closeAuthModal());
+        })
+        .catch((error) => {
+          console.error('Google Sign-In Error:', error);
+          resetGoogleBtn(btn);
+
+          if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+            return; // user closed the popup, no need to show an error
+          }
+
+          if (error.code === 'auth/popup-blocked') {
+            // Browser blocked the popup — fall back to redirect flow.
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Redirecting...';
+            auth.signInWithRedirect(provider).catch(err => {
+              console.error('Google Redirect Fallback Error:', err);
+              resetGoogleBtn(btn);
+              showAuthError(err.message || 'Google sign-in failed. Please try again.');
+            });
+            return;
+          }
+
+          if (error.code === 'auth/unauthorized-domain') {
+            showAuthError('This site\'s domain is not authorised for Google sign-in yet. Add it under Firebase Console → Authentication → Settings → Authorized domains.');
+            return;
+          }
+
+          showAuthError(error.message || 'Google sign-in failed. Please try again.');
+        });
+    });
+
+    document.getElementById('appleAuthBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      showOrderNotification('Coming Soon', 'Apple Sign-In will be available in a future update.', '🍎', false);
+    });
+
+    // ============================================================
+    // PROFILE LINK HANDLER
+    // ============================================================
+    function setupProfileLinks() {
+      const profileLink = document.getElementById('profileLink');
+      const mobileProfileLink = document.getElementById('mobileProfileLink');
+
+      function handleProfileClick(e) {
+        e.preventDefault();
+        if (currentUser) {
+          window.location.href = 'account.html';
+        } else {
+          openAuthModal();
+        }
+      }
+
+      profileLink.addEventListener('click', handleProfileClick);
+      mobileProfileLink.addEventListener('click', handleProfileClick);
+    }
+
+    // ============================================================
+    // MOBILE MENU ACCOUNT & ORDER BUTTON LOGIC
+    // ============================================================
+    function updateMobileProfile() {
+      const mobileIcon = document.getElementById('mobileProfileIcon');
+      const mobileText = document.getElementById('mobileProfileText');
+      if (currentUser) {
+        const initial = (currentUser.displayName || currentUser.email || 'G').charAt(0).toUpperCase();
+        mobileIcon.textContent = initial;
+        mobileText.textContent = 'Account';
+      } else {
+        mobileIcon.textContent = 'M';
+        mobileText.textContent = 'Account';
+      }
+    }
+
+    document.getElementById('mobileOrderBtn').addEventListener('click', () => {
+      document.getElementById('mobileMenu').classList.add('hidden');
+      openCart();
+    });
+
+    // ============================================================
+    // AUTH STATE LISTENER
+    // ============================================================
+    if (auth) {
+      auth.onAuthStateChanged((user) => {
+        currentUser = user;
+        const icon = document.getElementById('profileIcon');
+        const initial = document.getElementById('profileInitial');
+
+        if (user) {
+          const displayName = user.displayName || user.email || 'Guest';
+          icon.classList.add('hidden');
+          initial.classList.remove('hidden');
+          initial.textContent = displayName.charAt(0).toUpperCase();
+          updateMobileProfile();
+          loadCartFromFirestore();
+          loadFavouritesFromFirestore();
+
+          currentUserPhone = '';
+          if (db) {
+            db.collection('users').doc(user.uid).get()
+              .then(doc => { currentUserPhone = (doc.exists && doc.data().phone) ? doc.data().phone : ''; })
+              .catch(err => console.error('Error loading saved phone number:', err));
+          }
+
+          if (!authOverlay.classList.contains('hidden')) {
+            closeAuthModal();
+          }
+
+          showOrderNotification(
+            'Welcome!',
+            `Signed in as ${displayName}`,
+            '👋',
+            true
+          );
+        } else {
+          icon.classList.remove('hidden');
+          initial.classList.add('hidden');
+          updateMobileProfile();
+          loadCartFromLocalStorage();
+          favourites = [];
+          updateFavouriteButtons();
+          currentUserPhone = '';
+        }
+      });
+    } else {
+      console.error('⚠️ Auth listener skipped — Firebase auth is unavailable.');
+    }
+
+    // Handle redirect result for Google Sign-In
+    if (auth) {
+      auth.getRedirectResult().then((result) => {
+        if (result.user) {
+          const user = result.user;
+          db.collection('users').doc(user.uid).set({
+            name: user.displayName || 'Google User',
+            email: user.email,
+            phone: user.phoneNumber || '',
+            photoURL: user.photoURL || '',
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true }).then(() => {
+            console.log('✅ Google user saved to Firestore');
+          }).catch(err => console.error('Error saving Google user:', err));
+        }
+      }).catch((error) => {
+        console.error('Google Redirect Error:', error);
+        if (error.code !== 'auth/popup-closed-by-user') {
+          showAuthError(error.message || 'Google sign-in failed. Please try again.');
+        }
+      });
+    }
+
+    // ============================================================
+    // NEW AUTO SLIDER (FOOD SLIDER)
+    // ============================================================
+    (function autoSlider() {
+      const track = document.getElementById('autoSliderTrack');
+      const viewport = document.getElementById('autoSliderViewport');
+
+      let setWidth = track.scrollWidth / 2;
+
+      window.addEventListener('resize', () => {
+        setWidth = track.scrollWidth / 2;
+      });
+
+      let autoOffset = 0;
+      let scrollOffset = 0;
+      const autoSpeed = 0.55;
+
+      let isDragging = false;
+      let dragStartX = 0;
+      let dragStartScrollOffset = 0;
+      let isPaused = false;
+
+      function wrap(val) {
+        while (val >= setWidth) val -= setWidth;
+        while (val < 0) val += setWidth;
+        return val;
+      }
+
+      function render() {
+        const total = wrap(autoOffset + scrollOffset);
+        track.style.transform = `translateX(${-total}px)`;
+      }
+
+      function animate() {
+        if (!isPaused) {
+          autoOffset += autoSpeed;
+          autoOffset = wrap(autoOffset);
+          render();
+        }
+        requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
+
+      let lastScrollY = window.scrollY;
+      window.addEventListener('scroll', () => {
+        const delta = window.scrollY - lastScrollY;
+        lastScrollY = window.scrollY;
+        scrollOffset += delta * 0.9;
+        scrollOffset = wrap(scrollOffset);
+      }, { passive: true });
+
+      function getPointerX(e) {
+        return e.touches ? e.touches[0].clientX : e.clientX;
+      }
+
+      function dragStart(e) {
+        isDragging = true;
+        isPaused = true;
+        viewport.classList.add('dragging');
+        dragStartX = getPointerX(e);
+        dragStartScrollOffset = scrollOffset;
+      }
+
+      function dragMove(e) {
+        if (!isDragging) return;
+        const x = getPointerX(e);
+        const delta = dragStartX - x;
+        scrollOffset = wrap(dragStartScrollOffset + delta);
+        render();
+      }
+
+      function dragEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        isPaused = false;
+        viewport.classList.remove('dragging');
+      }
+
+      viewport.addEventListener('mousedown', dragStart);
+      window.addEventListener('mousemove', dragMove);
+      window.addEventListener('mouseup', dragEnd);
+      viewport.addEventListener('mouseleave', dragEnd);
+
+      viewport.addEventListener('touchstart', dragStart, { passive: true });
+      viewport.addEventListener('touchmove', dragMove, { passive: true });
+      viewport.addEventListener('touchend', dragEnd);
+      viewport.addEventListener('touchcancel', dragEnd);
+    })();
+
+    // ============================================================
+    // BOOKING FORM VALIDATION + SEATING SELECTOR
+    // ============================================================
+    function initBookingValidation() {
+      const bookingDate = document.getElementById('bookingDate');
+      const bookingTime = document.getElementById('bookingTime');
+      const bookingError = document.getElementById('bookingError');
+
+      const now = getSriLankaNow();
+      const todayStr = `${now.year}-${String(now.month).padStart(2, '0')}-${String(now.day).padStart(2, '0')}`;
+      bookingDate.setAttribute('min', todayStr);
+
+      if (!bookingDate.value) {
+        bookingDate.value = todayStr;
+      }
+
+      if (!bookingTime.value) {
+        let hour = now.hour + 1;
+        let minute = now.minute;
+        if (minute > 0 && minute <= 30) {
+          minute = 30;
+        } else if (minute > 30) {
+          minute = 0;
+          hour += 1;
+        }
+        if (hour >= 24) {
+          hour = hour - 24;
+        }
+        const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+        bookingTime.value = timeStr;
+      }
+
+      function validateDateTime() {
+        const selectedDate = bookingDate.value;
+        const selectedTime = bookingTime.value;
+
+        if (!selectedDate || !selectedTime) {
+          bookingError.classList.remove('show');
+          return true;
+        }
+
+        const [year, month, day] = selectedDate.split('-').map(Number);
+        const [hour, minute] = selectedTime.split(':').map(Number);
+        const selectedDateTime = new Date(year, month - 1, day, hour, minute);
+        const nowDateTime = new Date(now.year, now.month - 1, now.day, now.hour, now.minute);
+
+        if (selectedDateTime < nowDateTime) {
+          bookingError.textContent = '❌ Please select a future date and time. Bookings cannot be made for past times.';
+          bookingError.classList.add('show');
+          return false;
+        }
+
+        bookingError.classList.remove('show');
+        return true;
+      }
+
+      bookingDate.addEventListener('change', validateDateTime);
+      bookingTime.addEventListener('change', validateDateTime);
+
+      const bookingForm = document.getElementById('bookingForm');
+      bookingForm.addEventListener('submit', function(e) {
+        if (!validateDateTime()) {
+          e.preventDefault();
+          return false;
+        }
+        return true;
+      }, true);
+
+      // Seating selector
+      const seatBtns = document.querySelectorAll('.seat-btn');
+      const seatingHidden = document.getElementById('seatingPreference');
+      seatBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          seatBtns.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          seatingHidden.value = this.dataset.seat;
+        });
+      });
+      document.querySelector('.seat-btn[data-seat="Upstairs"]').classList.add('active');
+      seatingHidden.value = 'Upstairs';
+
+      validateDateTime();
+    }
+
+    // ============================================================
+    // BOOKING FORM SUBMIT (updated with new fields)
+    // ============================================================
+    const guestsSelect = document.getElementById('guestsSelect');
+    const customGuestsWrapper = document.getElementById('customGuestsWrapper');
+    const customGuestsInput = document.getElementById('customGuestsInput');
+
+    guestsSelect.addEventListener('change', function() {
+      if (this.value === 'custom') {
+        customGuestsWrapper.classList.remove('hidden');
+        customGuestsInput.focus();
+      } else {
+        customGuestsWrapper.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+      // MUST prevent the default form submission immediately. The <form>
+      // has no action/method attributes, so without this, a successful
+      // booking (the normal path, where neither error branch below runs)
+      // falls through to the browser's default GET submit — which reloads
+      // the whole page and was why "Book a Table" appeared to refresh the site.
+      e.preventDefault();
+
+      const bookingDate = document.getElementById('bookingDate');
+      const bookingTime = document.getElementById('bookingTime');
+      const bookingError = document.getElementById('bookingError');
+      
+      const selectedDate = bookingDate.value;
+      const selectedTime = bookingTime.value;
+      
+      if (!selectedDate || !selectedTime) {
+        bookingError.textContent = '❌ Please select both a date and time.';
+        bookingError.classList.add('show');
+        return;
+      }
+      
+      const now = getSriLankaNow();
+      const [year, month, day] = selectedDate.split('-').map(Number);
+      const [hour, minute] = selectedTime.split(':').map(Number);
+      const selectedDateTime = new Date(year, month - 1, day, hour, minute);
+      const nowDateTime = new Date(now.year, now.month - 1, now.day, now.hour, now.minute);
+      
+      if (selectedDateTime < nowDateTime) {
+        e.preventDefault();
+        bookingError.textContent = '❌ Please select a future date and time. Bookings cannot be made for past times.';
+        bookingError.classList.add('show');
+        return;
+      }
+      
+      bookingError.classList.remove('show');
+
+      const form = e.target;
+      const name = form.querySelector('input[type="text"]').value;
+      const phoneInput = form.querySelector('input[type="tel"]');
+      const countryCode = form.querySelector('#countryCode').value;
+      const phone = countryCode + phoneInput.value;
+      const dateInput = form.querySelector('input[type="date"]');
+      const timeInput = form.querySelector('input[type="time"]');
+      let guestsValue = guestsSelect.value;
+      if (guestsSelect.value === 'custom') {
+        const customVal = customGuestsInput.value.trim();
+        guestsValue = customVal ? `${customVal} Guests` : '2 Guests';
+      }
+      
+      // New fields
+      const seating = document.getElementById('bookingSeating').value || 'Not specified';
+      const table = document.getElementById('bookingTable').value || 'Any';
+      const specialRequest = document.getElementById('bookingSpecialRequests').value || 'None';
+      const additionalRequests = form.querySelector('textarea').value || 'None';
+      
+      const bookingId = 'BK-' + Date.now().toString().slice(-6);
+      const createdAt = new Date().toLocaleString('en-LK', {
+        timeZone: 'Asia/Colombo',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+      const userEmail = currentUser ? currentUser.email : 'guest@example.com';
+      const userName = currentUser ? (currentUser.displayName || currentUser.email || 'Guest') : name;
+      const uid = currentUser ? currentUser.uid : 'guest';
+      const seatingPreference = document.getElementById('seatingPreference').value || 'Not specified';
+
+      const bookingData = {
+        name, phone, date: dateInput.value, time: timeInput.value, guests: guestsValue,
+        seating, table, specialRequest, additionalRequests, bookingId,
+        guestType: currentUser ? 'Logged In User' : 'Guest',
+        createdAt, userEmail, userName, seatingPreference
+      };
+
+      // Send the Telegram alert immediately, independent of the Firestore
+      // write below — so staff always get notified even if the save fails.
+      try {
+        sendBookingTelegram(bookingData).then(result => {
+          if (!result.success) {
+            const reason = (result.data && result.data.description) || result.error || 'Unknown error';
+            showOrderNotification(
+              '⚠️ Booking Saved, But Telegram Alert Failed',
+              `Your table booking was recorded, but staff were NOT notified on Telegram (${reason}). Please call to confirm your table.`,
+              '⚠️',
+              false
+            );
+          }
+        });
+      } catch (tgErr) {
+        console.error('❌ Booking Telegram send threw synchronously:', tgErr);
+      }
+
+      if (!db) {
+        console.error('❌ Firestore (db) is not available — booking was sent to Telegram but NOT saved, so it will not appear in the admin panel or your account.');
+      } else {
+        db.collection('bookings').add({
+          uid, name, email: userEmail, phone, date: dateInput.value, time: timeInput.value,
+          guests: guestsValue, seating, table, specialRequest, additionalRequests, bookingId,
+          branch: currentBranchKey, guestType: currentUser ? 'Logged In User' : 'Guest',
+          seatingPreference: seatingPreference,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        }).then(() => {
+          console.log('✅ Booking saved to Firestore');
+        }).catch((err) => {
+          console.error('❌ Booking Firestore save error:', err.code || '', err.message || err);
+        });
+      }
+
+      document.getElementById('bookingSuccess').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('bookingSuccess').classList.add('hidden');
+      }, 5000);
+      form.reset();
+      customGuestsWrapper.classList.add('hidden');
+      guestsSelect.value = '2 Guests';
+      
+      const nowReset = getSriLankaNow();
+      const todayStrReset = `${nowReset.year}-${String(nowReset.month).padStart(2, '0')}-${String(nowReset.day).padStart(2, '0')}`;
+      document.getElementById('bookingDate').value = todayStrReset;
+      let hourReset = nowReset.hour + 1;
+      let minuteReset = nowReset.minute;
+      if (minuteReset > 0 && minuteReset <= 30) {
+        minuteReset = 30;
+      } else if (minuteReset > 30) {
+        minuteReset = 0;
+        hourReset += 1;
+      }
+      if (hourReset >= 24) {
+        hourReset = hourReset - 24;
+      }
+      document.getElementById('bookingTime').value = `${String(hourReset).padStart(2, '0')}:${String(minuteReset).padStart(2, '0')}`;
+      document.querySelectorAll('.seat-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('.seat-btn[data-seat="Upstairs"]').classList.add('active');
+      document.getElementById('seatingPreference').value = 'Upstairs';
+      
+      // Reset new fields
+      document.getElementById('bookingSeating').value = 'Upstairs';
+      document.getElementById('bookingTable').value = '';
+      document.getElementById('bookingSpecialRequests').value = '';
+    });
+
+    // ============================================================
+    // NAV BAR — hidden at the very top, fades/slides in on scroll
+    // ============================================================
+    try {
+      const siteHeader = document.getElementById('siteHeader');
+      const revealNav = () => {
+        siteHeader.classList.toggle('nav-visible', window.scrollY > 120);
+      };
+      revealNav();
+      window.addEventListener('scroll', revealNav, { passive: true });
+    } catch (err) {
+      console.error('⚠️ Nav reveal-on-scroll failed:', err);
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const b = BRANCHES[currentBranchKey];
+    document.getElementById('branchLabelHours').textContent = b.name;
+    document.getElementById('branchLabelBook').textContent = b.name;
+
+    // Start the shop open/close countdown FIRST and on its own, so it can
+    // never be blocked or broken by a Firebase / network problem below.
+    try {
+      renderStatus();
+      if (countdownIntervalId) {
+        clearInterval(countdownIntervalId);
+      }
+      countdownIntervalId = setInterval(renderStatus, 1000);
+      console.log('✅ Countdown started (independent of Firebase)');
+    } catch (err) {
+      console.error('⚠️ Countdown failed to start:', err);
+    }
+
+    try { loadCartFromLocalStorage(); } catch (err) { console.error('⚠️ Cart load failed:', err); }
+    try { renderDailySpecial(); } catch (err) { console.error('⚠️ Daily special render failed:', err); }
+    try { renderMenu(); } catch (err) { console.error('⚠️ Menu render failed:', err); }
+    try { setupProfileLinks(); } catch (err) { console.error('⚠️ Profile links setup failed:', err); }
+
+    console.log('🔄 Starting discount listener...');
+    try { listenDiscounts(); } catch (err) { console.error('⚠️ Discount listener failed:', err); }
+
+    console.log('🔄 Starting promo code listeners...');
+    try { listenPromoSettings(); } catch (err) { console.error('⚠️ Promo settings listener failed:', err); }
+    try { listenPromoCodes(); } catch (err) { console.error('⚠️ Promo codes listener failed:', err); }
+
+    console.log('🔄 Starting daily special listener...');
+    try { listenDailySpecials(); } catch (err) { console.error('⚠️ Daily special listener failed:', err); }
+
+    console.log('🔄 Initializing booking validation...');
+    try { initBookingValidation(); } catch (err) { console.error('⚠️ Booking validation failed:', err); }
+
+    // ============================================================
+    // FOOTER — scroll reveal + back-to-top button
+    // ============================================================
+    try {
+      const footerCols = document.querySelectorAll('.footer-grid > div');
+      if ('IntersectionObserver' in window && footerCols.length) {
+        const footerObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('in-view');
+              footerObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.15 });
+        footerCols.forEach((col) => footerObserver.observe(col));
+      } else {
+        footerCols.forEach((col) => col.classList.add('in-view'));
+      }
+
+      const backToTopBtn = document.getElementById('backToTop');
+      if (backToTopBtn) {
+        window.addEventListener('scroll', () => {
+          backToTopBtn.classList.toggle('show', window.scrollY > 500);
+        }, { passive: true });
+        backToTopBtn.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+      console.log('✅ Footer reveal + back-to-top ready');
+    } catch (err) {
+      console.error('⚠️ Footer enhancements failed:', err);
+    }
+
+    console.log('✅ THE GARAGE CAFE site initialized!');
+    console.log('✅ Daily specials updated with combo offers!');
+    console.log('✅ Service fee: 2% for combos, 5% for regular items');
+    console.log('✅ Combo prices displayed with strike-through actual prices');
+    console.log('✅ Savings badges shown on each combo item');
+    console.log('✅ Pickup / On Shop selector added with table list for On Shop');
+    console.log('✅ All prices displayed in Rs.');
+  </script>
+</body>
+</html>
