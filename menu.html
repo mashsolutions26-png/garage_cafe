@@ -1213,10 +1213,29 @@
             <p id="cartPhoneError" class="dining-error">Enter a valid Sri Lankan phone number (10 digits, starting with 0).</p>
           </div>
         </div>
+        <div id="promoCodeBox" class="hidden mb-4">
+          <div id="promoApplyRow" class="flex gap-2">
+            <input id="promoCodeInput" type="text" placeholder="Promo code" maxlength="30"
+              class="flex-1 bg-ink border border-cream/15 rounded-xl px-4 py-2.5 text-sm uppercase tracking-wide focus:border-gold/60" />
+            <button id="promoApplyBtn" class="bg-gold/10 text-gold border border-gold/30 rounded-xl px-4 text-sm font-semibold hover:bg-gold hover:text-ink transition">Apply</button>
+          </div>
+          <p id="promoMessage" class="text-xs mt-2 hidden"></p>
+          <div id="promoAppliedRow" class="hidden flex items-center justify-between bg-gold/10 border border-gold/30 rounded-xl px-4 py-2.5 mt-1">
+            <div class="flex items-center gap-2 text-sm text-gold font-semibold">
+              <i class="fa-solid fa-ticket"></i>
+              <span id="promoAppliedCode">CODE</span>
+            </div>
+            <button id="promoRemoveBtn" class="text-cream/50 hover:text-crimson text-xs underline">Remove</button>
+          </div>
+        </div>
         <div id="cartSummary" class="hidden border-t border-cream/10 pt-4 space-y-2">
           <div class="flex justify-between text-sm">
             <span class="text-cream/60">Subtotal</span>
             <span id="cartSubtotal" class="font-mono text-cream">$0.00</span>
+          </div>
+          <div id="cartDiscountRow" class="hidden flex justify-between text-sm">
+            <span class="text-gold/80" id="cartDiscountLabel">Discount</span>
+            <span id="cartDiscount" class="font-mono text-gold">- LKR 0.00</span>
           </div>
           <div class="flex justify-between text-sm">
             <span class="text-cream/60" id="serviceFeeLabel">Service Fee (5%)</span>
@@ -1327,6 +1346,15 @@
     let activeDiscount = null;
     let discountsUnsubscribe = null;
     let favUnsubscribe = null;
+
+    // Promo codes (real-time sync from Admin Panel — same source as index.html
+    // so a code applied here matches the main site exactly).
+    let promoCodesUnsubscribe = null;
+    let promoSettingsUnsubscribe = null;
+    let promoCodesList = [];
+    let promoSystemEnabled = false;
+    let appliedPromo = null; // { code, discountPercent, applyMode, items }
+    let pendingSavedPromoCode = null;
 
     // ============================================================
     // DINING OPTION (Pick Up / On Shop + Table) — chosen once per
@@ -1673,6 +1701,11 @@
       if (saved) {
         try { cart = JSON.parse(saved); updateCartUI(); } catch(e) { cart = []; }
       }
+      const savedPromoCode = localStorage.getItem('garageCafePromoCode');
+      if (savedPromoCode) {
+        // will be re-validated once promo codes load from Firestore
+        pendingSavedPromoCode = savedPromoCode;
+      }
     }
 
     function saveCartToLocalStorage() {
@@ -1720,14 +1753,136 @@
       saveCartToFirestore();
     }
 
+    function getPromoDiscountAmount(subtotal) {
+      if (!appliedPromo) return 0;
+      if (appliedPromo.applyMode === 'items' && appliedPromo.items && appliedPromo.items.length) {
+        const eligibleSubtotal = cart.reduce((sum, item) => {
+          return appliedPromo.items.includes(item.name) ? sum + ((Number(item?.price) || 0) * (Number(item?.quantity) || 1)) : sum;
+        }, 0);
+        return eligibleSubtotal * (appliedPromo.discountPercent / 100);
+      }
+      // full cart
+      return subtotal * (appliedPromo.discountPercent / 100);
+    }
+
     function getCartTotal() {
       const subtotal = cart.reduce((sum, i) => sum + ((Number(i?.price) || 0) * (Number(i?.quantity) || 1)), 0);
-      const serviceFee = subtotal * SERVICE_FEE_RATE;
+      const discount = (promoSystemEnabled && appliedPromo) ? getPromoDiscountAmount(subtotal) : 0;
+      const discountedSubtotal = Math.max(0, subtotal - discount);
+      const serviceFee = discountedSubtotal * SERVICE_FEE_RATE;
       const label = document.getElementById('serviceFeeLabel');
       if (label) {
         label.textContent = `Service Fee (${Math.round(SERVICE_FEE_RATE * 100)}%)`;
       }
-      return { subtotal, serviceFee, total: subtotal + serviceFee, serviceRate: SERVICE_FEE_RATE };
+      return { subtotal, discount, discountedSubtotal, serviceFee, total: discountedSubtotal + serviceFee, serviceRate: SERVICE_FEE_RATE };
+    }
+
+    // ============================================================
+    // PROMO CODE LISTENERS (real-time sync from Admin Panel — the
+    // same 'promoCodes' / 'settings/promoSystem' Firestore data that
+    // powers the promo box on index.html, so a code works everywhere).
+    // ============================================================
+    function listenPromoSettings() {
+      if (promoSettingsUnsubscribe) promoSettingsUnsubscribe();
+      promoSettingsUnsubscribe = db.collection('settings').doc('promoSystem').onSnapshot(doc => {
+        promoSystemEnabled = !!(doc.exists && doc.data().enabled);
+        const box = document.getElementById('promoCodeBox');
+        if (box) {
+          if (promoSystemEnabled && cart.length > 0) {
+            box.classList.remove('hidden');
+          } else {
+            box.classList.add('hidden');
+          }
+        }
+        if (!promoSystemEnabled && appliedPromo) {
+          appliedPromo = null;
+          localStorage.removeItem('garageCafePromoCode');
+          showPromoMessage('Promo codes are currently unavailable.', false);
+        }
+        updateCartUI();
+      }, err => { console.error('❌ Promo settings listener error:', err); });
+    }
+
+    function listenPromoCodes() {
+      if (promoCodesUnsubscribe) promoCodesUnsubscribe();
+      promoCodesUnsubscribe = db.collection('promoCodes').onSnapshot(snap => {
+        promoCodesList = [];
+        snap.forEach(doc => {
+          const d = doc.data();
+          d.id = doc.id;
+          promoCodesList.push(d);
+        });
+
+        if (pendingSavedPromoCode && !appliedPromo) {
+          const match = promoCodesList.find(p => p.code === pendingSavedPromoCode && p.status === 'active');
+          if (match && promoSystemEnabled) {
+            appliedPromo = { code: match.code, discountPercent: match.discountPercent, applyMode: match.applyMode, items: match.items || [] };
+          } else {
+            localStorage.removeItem('garageCafePromoCode');
+          }
+          pendingSavedPromoCode = null;
+        }
+
+        if (appliedPromo) {
+          const stillValid = promoCodesList.find(p => p.code === appliedPromo.code && p.status === 'active');
+          if (!stillValid) {
+            appliedPromo = null;
+            localStorage.removeItem('garageCafePromoCode');
+            showPromoMessage('Your promo code is no longer valid and was removed.', false);
+          } else {
+            appliedPromo.discountPercent = stillValid.discountPercent;
+            appliedPromo.applyMode = stillValid.applyMode;
+            appliedPromo.items = stillValid.items || [];
+          }
+        }
+
+        updateCartUI();
+      }, err => { console.error('❌ Promo codes listener error:', err); });
+    }
+
+    function showPromoMessage(msg, isSuccess) {
+      const el = document.getElementById('promoMessage');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = `text-xs mt-2 ${isSuccess ? 'text-gold' : 'text-crimson'}`;
+      el.classList.remove('hidden');
+    }
+
+    function applyPromoCode() {
+      const input = document.getElementById('promoCodeInput');
+      const code = (input.value || '').trim().toUpperCase();
+      if (!code) {
+        showPromoMessage('Please enter a promo code.', false);
+        return;
+      }
+      if (!promoSystemEnabled) {
+        showPromoMessage('Promo codes are currently unavailable.', false);
+        return;
+      }
+      const match = promoCodesList.find(p => p.code === code && p.status === 'active');
+      if (!match) {
+        showPromoMessage('Invalid or expired promo code.', false);
+        return;
+      }
+      if (match.applyMode === 'items' && (!match.items || !match.items.length ||
+          !cart.some(item => match.items.includes(item.name)))) {
+        showPromoMessage(`This code only applies to: ${(match.items || []).join(', ') || 'select items'}.`, false);
+        return;
+      }
+      appliedPromo = { code: match.code, discountPercent: match.discountPercent, applyMode: match.applyMode, items: match.items || [] };
+      localStorage.setItem('garageCafePromoCode', match.code);
+      showPromoMessage(`Promo code applied — ${match.discountPercent}% off!`, true);
+      updateCartUI();
+    }
+
+    function removePromoCode() {
+      appliedPromo = null;
+      localStorage.removeItem('garageCafePromoCode');
+      const input = document.getElementById('promoCodeInput');
+      if (input) input.value = '';
+      const el = document.getElementById('promoMessage');
+      if (el) el.classList.add('hidden');
+      updateCartUI();
     }
 
     function updateCartUI() {
@@ -1737,6 +1892,7 @@
       const checkoutBtn = document.getElementById('checkoutBtn');
       const cartCount = document.getElementById('cartCount');
       const diningOptionBox = document.getElementById('diningOptionBox');
+      const promoBox = document.getElementById('promoCodeBox');
 
       if (cart.length === 0) {
         emptyCart.classList.remove('hidden');
@@ -1745,6 +1901,7 @@
         checkoutBtn.classList.add('hidden');
         cartCount.classList.add('hidden');
         if (diningOptionBox) diningOptionBox.classList.add('hidden');
+        if (promoBox) promoBox.classList.add('hidden');
         return;
       }
 
@@ -1753,6 +1910,7 @@
       summary.classList.remove('hidden');
       checkoutBtn.classList.remove('hidden');
       if (diningOptionBox) diningOptionBox.classList.remove('hidden');
+      if (promoBox) promoBox.classList.toggle('hidden', !promoSystemEnabled);
 
       cartItems.innerHTML = cart.map(item => {
         // Safe fallbacks so a malformed cart item can never throw and
@@ -1780,6 +1938,23 @@
       document.getElementById('cartSubtotal').textContent = `LKR ${totals.subtotal.toFixed(2)}`;
       document.getElementById('cartServiceFee').textContent = `LKR ${totals.serviceFee.toFixed(2)}`;
       document.getElementById('cartTotal').textContent = `LKR ${totals.total.toFixed(2)}`;
+
+      const discountRow = document.getElementById('cartDiscountRow');
+      const appliedRow = document.getElementById('promoAppliedRow');
+      const applyRow = document.getElementById('promoApplyRow');
+      if (promoSystemEnabled && appliedPromo && totals.discount > 0) {
+        if (discountRow) discountRow.classList.remove('hidden');
+        const discountLabelEl = document.getElementById('cartDiscountLabel');
+        if (discountLabelEl) discountLabelEl.textContent = `Discount (${appliedPromo.code})`;
+        const discountValEl = document.getElementById('cartDiscount');
+        if (discountValEl) discountValEl.textContent = `- LKR ${totals.discount.toFixed(2)}`;
+        if (appliedRow) { appliedRow.classList.remove('hidden'); document.getElementById('promoAppliedCode').textContent = appliedPromo.code; }
+        if (applyRow) applyRow.classList.add('hidden');
+      } else {
+        if (discountRow) discountRow.classList.add('hidden');
+        if (appliedRow) appliedRow.classList.add('hidden');
+        if (applyRow) applyRow.classList.remove('hidden');
+      }
 
       const totalItems = cart.reduce((sum, i) => sum + (Number(i?.quantity) || 1), 0);
       cartCount.textContent = totalItems;
@@ -1877,6 +2052,8 @@
         customerDetails: { name: currentUser.displayName || currentUser.email || 'Guest', phone: phone },
         items: orderItems,
         subtotal: totals.subtotal,
+        promoCode: (promoSystemEnabled && appliedPromo) ? appliedPromo.code : null,
+        discount: totals.discount || 0,
         serviceFeeRate: totals.serviceRate,
         serviceFee: totals.serviceFee,
         // Keep both names in sync: `total` for legacy screens still reading
@@ -1912,13 +2089,15 @@
 <b>Items:</b>
 ${itemLines}
 
-💰 <b>Subtotal:</b> Rs. ${totals.subtotal.toFixed(0)}
+💰 <b>Subtotal:</b> Rs. ${totals.subtotal.toFixed(0)}${orderData.promoCode ? `\n🎟️ <b>Promo (${orderData.promoCode}):</b> - Rs. ${totals.discount.toFixed(0)}` : ''}
 💵 <b>Service Fee (${Math.round(totals.serviceRate * 100)}%):</b> Rs. ${totals.serviceFee.toFixed(0)}
 🟡 <b>Total Amount:</b> Rs. ${totalAmount.toFixed(0)}
       `;
 
       function finish() {
         cart = [];
+        appliedPromo = null;
+        localStorage.removeItem('garageCafePromoCode');
         updateCartUI();
         // Clear the shared cart key so every page (index, menu, account)
         // reflects the empty cart immediately.
@@ -2100,6 +2279,12 @@ ${itemLines}
     // ============================================================
     // MOBILE NAV (same as original)
     // ============================================================
+    document.getElementById('promoApplyBtn')?.addEventListener('click', applyPromoCode);
+    document.getElementById('promoRemoveBtn')?.addEventListener('click', removePromoCode);
+    document.getElementById('promoCodeInput')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); applyPromoCode(); }
+    });
+
     document.getElementById('mobileToggle').addEventListener('click', () => {
       document.getElementById('mobileMenu').classList.toggle('hidden');
     });
@@ -2218,6 +2403,17 @@ ${itemLines}
       currentUser = user;
       const icon = document.getElementById('profileIcon');
       const initial = document.getElementById('profileInitial');
+
+      // Re-attach the promo code / promo settings / discount listeners on
+      // every auth state change (login, logout, or first resolution on
+      // page load). If Firestore's rules require an authenticated read
+      // of 'promoCodes' / 'settings', the very first attempt (before auth
+      // resolves) can fail with permission-denied, and a dead onSnapshot
+      // listener never auto-retries — so we refresh it here too.
+      try { listenPromoSettings(); } catch (err) { console.error('⚠️ Promo settings listener failed:', err); }
+      try { listenPromoCodes(); } catch (err) { console.error('⚠️ Promo codes listener failed:', err); }
+      try { listenDiscounts(); } catch (err) { console.error('⚠️ Discount listener failed:', err); }
+
       if (user) {
         const displayName = user.displayName || user.email || 'Guest';
         icon.classList.add('hidden');
@@ -2285,6 +2481,8 @@ ${itemLines}
     loadCartFromLocalStorage();
     setupProfileLinks();
     listenDiscounts();
+    listenPromoSettings();
+    listenPromoCodes();
     listenMenuItems(); // live sync with admin.html's menuItems collection
   </script>
 </body>
