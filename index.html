@@ -839,7 +839,7 @@
       margin-bottom: 20px;
     }
 
-    .coffee-animation {
+    .gear-animation {
       position: relative;
       display: inline-flex;
       align-items: center;
@@ -852,35 +852,61 @@
       border: 1px solid rgba(244,185,62,0.25);
     }
 
-    .coffee-icon {
-      font-size: 20px;
-      color: var(--gold);
-      animation: coffeeFloat 3s ease-in-out infinite;
+    /* two meshing gears, spinning in opposite directions like a garage machine */
+    .gear-icon {
+      position: absolute;
       transform-origin: center;
+      filter: drop-shadow(0 0 6px rgba(244, 185, 62, 0.25));
     }
 
-    .coffee-steam {
+    .gear-large {
+      font-size: 26px;
+      color: var(--gold);
+      top: 8px;
+      left: 6px;
+      animation: gearSpinCW 7s linear infinite;
+    }
+
+    .gear-small {
+      font-size: 16px;
+      color: var(--crimson);
+      bottom: 6px;
+      right: 4px;
+      animation: gearSpinCCW 4.5s linear infinite;
+      filter: drop-shadow(0 0 6px rgba(200, 16, 46, 0.3));
+    }
+
+    /* faint spark pulses flicked off the gear teeth, garage-welding style */
+    .spark {
       position: absolute;
       width: 3px;
-      background: linear-gradient(to top, rgba(244,185,62,0.7), transparent);
-      border-radius: 2px;
-      animation: steamRise 2.5s ease-in-out infinite;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 6px 1px rgba(244, 185, 62, 0.8);
+      animation: sparkPop 2.6s ease-in-out infinite;
+      opacity: 0;
     }
 
-    .steam-1 { height: 14px; top: -6px; left: 14px; animation-delay: 0s; }
-    .steam-2 { height: 11px; top: -3px; left: 22px; animation-delay: 0.8s; }
-    .steam-3 { height: 13px; top: -4px; left: 30px; animation-delay: 1.6s; }
+    .spark-1 { top: 2px; right: 6px; animation-delay: 0s; }
+    .spark-2 { top: 12px; right: -2px; animation-delay: .9s; }
+    .spark-3 { bottom: 8px; left: 0px; animation-delay: 1.8s; }
 
-    @keyframes coffeeFloat {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-5px) rotate(4deg); }
+    @keyframes gearSpinCW {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
-    @keyframes steamRise {
-      0% { opacity: 0; transform: translateY(0) scale(0.8); }
-      30% { opacity: 0.8; transform: translateY(-8px) scale(1); }
-      70% { opacity: 0.4; transform: translateY(-16px) scale(1.1); }
-      100% { opacity: 0; transform: translateY(-24px) scale(1.2); }
+    @keyframes gearSpinCCW {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+
+    @keyframes sparkPop {
+      0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+      15% { opacity: 1; transform: translate(2px, -2px) scale(1); }
+      45% { opacity: 0; transform: translate(8px, -10px) scale(0.4); }
+      100% { opacity: 0; }
     }
 
     .logo-text {
@@ -928,7 +954,19 @@
       color: var(--cream);
       text-decoration: none;
       overflow: hidden;
+      animation: pitLightFlicker 3.6s ease-in-out infinite;
       transition: transform .35s cubic-bezier(.34,1.56,.64,1), border-color .35s ease, color .35s ease, box-shadow .35s ease;
+    }
+
+    /* staggered so the row of icons flickers like a row of garage pit lights */
+    .social-link:nth-child(1) { animation-delay: 0s; }
+    .social-link:nth-child(2) { animation-delay: .5s; }
+    .social-link:nth-child(3) { animation-delay: 1s; }
+    .social-link:nth-child(4) { animation-delay: 1.5s; }
+
+    @keyframes pitLightFlicker {
+      0%, 100% { box-shadow: 0 0 0 rgba(244,185,62,0); border-color: rgba(244, 185, 62, 0.18); }
+      50% { box-shadow: 0 0 14px -2px rgba(244,185,62,0.4); border-color: rgba(244, 185, 62, 0.4); }
     }
 
     .social-link::before {
@@ -941,11 +979,21 @@
       z-index: -1;
     }
 
+    /* hover feels like a socket wrench catching a bolt */
     .social-link:hover {
-      transform: translateY(-4px) scale(1.08);
+      transform: translateY(-4px) scale(1.08) rotate(-18deg);
       border-color: transparent;
       color: var(--ink);
       box-shadow: 0 8px 20px -6px rgba(244, 185, 62, 0.5);
+      animation-play-state: paused;
+    }
+
+    .social-link:hover i {
+      transform: rotate(18deg);
+    }
+
+    .social-link i {
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1);
     }
 
     .social-link:hover::before {
@@ -2548,22 +2596,22 @@
 
         <div>
           <div class="footer-logo">
-            <div class="coffee-animation">
-              <i class="fas fa-mug-hot coffee-icon"></i>
-              <div class="coffee-steam steam-1"></div>
-              <div class="coffee-steam steam-2"></div>
-              <div class="coffee-steam steam-3"></div>
+            <div class="gear-animation">
+              <i class="fas fa-cog gear-icon gear-large"></i>
+              <i class="fas fa-cog gear-icon gear-small"></i>
+              <div class="spark spark-1"></div>
+              <div class="spark spark-2"></div>
+              <div class="spark spark-3"></div>
             </div>
             <span class="logo-text">THE GARAGE CAFE</span>
           </div>
           <p class="footer-description">
-            A cozy café slinging honest breakfasts and slow-drip coffee from a hidden corner of Kandy. No pretense — just brick walls, good light, and a kitchen that opens early.
+            Once a working garage, now Kandy's favourite hideout — exposed brick, amber pit-lights, and honest all-day food served where the engines used to run. Pull up a stool and stay awhile.
           </p>
           <div class="social-links">
-            <a href="https://www.facebook.com/theblizzcafe" target="_blank" class="social-link"><i class="fab fa-facebook-f"></i></a>
-            <a href="https://www.instagram.com/blizz_cafe_" target="_blank" class="social-link"><i class="fab fa-instagram"></i></a>
-            <a href="https://www.tiktok.com/@blizz.cafe" target="_blank" class="social-link"><i class="fab fa-tiktok"></i></a>
-            <a href="#" target="_blank" class="social-link"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.facebook.com/share/1DQy2cc5sF/?mibextid=wwXIfr" target="_blank" rel="noopener" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/thegaragecafe_?igsh=MWMzeHppY2N6YWg3ZQ==" target="_blank" rel="noopener" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.tiktok.com/@thegaragecafekandy?_r=1&_t=ZS-98JBVhR17h2" target="_blank" rel="noopener" class="social-link" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
           </div>
         </div>
 
@@ -2590,9 +2638,9 @@
         <div>
           <h4 class="footer-heading">Follow</h4>
           <ul class="footer-links" style="list-style: none; color: #999;">
-            <li><a href="https://www.instagram.com/blizz_cafe_" target="_blank" class="footer-link-btn">Instagram</a></li>
-            <li><a href="https://www.facebook.com/theblizzcafe" target="_blank" class="footer-link-btn">Facebook</a></li>
-            <li><a href="https://www.tiktok.com/@blizz.cafe" target="_blank" class="footer-link-btn">TikTok</a></li>
+            <li><i class="fab fa-instagram"></i><a href="https://www.instagram.com/thegaragecafe_?igsh=MWMzeHppY2N6YWg3ZQ==" target="_blank" rel="noopener" class="footer-link-btn">Instagram</a></li>
+            <li><i class="fab fa-facebook-f"></i><a href="https://www.facebook.com/share/1DQy2cc5sF/?mibextid=wwXIfr" target="_blank" rel="noopener" class="footer-link-btn">Facebook</a></li>
+            <li><i class="fab fa-tiktok"></i><a href="https://www.tiktok.com/@thegaragecafekandy?_r=1&_t=ZS-98JBVhR17h2" target="_blank" rel="noopener" class="footer-link-btn">TikTok</a></li>
             <li><i class="fas fa-map-marker-alt"></i> Kandy, Sri Lanka</li>
             <li><i class="fas fa-phone"></i> +94 (75) 666 0666</li>
           </ul>
