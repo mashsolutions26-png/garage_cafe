@@ -141,6 +141,7 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-auto-rows: 190px;
+            grid-auto-flow: dense;
             gap: 0.6rem;
             transition: max-height 0.6s ease;
             overflow: hidden;
@@ -897,30 +898,42 @@
         // ============================================================
         // LAZY LOAD
         // ============================================================
-        (function lazyLoadImages() {
-            const lazyImages = document.querySelectorAll('img.lazy-load');
+        // NOTE: this used to run once, immediately on page load — before
+        // the gallery grid images even existed in the DOM (they're
+        // injected later by renderGallery()). That meant the observer
+        // never watched a single gallery image, so any image below the
+        // fold — and every image added later via "View More" — stayed
+        // stuck at opacity:0 forever (looked like missing/hidden images).
+        // Fixing this by turning it into a reusable function that gets
+        // called again every time new images are added to the grid.
+        let lazyObserver = null;
+        function applyLazyLoad() {
+            const lazyImages = document.querySelectorAll('img.lazy-load:not(.loaded)');
+            const winHeight = window.innerHeight || document.documentElement.clientHeight;
+
             if ('IntersectionObserver' in window) {
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('loaded');
-                            observer.unobserve(entry.target);
-                        }
-                    });
-                }, { rootMargin: '200px' });
+                if (!lazyObserver) {
+                    lazyObserver = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add('loaded');
+                                lazyObserver.unobserve(entry.target);
+                            }
+                        });
+                    }, { rootMargin: '200px' });
+                }
                 lazyImages.forEach(img => {
                     const rect = img.getBoundingClientRect();
-                    const winHeight = window.innerHeight || document.documentElement.clientHeight;
                     if (rect.top < winHeight + 200) {
                         img.classList.add('loaded');
                     } else {
-                        observer.observe(img);
+                        lazyObserver.observe(img);
                     }
                 });
             } else {
                 lazyImages.forEach(img => img.classList.add('loaded'));
             }
-        })();
+        }
 
         // ============================================================
         // GALLERY DATA
@@ -991,7 +1004,8 @@
                 item.className = 'gallery-item' + (sizeClass ? ' ' + sizeClass : '');
                 item.dataset.index = index;
                 item.innerHTML = `
-                    <img src="${img.src}" alt="${img.alt}" class="lazy-load" loading="lazy" />
+                    <img src="${img.src}" alt="${img.alt}" class="lazy-load" loading="lazy"
+                         onerror="this.onerror=null; this.classList.add('loaded'); this.style.objectFit='contain'; this.style.opacity='0.25'; this.src='logo/logo.webp';" />
                     <div class="overlay">
                         <span>${img.caption}</span>
                     </div>
@@ -1007,13 +1021,7 @@
                 viewMoreBtn.textContent = hasMore ? 'View More' : 'Showing All';
             }
 
-            document.querySelectorAll('img.lazy-load:not(.loaded)').forEach(img => {
-                const rect = img.getBoundingClientRect();
-                const winHeight = window.innerHeight || document.documentElement.clientHeight;
-                if (rect.top < winHeight + 200) {
-                    img.classList.add('loaded');
-                }
-            });
+            applyLazyLoad();
         }
 
         // ============================================================

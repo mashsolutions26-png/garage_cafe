@@ -2540,41 +2540,6 @@
     </div>
   </section>
 
-  <!-- GALLERY (AUTO SLIDER ONLY) -->
-  <section id="gallery" class="py-24 border-t border-brickline overflow-hidden">
-    <div class="auto-slider-section mt-16">
-      <div class="auto-slider-head">
-      </div>
-
-      <div class="viewport" id="autoSliderViewport">
-        <div class="track" id="autoSliderTrack">
-          <!-- All images with loading="lazy" -->
-          <div class="slide"><img src="img/p1.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p2.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p3.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p4.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p5.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p6.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p7.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p8.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p9.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p10.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p11.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p12.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p13.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p14.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p15.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p16.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p17.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p18.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p19.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p20.webp" alt="gallery" loading="lazy"></div>
-          <div class="slide"><img src="img/p21.webp" alt="gallery" loading="lazy"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- FOOTER - THE GARAGE CAFE (background colour animation removed) -->
   <footer class="minimal-footer">
     <!-- footer-glow removed to stop colour animation -->
@@ -2609,7 +2574,7 @@
             <li><a href="index.html#menu" class="footer-link-btn">Menu</a></li>
             <li><a href="menu.html" class="footer-link-btn text-gold">Full Menu</a></li>
             <li><a href="index.html#book" class="footer-link-btn">Book a Table</a></li>
-            <li><a href="index.html#gallery" class="footer-link-btn">Gallery</a></li>
+            <li><a href="gallery.html" class="footer-link-btn">Gallery</a></li>
           </ul>
         </div>
 
@@ -4864,95 +4829,6 @@ ${orderItems.map(i => `  • ${escapeTelegramHtml(i.name)} x${i.quantity} (Rs. $
         }
       });
     }
-
-    // ============================================================
-    // NEW AUTO SLIDER (FOOD SLIDER)
-    // ============================================================
-    (function autoSlider() {
-      const track = document.getElementById('autoSliderTrack');
-      const viewport = document.getElementById('autoSliderViewport');
-
-      let setWidth = track.scrollWidth / 2;
-
-      window.addEventListener('resize', () => {
-        setWidth = track.scrollWidth / 2;
-      });
-
-      let autoOffset = 0;
-      let scrollOffset = 0;
-      const autoSpeed = 0.55;
-
-      let isDragging = false;
-      let dragStartX = 0;
-      let dragStartScrollOffset = 0;
-      let isPaused = false;
-
-      function wrap(val) {
-        while (val >= setWidth) val -= setWidth;
-        while (val < 0) val += setWidth;
-        return val;
-      }
-
-      function render() {
-        const total = wrap(autoOffset + scrollOffset);
-        track.style.transform = `translateX(${-total}px)`;
-      }
-
-      function animate() {
-        if (!isPaused) {
-          autoOffset += autoSpeed;
-          autoOffset = wrap(autoOffset);
-          render();
-        }
-        requestAnimationFrame(animate);
-      }
-      requestAnimationFrame(animate);
-
-      let lastScrollY = window.scrollY;
-      window.addEventListener('scroll', () => {
-        const delta = window.scrollY - lastScrollY;
-        lastScrollY = window.scrollY;
-        scrollOffset += delta * 0.9;
-        scrollOffset = wrap(scrollOffset);
-      }, { passive: true });
-
-      function getPointerX(e) {
-        return e.touches ? e.touches[0].clientX : e.clientX;
-      }
-
-      function dragStart(e) {
-        isDragging = true;
-        isPaused = true;
-        viewport.classList.add('dragging');
-        dragStartX = getPointerX(e);
-        dragStartScrollOffset = scrollOffset;
-      }
-
-      function dragMove(e) {
-        if (!isDragging) return;
-        const x = getPointerX(e);
-        const delta = dragStartX - x;
-        scrollOffset = wrap(dragStartScrollOffset + delta);
-        render();
-      }
-
-      function dragEnd() {
-        if (!isDragging) return;
-        isDragging = false;
-        isPaused = false;
-        viewport.classList.remove('dragging');
-      }
-
-      viewport.addEventListener('mousedown', dragStart);
-      window.addEventListener('mousemove', dragMove);
-      window.addEventListener('mouseup', dragEnd);
-      viewport.addEventListener('mouseleave', dragEnd);
-
-      viewport.addEventListener('touchstart', dragStart, { passive: true });
-      viewport.addEventListener('touchmove', dragMove, { passive: true });
-      viewport.addEventListener('touchend', dragEnd);
-      viewport.addEventListener('touchcancel', dragEnd);
-    })();
 
     // ============================================================
     // BOOKING FORM VALIDATION + SEATING SELECTOR
